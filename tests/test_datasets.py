@@ -28,3 +28,11 @@ def test_head_keeps_both_classes_for_clinc():
 
 def test_task_names():
     assert set(TASKS) == {"banking77", "clinc150", "massive_en", "massive_hi"}
+
+
+def test_head_takes_one_item_per_label_before_any_second_one():
+    t = load_task("banking77", head=77)
+    assert len({i.label for i in t.items}) == 77
+    en, hi = load_task("massive_en", head=60), load_task("massive_hi", head=60)
+    assert len({i.label for i in en.items}) == min(60, len(en.labels))
+    assert [i.id for i in en.items] == [i.id for i in hi.items]
