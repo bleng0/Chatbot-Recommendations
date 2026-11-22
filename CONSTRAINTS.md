@@ -32,7 +32,7 @@ flagged `eligible (modeled)` and the UI says so.
 | G14 | Licence/terms permit commercial use | required | vendor-doc | Owner default |
 
 Gate rules:
-- Quality gates (G1–G7) compare the **mean point estimate over 3 runs**. Bootstrap 95%
+- Quality gates (G1–G7) compare the **point estimate of 1 run** (Phase 1 prototype, owner decision 2026-11-22: simplify, no multi-hour runs; was 3 runs). Bootstrap 95%
   CIs are shown next to them but don't decide pass/fail. A CI that crosses the threshold
   is flagged "marginal".
 - G8–G10: pass if at least one tested concurrency level reaches ≥ 8 req/s with p95 ≤ 3000 ms
