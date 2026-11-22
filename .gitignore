@@ -19,3 +19,4 @@ SPEC.md
 .coverage
 lcov.info
 coverage.lcov
+pome/data/.cache/

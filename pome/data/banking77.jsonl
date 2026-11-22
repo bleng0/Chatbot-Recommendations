@@ -1,0 +1,300 @@
+{"id": "b77-100", "label": "exchange_rate", "text": "What is the base of the exchange rates?"}
+{"id": "b77-101", "label": "exchange_rate", "text": "What exchange rate do you use?"}
+{"id": "b77-1014", "label": "top_up_reverted", "text": "There appears to have been a reversion in my top up"}
+{"id": "b77-1018", "label": "top_up_reverted", "text": "I topped up but the app reverted it"}
+{"id": "b77-1027", "label": "top_up_reverted", "text": "The app reverted my action when I topped up."}
+{"id": "b77-1032", "label": "top_up_reverted", "text": "My top-up was revoked."}
+{"id": "b77-1058", "label": "balance_not_updated_after_cheque_or_cash_deposit", "text": "IM still waiting for my account to update from a cash deposit?"}
+{"id": "b77-1061", "label": "balance_not_updated_after_cheque_or_cash_deposit", "text": "My bank statement doesn't show the cash deposit I made recently."}
+{"id": "b77-1069", "label": "balance_not_updated_after_cheque_or_cash_deposit", "text": "I had a cheque deposited, but I still haven't seen the cash."}
+{"id": "b77-1071", "label": "balance_not_updated_after_cheque_or_cash_deposit", "text": "I submitted a cash deposit to my account but it hasn't posted yet."}
+{"id": "b77-1087", "label": "card_payment_not_recognised", "text": "I found an unauthorized card payment"}
+{"id": "b77-1103", "label": "card_payment_not_recognised", "text": "What should I do to get transactions off of my account if I didn't make them?  My card must have been compromised and I need to freeze it asap!"}
+{"id": "b77-1104", "label": "card_payment_not_recognised", "text": "I have a payment listed in error."}
+{"id": "b77-1108", "label": "card_payment_not_recognised", "text": "There is a payment in the App that is not mine."}
+{"id": "b77-1137", "label": "edit_personal_details", "text": "My address has changed. How do I report it?"}
+{"id": "b77-1141", "label": "edit_personal_details", "text": "My address has updated and I need to change it."}
+{"id": "b77-1148", "label": "edit_personal_details", "text": "I need to change my name since I got married"}
+{"id": "b77-1155", "label": "edit_personal_details", "text": "Should I just wait until the post office sends a change of address form?"}
+{"id": "b77-1165", "label": "why_verify_identity", "text": "What is the need to verify my identity?"}
+{"id": "b77-1171", "label": "why_verify_identity", "text": "Can I still use my account, even though the identity verification has not passed yet?"}
+{"id": "b77-1187", "label": "why_verify_identity", "text": "I won't verify my identity."}
+{"id": "b77-1192", "label": "why_verify_identity", "text": "What other methods are there to verify my identity?"}
+{"id": "b77-1205", "label": "unable_to_verify_identity", "text": "It is impossible to verify my identity"}
+{"id": "b77-1213", "label": "unable_to_verify_identity", "text": "I am not being recognized by the app."}
+{"id": "b77-1225", "label": "unable_to_verify_identity", "text": "What do i need to verify my id?"}
+{"id": "b77-1231", "label": "unable_to_verify_identity", "text": "Why am I not able to verify my id?"}
+{"id": "b77-124", "label": "card_payment_wrong_exchange_rate", "text": "The exchange rate on my purchase is wrong."}
+{"id": "b77-1244", "label": "get_physical_card", "text": "I cannot seem to find my PIN. Where is it?"}
+{"id": "b77-1254", "label": "get_physical_card", "text": "what is my card PIN"}
+{"id": "b77-127", "label": "card_payment_wrong_exchange_rate", "text": "The rate applied to my foreign purchase was incorrect"}
+{"id": "b77-1271", "label": "get_physical_card", "text": "When do I receive my PIN"}
+{"id": "b77-1282", "label": "visa_or_mastercard", "text": "How do I get a visa card?"}
+{"id": "b77-1284", "label": "visa_or_mastercard", "text": "Are both Visa and Mastercard accepted?"}
+{"id": "b77-1286", "label": "visa_or_mastercard", "text": "Are both Visa and Mastercard offered?"}
+{"id": "b77-1298", "label": "visa_or_mastercard", "text": "I want to get Visa and Mastercard"}
+{"id": "b77-1335", "label": "topping_up_by_card", "text": "How do I transfer money using a credit card?"}
+{"id": "b77-1340", "label": "topping_up_by_card", "text": "Is there a way to transfer funds directly from my card?"}
+{"id": "b77-1349", "label": "topping_up_by_card", "text": "Can I transfer money to my credit card?"}
+{"id": "b77-1353", "label": "topping_up_by_card", "text": "My friends want to top up my account"}
+{"id": "b77-1362", "label": "disposable_card_limits", "text": "I need to use my disposable card multiple times a day, is there a cutoff limit?"}
+{"id": "b77-1379", "label": "disposable_card_limits", "text": "I have to have several disposable cards per day."}
+{"id": "b77-1394", "label": "disposable_card_limits", "text": "What can I use a virtual disposable card for?"}
+{"id": "b77-1398", "label": "disposable_card_limits", "text": "How many transactions can I do with one disposable card?"}
+{"id": "b77-14", "label": "card_arrival", "text": "I am still waiting for my card after 1 week.  Is this ok?"}
+{"id": "b77-1403", "label": "compromised_card", "text": "My card was used without my permission."}
+{"id": "b77-1419", "label": "compromised_card", "text": "I see random purchases to my account, was it hacked?"}
+{"id": "b77-1425", "label": "compromised_card", "text": "How do I freeze my account?"}
+{"id": "b77-1429", "label": "compromised_card", "text": "Someone else used my card!"}
+{"id": "b77-1441", "label": "atm_support", "text": "Which ATMs accept this card?"}
+{"id": "b77-145", "label": "card_payment_wrong_exchange_rate", "text": "The exchange rate seems off on this transaction"}
+{"id": "b77-1455", "label": "atm_support", "text": "How many miles away is the ATM?"}
+{"id": "b77-1456", "label": "atm_support", "text": "From where can I withdraw?"}
+{"id": "b77-1473", "label": "atm_support", "text": "Where can I find an ATM to use this card?"}
+{"id": "b77-1503", "label": "direct_debit_payment_not_recognised", "text": "why does the app show a direct debit payment that I did not authorize"}
+{"id": "b77-1507", "label": "direct_debit_payment_not_recognised", "text": "I have a direct debit charge that I do not recognize"}
+{"id": "b77-1508", "label": "direct_debit_payment_not_recognised", "text": "I didn't make this direct debit transaction"}
+{"id": "b77-1509", "label": "direct_debit_payment_not_recognised", "text": "There's a direct debit on my account that I didn't authorize"}
+{"id": "b77-1526", "label": "passcode_forgotten", "text": "Something is wrong with my password."}
+{"id": "b77-1537", "label": "passcode_forgotten", "text": "Show me please how to reset my passcode."}
+{"id": "b77-1541", "label": "passcode_forgotten", "text": "I do not remember the code, what should I do?"}
+{"id": "b77-1561", "label": "declined_cash_withdrawal", "text": "My withdrawal was cancelled."}
+{"id": "b77-157", "label": "card_payment_wrong_exchange_rate", "text": "Your exchange rate is totally wrong for my card payment"}
+{"id": "b77-1583", "label": "declined_cash_withdrawal", "text": "How come I can't take money out of the ATM?"}
+{"id": "b77-1592", "label": "declined_cash_withdrawal", "text": "Why was I declined getting cash?"}
+{"id": "b77-1597", "label": "declined_cash_withdrawal", "text": "Is there a reason that the ATM declined my transaction?"}
+{"id": "b77-1604", "label": "pending_card_payment", "text": "Why is my card payment showing as pending?"}
+{"id": "b77-161", "label": "extra_charge_on_statement", "text": "Why is there a fee for an extra pound in my statement?"}
+{"id": "b77-1616", "label": "pending_card_payment", "text": "What is a pending payment?"}
+{"id": "b77-1617", "label": "pending_card_payment", "text": "I would like to know why my purchases from this morning are still pending."}
+{"id": "b77-1621", "label": "pending_card_payment", "text": "I made a purchase and it says it's pending. What does that mean?"}
+{"id": "b77-1651", "label": "lost_or_stolen_phone", "text": "I lost my phone and need help securing it."}
+{"id": "b77-1652", "label": "lost_or_stolen_phone", "text": "My phone was stolen so I no longer have access to the app."}
+{"id": "b77-1664", "label": "lost_or_stolen_phone", "text": "I believe I left my smartphone at the hotel I was staying at."}
+{"id": "b77-167", "label": "extra_charge_on_statement", "text": "What is this $1 charge on my statement?"}
+{"id": "b77-1679", "label": "lost_or_stolen_phone", "text": "My things were stolen yesterday and I can't use any apps or anything, so I am going to need some help."}
+{"id": "b77-1689", "label": "request_refund", "text": "I wasn't charged the correct amount for an item I purchased, how can I fix this?"}
+{"id": "b77-169", "label": "extra_charge_on_statement", "text": "I do not remember purchasing anything for 1£, and it is on my statement. Can you please tell me what that is about?"}
+{"id": "b77-1690", "label": "request_refund", "text": "Hi there! I need to cancel an order I recently made and start processing a refund. Can you please help me with this and set up the refund as soon as possible? It's very urgent."}
+{"id": "b77-1694", "label": "request_refund", "text": "Can I have an item refunded?"}
+{"id": "b77-1711", "label": "request_refund", "text": "I want to reverse a purchase. Can I cancel it?"}
+{"id": "b77-1732", "label": "declined_transfer", "text": "Why did I get a transfer declined?"}
+{"id": "b77-1736", "label": "declined_transfer", "text": "Why was I unable to do a transfer?"}
+{"id": "b77-1737", "label": "declined_transfer", "text": "Trouble transferring transaction contact for help"}
+{"id": "b77-1749", "label": "declined_transfer", "text": "For what reason was my transfer declined?"}
+{"id": "b77-1777", "label": "Refund_not_showing_up", "text": "Why isn't a recent refund on my statement?"}
+{"id": "b77-1786", "label": "Refund_not_showing_up", "text": "I am missing a refund."}
+{"id": "b77-1788", "label": "Refund_not_showing_up", "text": "I am not seeing a refund in my statement."}
+{"id": "b77-1791", "label": "Refund_not_showing_up", "text": "Where is my refund? I have been checking my account all day."}
+{"id": "b77-1816", "label": "declined_card_payment", "text": "I have a card payment that was declined, but why?"}
+{"id": "b77-1826", "label": "declined_card_payment", "text": "My card was rejected at the store for some reason, can you look into this for me?"}
+{"id": "b77-1833", "label": "declined_card_payment", "text": "I finally got my new card and was very excited to use it today. However, my payment kept declining. What is happening?"}
+{"id": "b77-1834", "label": "declined_card_payment", "text": "My card payment did not complete."}
+{"id": "b77-1848", "label": "pending_transfer", "text": "I had made a transfer but its still pending."}
+{"id": "b77-1852", "label": "pending_transfer", "text": "My transfer is still coming up as pending."}
+{"id": "b77-1855", "label": "pending_transfer", "text": "I transferred money yesterday, but it still isn't available?"}
+{"id": "b77-1876", "label": "pending_transfer", "text": "I am still waiting for a money transfer to show"}
+{"id": "b77-1891", "label": "terminate_account", "text": "I don't like your company. Delete my account."}
+{"id": "b77-1895", "label": "terminate_account", "text": "please delete my account, your services are not up to par."}
+{"id": "b77-1899", "label": "terminate_account", "text": "How do I get rid of my account ASAP?"}
+{"id": "b77-190", "label": "extra_charge_on_statement", "text": "For some reason my account's been charged an extra dollar."}
+{"id": "b77-1913", "label": "terminate_account", "text": "I wish to close my account. I do not like the service you provide."}
+{"id": "b77-1926", "label": "card_swallowed", "text": "Is there a way I can get my ATM card back from the machine?"}
+{"id": "b77-1936", "label": "card_swallowed", "text": "The ATM won't give me my card back."}
+{"id": "b77-1939", "label": "card_swallowed", "text": "ATM still has my card"}
+{"id": "b77-1957", "label": "card_swallowed", "text": "I was at an ATM and it swallowed my card."}
+{"id": "b77-1962", "label": "transaction_charged_twice", "text": "Why am I being charged twice fro a restaurant?"}
+{"id": "b77-1964", "label": "transaction_charged_twice", "text": "I didn't buy this twice"}
+{"id": "b77-1988", "label": "transaction_charged_twice", "text": "Can you explain why there is a payment showing twice?"}
+{"id": "b77-2003", "label": "verify_source_of_funds", "text": "I would like to verify the source of my money"}
+{"id": "b77-2014", "label": "verify_source_of_funds", "text": "What information do you need to verify my Source of Funds?"}
+{"id": "b77-2019", "label": "verify_source_of_funds", "text": "What is the source of my money?"}
+{"id": "b77-203", "label": "pending_cash_withdrawal", "text": "Hey I tried to get some money out earlier but the machine didn't work. Now just saw the transaction still seems in progress! Can you please check what's going there, seems something is broken, I don't want to be charged for money that I haven't actually received!"}
+{"id": "b77-2040", "label": "transfer_timing", "text": "What is the number of days I have to wait for my Europe transfer?"}
+{"id": "b77-2048", "label": "transfer_timing", "text": "how long dies it take for transfers to reflect on my balance"}
+{"id": "b77-2069", "label": "transfer_timing", "text": "How long does a funds transfer take from one back to another?"}
+{"id": "b77-2073", "label": "transfer_timing", "text": "How long is it going to take for my funds to show in my account?"}
+{"id": "b77-2082", "label": "reverted_card_payment?", "text": "the app reverted my payment"}
+{"id": "b77-2090", "label": "reverted_card_payment?", "text": "What do I do if it says my card payment has been cancelled?"}
+{"id": "b77-2096", "label": "reverted_card_payment?", "text": "My credit card cancelled a payment for a purchase."}
+{"id": "b77-2105", "label": "reverted_card_payment?", "text": "There must be an issue, why has my card been cancelled?"}
+{"id": "b77-2125", "label": "change_pin", "text": "How might  I change my PIN?"}
+{"id": "b77-2141", "label": "change_pin", "text": "I am travelling for two more weeks but really need to change my PIN asap. What do I do?"}
+{"id": "b77-2157", "label": "change_pin", "text": "What steps do I need to take to change my card PIN?"}
+{"id": "b77-218", "label": "pending_cash_withdrawal", "text": "Hi,I tried to get some money out but the machine was not working .The transaction still seems in progress! Can you please check what's going on.I don't want to be charged for money that I did not received."}
+{"id": "b77-2180", "label": "beneficiary_not_allowed", "text": "How come I'm not allowed to transfer funds right now? I just keep getting an error message."}
+{"id": "b77-2181", "label": "beneficiary_not_allowed", "text": "I couldn't do a transfer to an account"}
+{"id": "b77-2189", "label": "beneficiary_not_allowed", "text": "I am trying to exchange crypto and it's not working. Tell me how to fix this."}
+{"id": "b77-2190", "label": "beneficiary_not_allowed", "text": "The account transfer I was trying to do failed."}
+{"id": "b77-2201", "label": "transfer_fee_charged", "text": "I was charged a fee for my transfer."}
+{"id": "b77-2218", "label": "transfer_fee_charged", "text": "Is there a transfer fee?"}
+{"id": "b77-2224", "label": "transfer_fee_charged", "text": "Why am I seeing a transfer fee?"}
+{"id": "b77-2235", "label": "transfer_fee_charged", "text": "I transferred money and was charged and want to know why."}
+{"id": "b77-2256", "label": "receiving_money", "text": "What are the ways for others to transfer me money?"}
+{"id": "b77-2260", "label": "receiving_money", "text": "Can I directly transfer my salary onto here?"}
+{"id": "b77-2261", "label": "receiving_money", "text": "Can this be used to receive my salary?"}
+{"id": "b77-2272", "label": "receiving_money", "text": "Do you know if I can use this for my salary?"}
+{"id": "b77-2293", "label": "failed_transfer", "text": "Why has my transfer failed?"}
+{"id": "b77-2298", "label": "failed_transfer", "text": "The transfer keeps failing , I tried to transfer some money to friends this morning but it keeps getting rejected for some reason, Would you please check the issue ?"}
+{"id": "b77-2304", "label": "failed_transfer", "text": "My transfer appeared not to work."}
+{"id": "b77-231", "label": "pending_cash_withdrawal", "text": "I received cash from the ATM earlier, but this shows up as pending in the app.  I've got the cash already.  How can this be still pending?"}
+{"id": "b77-2316", "label": "failed_transfer", "text": "Why didn't my transfer go through?"}
+{"id": "b77-2341", "label": "transfer_into_account", "text": "What methods can I use to add money to my account?"}
+{"id": "b77-2345", "label": "transfer_into_account", "text": "I need to bank account transfer from another account into this one, what is the easiest way that can be done, and what information do i need?"}
+{"id": "b77-2347", "label": "transfer_into_account", "text": "How do I send my account money through transfer?"}
+{"id": "b77-2358", "label": "transfer_into_account", "text": "I would like to transfer money from my other bank account into this one."}
+{"id": "b77-2362", "label": "verify_top_up", "text": "Where can I find the top-up verification code?"}
+{"id": "b77-2366", "label": "verify_top_up", "text": "how come the verification with the top up"}
+{"id": "b77-238", "label": "pending_cash_withdrawal", "text": "Why is my cash withdrawal from the ATM still not yet showing as confirmed in my account?"}
+{"id": "b77-2389", "label": "verify_top_up", "text": "help me find the top-up card's verification code?"}
+{"id": "b77-2392", "label": "verify_top_up", "text": "Where do I go to get the code to verify the top up card?"}
+{"id": "b77-2402", "label": "getting_spare_card", "text": "I want to order another crad"}
+{"id": "b77-2408", "label": "getting_spare_card", "text": "How would I go about getting a second card?"}
+{"id": "b77-2422", "label": "getting_spare_card", "text": "Where can I get a second card?"}
+{"id": "b77-2432", "label": "getting_spare_card", "text": "Where do I request another card?"}
+{"id": "b77-2446", "label": "top_up_by_cash_or_cheque", "text": "Need to deposit a cheque into my account"}
+{"id": "b77-2465", "label": "top_up_by_cash_or_cheque", "text": "How can I top up with this cheque I got?"}
+{"id": "b77-2475", "label": "top_up_by_cash_or_cheque", "text": "I have a cheque here, can I use it to top off my account?"}
+{"id": "b77-2477", "label": "top_up_by_cash_or_cheque", "text": "How can I top-up my card?"}
+{"id": "b77-2488", "label": "order_physical_card", "text": "Can I request a physical card?"}
+{"id": "b77-2489", "label": "order_physical_card", "text": "Is there a charge for physical cards"}
+{"id": "b77-25", "label": "card_arrival", "text": "What is the tracking number for my card that was mailed?"}
+{"id": "b77-2507", "label": "order_physical_card", "text": "What will I be charged for a physical card?"}
+{"id": "b77-2509", "label": "order_physical_card", "text": "What locations can a card be delivered to?"}
+{"id": "b77-2523", "label": "virtual_card_not_working", "text": "My non-physical card will not work"}
+{"id": "b77-253", "label": "fiat_currency_support", "text": "Can someone assist me with the details explaining which fiat currencies that you support?"}
+{"id": "b77-2532", "label": "virtual_card_not_working", "text": "Why was my virtual card declined when attempting to setup automatic billing?"}
+{"id": "b77-2548", "label": "virtual_card_not_working", "text": "My transaction was just declined when I was using my disposable virtual card. What can I do?"}
+{"id": "b77-2555", "label": "virtual_card_not_working", "text": "Tell me why my virtual disposable card won't work."}
+{"id": "b77-2562", "label": "wrong_exchange_rate_for_cash_withdrawal", "text": "I made a withdraw from the ATM this past holiday and it seems like a was charged too much. If I would have   known about these charges I wouldn't have made a withdraw."}
+{"id": "b77-2566", "label": "wrong_exchange_rate_for_cash_withdrawal", "text": "Why was the exchange rate wrong when I got cash"}
+{"id": "b77-2575", "label": "wrong_exchange_rate_for_cash_withdrawal", "text": "Will there be additional costs of I make a withdrawal from a local ATM of British pounds? I need some cash to feel comfortable on the journey home"}
+{"id": "b77-2593", "label": "wrong_exchange_rate_for_cash_withdrawal", "text": "The rate of exchange isn't right for my cash withdrawal."}
+{"id": "b77-2620", "label": "get_disposable_virtual_card", "text": "I would like to create a disposable virtual card. How do I go about doing that?"}
+{"id": "b77-2631", "label": "get_disposable_virtual_card", "text": "Is there a disposable virtual card I can order?"}
+{"id": "b77-2635", "label": "get_disposable_virtual_card", "text": "where do I request a disposable virtual card?"}
+{"id": "b77-2636", "label": "get_disposable_virtual_card", "text": "Can i get a throw away card"}
+{"id": "b77-2647", "label": "top_up_failed", "text": "I attempted to top up but the app denied it."}
+{"id": "b77-265", "label": "fiat_currency_support", "text": "What currencies are used in your exchange?"}
+{"id": "b77-2654", "label": "top_up_failed", "text": "Why caused my top up to not work?"}
+{"id": "b77-267", "label": "fiat_currency_support", "text": "Which country's currency do you support?"}
+{"id": "b77-2673", "label": "top_up_failed", "text": "My top-up has failed."}
+{"id": "b77-2677", "label": "top_up_failed", "text": "I'm pretty sure my top up failed. How do I fix this?"}
+{"id": "b77-268", "label": "fiat_currency_support", "text": "I want to make a currency exchange to EU."}
+{"id": "b77-2688", "label": "balance_not_updated_after_bank_transfer", "text": "I didn't get the money I transferred"}
+{"id": "b77-2695", "label": "balance_not_updated_after_bank_transfer", "text": "After the transfer, the balance did not update."}
+{"id": "b77-2696", "label": "balance_not_updated_after_bank_transfer", "text": "Could you please check one of my transfer which i made few hours ago from my UK bank account, as its not showing yet."}
+{"id": "b77-2706", "label": "balance_not_updated_after_bank_transfer", "text": "I have completed a transfer but it is not showing up."}
+{"id": "b77-2728", "label": "cash_withdrawal_not_recognised", "text": "The app said I withdrew cash at an ATM and I didn't"}
+{"id": "b77-2729", "label": "cash_withdrawal_not_recognised", "text": "My app says that I received cash from an ATM and I didn't."}
+{"id": "b77-2735", "label": "cash_withdrawal_not_recognised", "text": "i think someone is using my card to withdraw money. Someone stole my wallet. What can I do? it is urgent."}
+{"id": "b77-2748", "label": "cash_withdrawal_not_recognised", "text": "Can anyone help me, I lost my wallet and they've started withdrawing from my account."}
+{"id": "b77-2773", "label": "exchange_charge", "text": "Does it cost extra to exchange currencies?"}
+{"id": "b77-2783", "label": "exchange_charge", "text": "What is the exchange fee?"}
+{"id": "b77-2793", "label": "exchange_charge", "text": "Is there a discount for frequently exchanging currencies?"}
+{"id": "b77-2797", "label": "exchange_charge", "text": "Does it cost anything for exchanges?"}
+{"id": "b77-2811", "label": "top_up_by_card_charge", "text": "How much does it cost to top up by card?"}
+{"id": "b77-2819", "label": "top_up_by_card_charge", "text": "Will I be charged if I use European bank card for top up?"}
+{"id": "b77-2832", "label": "top_up_by_card_charge", "text": "What are the fees of using an international card to add money?"}
+{"id": "b77-2838", "label": "top_up_by_card_charge", "text": "What are the fees for top ups?"}
+{"id": "b77-2850", "label": "activate_my_card", "text": "Why can't I activate my card?"}
+{"id": "b77-2857", "label": "activate_my_card", "text": "Please, activate my card"}
+{"id": "b77-2871", "label": "activate_my_card", "text": "What is the process for activating my card?"}
+{"id": "b77-2878", "label": "activate_my_card", "text": "I got my new card. How do I activate it?"}
+{"id": "b77-2898", "label": "cash_withdrawal_charge", "text": "Is there a fee for withdrawing cash?"}
+{"id": "b77-2903", "label": "cash_withdrawal_charge", "text": "I thought cash withdrawals didn't have a fee"}
+{"id": "b77-2908", "label": "cash_withdrawal_charge", "text": "Is there a limit on how much I can withdraw from my account without being charged?"}
+{"id": "b77-2918", "label": "cash_withdrawal_charge", "text": "My account got charged for taking out cash, why did this happen?"}
+{"id": "b77-2923", "label": "card_about_to_expire", "text": "What do I do when my card expires?"}
+{"id": "b77-2950", "label": "card_about_to_expire", "text": "The expiration date of my card is approaching ."}
+{"id": "b77-2956", "label": "card_about_to_expire", "text": "in china, need new card"}
+{"id": "b77-2967", "label": "apple_pay_or_google_pay", "text": "Is it possible to top up with Apple Pay?"}
+{"id": "b77-2988", "label": "apple_pay_or_google_pay", "text": "I got my American Express in Apple Bay but top up is not working"}
+{"id": "b77-2991", "label": "apple_pay_or_google_pay", "text": "My American Express is in my Apple Pay and the top up is failing, why?"}
+{"id": "b77-2992", "label": "apple_pay_or_google_pay", "text": "How can I top-ff my account using my Apple Watch?"}
+{"id": "b77-3009", "label": "verify_my_identity", "text": "Are there any documents needed for the identity check?"}
+{"id": "b77-3014", "label": "verify_my_identity", "text": "What's the process for ID verification?"}
+{"id": "b77-302", "label": "card_delivery_estimate", "text": "How long should I expect for the card to arrive?"}
+{"id": "b77-3026", "label": "verify_my_identity", "text": "When getting my ID checked, what are the steps involved?"}
+{"id": "b77-3039", "label": "verify_my_identity", "text": "What do I need to do to verify my identity?"}
+{"id": "b77-3062", "label": "country_support", "text": "What countries do you support?"}
+{"id": "b77-3067", "label": "country_support", "text": "What countries will my card be supported in?"}
+{"id": "b77-3073", "label": "country_support", "text": "What countries do you currently do business in?"}
+{"id": "b77-3075", "label": "country_support", "text": "If i'm not in the UK, can I still get a card?"}
+{"id": "b77-310", "label": "card_delivery_estimate", "text": "I need my card to come as soon as possible."}
+{"id": "b77-314", "label": "card_delivery_estimate", "text": "I need it delivered by Saturday."}
+{"id": "b77-321", "label": "automatic_top_up", "text": "Is there a limit when using auto top-up?"}
+{"id": "b77-34", "label": "card_arrival", "text": "Does the card you sent have a way to track to it?"}
+{"id": "b77-340", "label": "automatic_top_up", "text": "What's the limit on automatic top-up?"}
+{"id": "b77-343", "label": "automatic_top_up", "text": "Can I have a auto top-up when my account is short?"}
+{"id": "b77-351", "label": "automatic_top_up", "text": "Can I be topped up once I hit a certain balance?"}
+{"id": "b77-365", "label": "card_not_working", "text": "My card won't work."}
+{"id": "b77-37", "label": "card_arrival", "text": "Is there tracking info available?"}
+{"id": "b77-372", "label": "card_not_working", "text": "Help me.  My card doesn't work."}
+{"id": "b77-382", "label": "card_not_working", "text": "I broke my card"}
+{"id": "b77-395", "label": "card_not_working", "text": "My card doesn't accept any transaction at all. What's wrong??"}
+{"id": "b77-400", "label": "exchange_via_app", "text": "May I exchange currencies with this?"}
+{"id": "b77-414", "label": "exchange_via_app", "text": "Is it possible to change to another currency?"}
+{"id": "b77-43", "label": "card_linking", "text": "I have received my card, can you help me put it in the app?"}
+{"id": "b77-431", "label": "exchange_via_app", "text": "I would like to exchange some currency."}
+{"id": "b77-433", "label": "exchange_via_app", "text": "Is there currency exchange on this app?"}
+{"id": "b77-440", "label": "lost_or_stolen_card", "text": "My entire gym bag, including my wallet, was stolen out of my locker today. Everything in my wallet is gone - how do I block the card to make it can't be used?"}
+{"id": "b77-454", "label": "lost_or_stolen_card", "text": "I lost my wallet today with all my credit cards. Will you please block the card and send a replacement?"}
+{"id": "b77-461", "label": "lost_or_stolen_card", "text": "Someone stole my wallet earlier today, not sure exactly when, probably on Piccadilly circus. Can you check if there were any attempts to use the card and obviously block it?"}
+{"id": "b77-466", "label": "lost_or_stolen_card", "text": "Somehow I am missing my card.  What should I do?"}
+{"id": "b77-487", "label": "age_limit", "text": "What is the youngest age in order to have an account?"}
+{"id": "b77-510", "label": "age_limit", "text": "will i be able to open an account for my daughter"}
+{"id": "b77-511", "label": "age_limit", "text": "How old do I need to be to open an account?"}
+{"id": "b77-516", "label": "age_limit", "text": "How old does my kids need to be to open an account?"}
+{"id": "b77-521", "label": "pin_blocked", "text": "Where can I view my PIN?"}
+{"id": "b77-529", "label": "pin_blocked", "text": "My pin was blocked, how do I make it so I can use it?"}
+{"id": "b77-533", "label": "pin_blocked", "text": "How can I unblock a blocked pin number for my account?"}
+{"id": "b77-537", "label": "pin_blocked", "text": "I attempted to use my card while I was intoxicated, and I failed to input my PIN, and the machine kept my card. How soon can I have it back?"}
+{"id": "b77-560", "label": "contactless_not_working", "text": "Are contactless payments enabled on my new card?"}
+{"id": "b77-561", "label": "contactless_not_working", "text": "My contanctless has stopped working"}
+{"id": "b77-564", "label": "contactless_not_working", "text": "How do I get the contactless feature to work for my card?"}
+{"id": "b77-58", "label": "card_linking", "text": "Where on the website do I go to link my card?"}
+{"id": "b77-602", "label": "top_up_by_bank_transfer_charge", "text": "I need to make a transfer, what will the fee be?"}
+{"id": "b77-607", "label": "top_up_by_bank_transfer_charge", "text": "Do I have to pay for topping up by transfer?"}
+{"id": "b77-613", "label": "top_up_by_bank_transfer_charge", "text": "Will there be any charges for money received?"}
+{"id": "b77-619", "label": "top_up_by_bank_transfer_charge", "text": "Will topping up by transfer lead to a charge on my account?"}
+{"id": "b77-647", "label": "pending_top_up", "text": "I've already topped up, but I cannot see the funds being available. What happened?"}
+{"id": "b77-65", "label": "card_linking", "text": "how do I link an already existing card?"}
+{"id": "b77-653", "label": "pending_top_up", "text": "Can you look into my top up please.  I made it over three hours ago and yet it's still pending."}
+{"id": "b77-66", "label": "card_linking", "text": "The app doesn't show the card I received."}
+{"id": "b77-670", "label": "pending_top_up", "text": "My top up hasn't worked, it's been stuck in pending for the last couple hours"}
+{"id": "b77-677", "label": "pending_top_up", "text": "When will my top-up process?"}
+{"id": "b77-699", "label": "cancel_transfer", "text": "Can I cancel a transfer if is already processed?"}
+{"id": "b77-701", "label": "cancel_transfer", "text": "I made a mistake when I did a transfer so now what can I do to fix that?"}
+{"id": "b77-708", "label": "cancel_transfer", "text": "Can a transaction be cancelled?"}
+{"id": "b77-709", "label": "cancel_transfer", "text": "How do i cancel my transaction?"}
+{"id": "b77-724", "label": "top_up_limits", "text": "How much money can i top up?"}
+{"id": "b77-735", "label": "top_up_limits", "text": "What is the limit to a top-up?"}
+{"id": "b77-740", "label": "top_up_limits", "text": "Can you tell me the limits for top ups?"}
+{"id": "b77-754", "label": "top_up_limits", "text": "Is there a limit for top-ups?"}
+{"id": "b77-768", "label": "wrong_amount_of_cash_received", "text": "The amount of cash I received was different than what I requested."}
+{"id": "b77-773", "label": "wrong_amount_of_cash_received", "text": "Where is the money I pushed it's on my mobile app as being withdrawn."}
+{"id": "b77-783", "label": "wrong_amount_of_cash_received", "text": "I withdrew money but the full amount wasn't dispensed."}
+{"id": "b77-791", "label": "wrong_amount_of_cash_received", "text": "I tried to take out cash but the amount isn't right, so what do I do?"}
+{"id": "b77-809", "label": "card_payment_fee_charged", "text": "Why was I charged an extra fee when paying with my card?"}
+{"id": "b77-817", "label": "card_payment_fee_charged", "text": "I have been charged a fee for paying with card"}
+{"id": "b77-826", "label": "card_payment_fee_charged", "text": "Is there a fee when you pay with your card?"}
+{"id": "b77-829", "label": "card_payment_fee_charged", "text": "Someone needs to make me aware when there are extra charges for payments. I happened to be looking at the app earlier and noticed a charge associated to a payment that was extra that no one made me aware of before at all."}
+{"id": "b77-864", "label": "transfer_not_received_by_recipient", "text": "Where is the transaction I made to a friend?"}
+{"id": "b77-873", "label": "transfer_not_received_by_recipient", "text": "When will my funds transfer?"}
+{"id": "b77-874", "label": "transfer_not_received_by_recipient", "text": "How long does it take for transfers to finish?  I sent funds to my pal, and she says that she has not gotten anything."}
+{"id": "b77-876", "label": "transfer_not_received_by_recipient", "text": "How long until my friend receives my transaction?"}
+{"id": "b77-89", "label": "exchange_rate", "text": "what are exchange rates based on"}
+{"id": "b77-900", "label": "supported_cards_and_currencies", "text": "When adding money, what are the currencies you take?"}
+{"id": "b77-904", "label": "supported_cards_and_currencies", "text": "why wouldn't you support american express? its a card i like and use often and i don't want to get a different one"}
+{"id": "b77-906", "label": "supported_cards_and_currencies", "text": "Do you support all cards and currencies?"}
+{"id": "b77-91", "label": "exchange_rate", "text": "What are the most current exchange rates?"}
+{"id": "b77-915", "label": "supported_cards_and_currencies", "text": "What cards and currencies will suffice?"}
+{"id": "b77-928", "label": "getting_virtual_card", "text": "what is the virtual card"}
+{"id": "b77-942", "label": "getting_virtual_card", "text": "I want one of those virtual cards!"}
+{"id": "b77-947", "label": "getting_virtual_card", "text": "why do i not have a virtual card"}
+{"id": "b77-950", "label": "getting_virtual_card", "text": "Please help me get a virtual card."}
+{"id": "b77-977", "label": "card_acceptance", "text": "Where can I use my card?"}
+{"id": "b77-985", "label": "card_acceptance", "text": "Can I use my card everywhere?"}
+{"id": "b77-989", "label": "card_acceptance", "text": "areas card is accpeted"}
+{"id": "b77-999", "label": "card_acceptance", "text": "Who accepts my card?"}

@@ -1,0 +1,300 @@
+{"id": "100", "label": "weather_query", "locale": "en-US", "text": "what's the week's forecast"}
+{"id": "10053", "label": "cooking_recipe", "locale": "en-US", "text": "how do i make pizza"}
+{"id": "10206", "label": "cooking_recipe", "locale": "en-US", "text": "how is rice prepared"}
+{"id": "10381", "label": "play_game", "locale": "en-US", "text": "start a competitive crossword for us"}
+{"id": "10403", "label": "play_game", "locale": "en-US", "text": "open games"}
+{"id": "10451", "label": "lists_query", "locale": "en-US", "text": "what i am going to do today"}
+{"id": "10494", "label": "lists_remove", "locale": "en-US", "text": "remove pencil from stationary"}
+{"id": "10501", "label": "lists_createoradd", "locale": "en-US", "text": "add broccoli to my grocery list"}
+{"id": "10513", "label": "lists_createoradd", "locale": "en-US", "text": "i want to make this week's shopping list"}
+{"id": "10655", "label": "lists_remove", "locale": "en-US", "text": "remove the list called party time"}
+{"id": "10756", "label": "lists_remove", "locale": "en-US", "text": "clear out the shopping list"}
+{"id": "1076", "label": "music_dislikeness", "locale": "en-US", "text": "do not play rock metal"}
+{"id": "10931", "label": "lists_query", "locale": "en-US", "text": "what is on my playlist"}
+{"id": "11029", "label": "lists_createoradd", "locale": "en-US", "text": "add to list"}
+{"id": "11270", "label": "play_podcasts", "locale": "en-US", "text": "play next podcast"}
+{"id": "11339", "label": "play_podcasts", "locale": "en-US", "text": "play my most watched podcast"}
+{"id": "11460", "label": "play_podcasts", "locale": "en-US", "text": "i want to listen to a sports podcast"}
+{"id": "1151", "label": "iot_cleaning", "locale": "en-US", "text": "start vacuum cleaner"}
+{"id": "11570", "label": "recommendation_events", "locale": "en-US", "text": "what's happening around my town"}
+{"id": "11612", "label": "recommendation_events", "locale": "en-US", "text": "what gun shows are in tulsa"}
+{"id": "11628", "label": "recommendation_locations", "locale": "en-US", "text": "where is the pharmacy in leavenworth"}
+{"id": "11677", "label": "recommendation_locations", "locale": "en-US", "text": "locate me the amazon restaurants"}
+{"id": "11733", "label": "recommendation_movies", "locale": "en-US", "text": "how is the new movie swat"}
+{"id": "11796", "label": "recommendation_locations", "locale": "en-US", "text": "which bar has the most affordable drinks near sixth street"}
+{"id": "11862", "label": "recommendation_movies", "locale": "en-US", "text": "recommend a movie for me"}
+{"id": "11999", "label": "recommendation_events", "locale": "en-US", "text": "tell me all events for today in my city"}
+{"id": "1202", "label": "datetime_query", "locale": "en-US", "text": "present time in new york"}
+{"id": "122", "label": "general_joke", "locale": "en-US", "text": "send a giggle my way"}
+{"id": "12244", "label": "transport_taxi", "locale": "en-US", "text": "book a taxi to go to the movies at one"}
+{"id": "12245", "label": "transport_query", "locale": "en-US", "text": "when is the next train to glasgow from aberdeen"}
+{"id": "12281", "label": "transport_ticket", "locale": "en-US", "text": "please book a train ticket from london to manchester"}
+{"id": "12377", "label": "transport_taxi", "locale": "en-US", "text": "get me a uber"}
+{"id": "124", "label": "general_joke", "locale": "en-US", "text": "olly tell me a joke"}
+{"id": "12536", "label": "transport_ticket", "locale": "en-US", "text": "book me a train ticket to barcelona please"}
+{"id": "12634", "label": "transport_query", "locale": "en-US", "text": "when is the next train leaving for austin"}
+{"id": "12689", "label": "transport_ticket", "locale": "en-US", "text": "book a train ticket from here to charleston west virginia at eight am today"}
+{"id": "12693", "label": "transport_traffic", "locale": "en-US", "text": "what does the traffic look like on my usual route to work"}
+{"id": "12736", "label": "transport_traffic", "locale": "en-US", "text": "road traffic"}
+{"id": "12818", "label": "transport_query", "locale": "en-US", "text": "how much is a train ticket to chicago"}
+{"id": "12838", "label": "transport_traffic", "locale": "en-US", "text": "how is the traffic at the moment"}
+{"id": "1300", "label": "audio_volume_up", "locale": "en-US", "text": "fast"}
+{"id": "13122", "label": "qa_maths", "locale": "en-US", "text": "what is the factorial of ten"}
+{"id": "13412", "label": "qa_maths", "locale": "en-US", "text": "what is four plus five"}
+{"id": "13516", "label": "qa_factoid", "locale": "en-US", "text": "why are whales big"}
+{"id": "13591", "label": "qa_factoid", "locale": "en-US", "text": "what is the capitol of west virginia"}
+{"id": "13681", "label": "qa_factoid", "locale": "en-US", "text": "how many plays has patrick stewart been in"}
+{"id": "13714", "label": "qa_definition", "locale": "en-US", "text": "what is a mango"}
+{"id": "14", "label": "iot_hue_lighton", "locale": "en-US", "text": "and the darkness has fallen"}
+{"id": "14189", "label": "qa_stock", "locale": "en-US", "text": "what is the price of starbuck's stock"}
+{"id": "14190", "label": "qa_stock", "locale": "en-US", "text": "how much is starbuck's stock these days"}
+{"id": "14228", "label": "qa_currency", "locale": "en-US", "text": "how much is the us dollar worth in canada"}
+{"id": "14591", "label": "qa_definition", "locale": "en-US", "text": "give me the description of a television circuit"}
+{"id": "14599", "label": "qa_currency", "locale": "en-US", "text": "currency exchange"}
+{"id": "14757", "label": "qa_maths", "locale": "en-US", "text": "divide seventy six in two parts"}
+{"id": "14874", "label": "qa_stock", "locale": "en-US", "text": "check stock price for dinky donuts"}
+{"id": "14963", "label": "general_quirky", "locale": "en-US", "text": "internet please"}
+{"id": "14995", "label": "qa_definition", "locale": "en-US", "text": "what does situation mean"}
+{"id": "1516", "label": "takeaway_order", "locale": "en-US", "text": "order a pizza with sausage from domino's"}
+{"id": "15225", "label": "social_query", "locale": "en-US", "text": "show me latest notifications"}
+{"id": "15298", "label": "social_query", "locale": "en-US", "text": "olly what's hot social media topics"}
+{"id": "15337", "label": "social_post", "locale": "en-US", "text": "post this video to facebook"}
+{"id": "15350", "label": "social_post", "locale": "en-US", "text": "i'm unhappy with tesco please help me"}
+{"id": "1554", "label": "iot_hue_lightoff", "locale": "en-US", "text": "turn off the lamps"}
+{"id": "15651", "label": "social_post", "locale": "en-US", "text": "send report to consumer service"}
+{"id": "1579", "label": "general_joke", "locale": "en-US", "text": "find me a joke related to baseball"}
+{"id": "15948", "label": "email_querycontact", "locale": "en-US", "text": "open contacts and call john smith"}
+{"id": "15963", "label": "email_query", "locale": "en-US", "text": "do i have any new emails from kellogg"}
+{"id": "16225", "label": "email_addcontact", "locale": "en-US", "text": "open contacts"}
+{"id": "16373", "label": "email_query", "locale": "en-US", "text": "have i received any emails with tracking numbers"}
+{"id": "1639", "label": "audio_volume_down", "locale": "en-US", "text": "please turn the volume down"}
+{"id": "1640", "label": "audio_volume_up", "locale": "en-US", "text": "turn it up olly"}
+{"id": "16470", "label": "email_addcontact", "locale": "en-US", "text": "please add this email to my contacts"}
+{"id": "16559", "label": "email_sendemail", "locale": "en-US", "text": "send a reply to mike with the answer four hundred and thirty from his email he sent this morning"}
+{"id": "16797", "label": "email_querycontact", "locale": "en-US", "text": "what is mr. taxi's phone number it is in my contacts"}
+{"id": "16883", "label": "email_sendemail", "locale": "en-US", "text": "send an email to jerry ask what time will he be home tonight"}
+{"id": "17054", "label": "email_addcontact", "locale": "en-US", "text": "just add a new email in my contacts from michael"}
+{"id": "171", "label": "takeaway_query", "locale": "en-US", "text": "olly do they deliver home"}
+{"id": "1803", "label": "news_query", "locale": "en-US", "text": "which teams are playing today in the premier league"}
+{"id": "1808", "label": "music_query", "locale": "en-US", "text": "title"}
+{"id": "1874", "label": "music_likeness", "locale": "en-US", "text": "add song to running list"}
+{"id": "1924", "label": "iot_cleaning", "locale": "en-US", "text": "turn on vacuum cleaner"}
+{"id": "1995", "label": "play_music", "locale": "en-US", "text": "play the beatles"}
+{"id": "2007", "label": "play_music", "locale": "en-US", "text": "please play thirteen"}
+{"id": "2075", "label": "iot_hue_lightup", "locale": "en-US", "text": "i want more light"}
+{"id": "2206", "label": "audio_volume_mute", "locale": "en-US", "text": "from now on mute"}
+{"id": "2309", "label": "datetime_convert", "locale": "en-US", "text": "it is seven am in pacific standard time"}
+{"id": "2540", "label": "iot_hue_lightchange", "locale": "en-US", "text": "make the room light blue"}
+{"id": "2566", "label": "iot_wemo_off", "locale": "en-US", "text": "turn off my wemo socket"}
+{"id": "2647", "label": "music_settings", "locale": "en-US", "text": "could you please create a pandora channel for adele"}
+{"id": "2673", "label": "alarm_query", "locale": "en-US", "text": "did i remember to set a reminder alarm for my next doctor's appointment"}
+{"id": "2774", "label": "iot_hue_lightoff", "locale": "en-US", "text": "shut off lights"}
+{"id": "2908", "label": "takeaway_query", "locale": "en-US", "text": "tell me if taco bell delivers"}
+{"id": "3029", "label": "music_dislikeness", "locale": "en-US", "text": "i hate this song"}
+{"id": "3103", "label": "music_dislikeness", "locale": "en-US", "text": "don't play this song again"}
+{"id": "3184", "label": "iot_wemo_on", "locale": "en-US", "text": "stop start the juice"}
+{"id": "3213", "label": "alarm_set", "locale": "en-US", "text": "set a new alarm for that time"}
+{"id": "3444", "label": "datetime_query", "locale": "en-US", "text": "is it ten"}
+{"id": "3486", "label": "audio_volume_down", "locale": "en-US", "text": "speak softer please"}
+{"id": "3522", "label": "iot_hue_lighton", "locale": "en-US", "text": "please turn on my balcony lights"}
+{"id": "3543", "label": "iot_hue_lightchange", "locale": "en-US", "text": "i want the light to be a little more red ish"}
+{"id": "3550", "label": "play_music", "locale": "en-US", "text": "put on some led zeppelin"}
+{"id": "3590", "label": "audio_volume_up", "locale": "en-US", "text": "speak loudly"}
+{"id": "3700", "label": "iot_hue_lightchange", "locale": "en-US", "text": "lights at percent"}
+{"id": "3762", "label": "iot_hue_lightup", "locale": "en-US", "text": "raise the lights"}
+{"id": "3774", "label": "iot_wemo_off", "locale": "en-US", "text": "disable smart socket"}
+{"id": "3809", "label": "audio_volume_down", "locale": "en-US", "text": "slow down the speaker volume"}
+{"id": "3884", "label": "alarm_query", "locale": "en-US", "text": "list current set alarms"}
+{"id": "4155", "label": "audio_volume_other", "locale": "en-US", "text": "change volume to thirty five percent"}
+{"id": "4201", "label": "iot_wemo_on", "locale": "en-US", "text": "power on wemo"}
+{"id": "4268", "label": "music_settings", "locale": "en-US", "text": "move to the next song in the list"}
+{"id": "4272", "label": "iot_coffee", "locale": "en-US", "text": "my coffee is cold please make more coffee"}
+{"id": "4283", "label": "iot_hue_lightup", "locale": "en-US", "text": "increase the brightness in this room"}
+{"id": "4412", "label": "weather_query", "locale": "en-US", "text": "what's the weather in portland"}
+{"id": "442", "label": "news_query", "locale": "en-US", "text": "what's happening in the news"}
+{"id": "4443", "label": "iot_coffee", "locale": "en-US", "text": "start the coffee machine at three"}
+{"id": "4524", "label": "weather_query", "locale": "en-US", "text": "olly what is the weather forecast for today"}
+{"id": "4544", "label": "takeaway_order", "locale": "en-US", "text": "order a twelve piece honey mustard wing combo with seasonimg altnon the fries and a sprite as the drink"}
+{"id": "46", "label": "general_greet", "locale": "en-US", "text": "what's up olly"}
+{"id": "4618", "label": "iot_wemo_on", "locale": "en-US", "text": "enable smart socket"}
+{"id": "4653", "label": "audio_volume_mute", "locale": "en-US", "text": "set the speakers to mute"}
+{"id": "4671", "label": "music_likeness", "locale": "en-US", "text": "i really enjoy this song"}
+{"id": "47", "label": "datetime_query", "locale": "en-US", "text": "what's the time in australia"}
+{"id": "4851", "label": "alarm_query", "locale": "en-US", "text": "is my alarm set"}
+{"id": "4921", "label": "alarm_remove", "locale": "en-US", "text": "turn off my first alarm"}
+{"id": "5103", "label": "alarm_remove", "locale": "en-US", "text": "olly cancel all soccer practice alarms"}
+{"id": "5332", "label": "datetime_convert", "locale": "en-US", "text": "time between us and canada"}
+{"id": "5333", "label": "datetime_convert", "locale": "en-US", "text": "time difference between u. k. and us"}
+{"id": "5396", "label": "iot_wemo_off", "locale": "en-US", "text": "please turn socket off"}
+{"id": "5635", "label": "alarm_set", "locale": "en-US", "text": "ensure i have to get up at six in morning"}
+{"id": "5812", "label": "audio_volume_other", "locale": "en-US", "text": "set the default audio setting"}
+{"id": "5919", "label": "news_query", "locale": "en-US", "text": "what is the latest update on the new york bridge proposal"}
+{"id": "5988", "label": "iot_hue_lightdim", "locale": "en-US", "text": "adjust the lights to a lower setting please"}
+{"id": "6015", "label": "iot_hue_lightdim", "locale": "en-US", "text": "decrease brightness of lights"}
+{"id": "6083", "label": "alarm_set", "locale": "en-US", "text": "create an alarm for today at ten am"}
+{"id": "6134", "label": "music_query", "locale": "en-US", "text": "find out what song this is and tell me the name"}
+{"id": "6578", "label": "general_quirky", "locale": "en-US", "text": "love"}
+{"id": "6878", "label": "calendar_set", "locale": "en-US", "text": "schedule a meeting with the accounting department on two thirty p. m. on friday"}
+{"id": "6980", "label": "calendar_query", "locale": "en-US", "text": "give me to do list"}
+{"id": "7061", "label": "calendar_set", "locale": "en-US", "text": "give me a reminder twenty four hours before my friday meeting with edg"}
+{"id": "761", "label": "music_query", "locale": "en-US", "text": "i want to know about this song"}
+{"id": "7711", "label": "calendar_set", "locale": "en-US", "text": "hey cancel all my other meetings and calls for second march as it is jim's birthday tag it as an event in your calendar"}
+{"id": "7891", "label": "calendar_remove", "locale": "en-US", "text": "cancel dinner tonight"}
+{"id": "804", "label": "audio_volume_mute", "locale": "en-US", "text": "hey siri mute the speakers"}
+{"id": "8853", "label": "calendar_remove", "locale": "en-US", "text": "clear my next activity"}
+{"id": "8856", "label": "calendar_remove", "locale": "en-US", "text": "delete all events in calendar"}
+{"id": "9107", "label": "calendar_query", "locale": "en-US", "text": "what time does the zach brown concert on june third begin"}
+{"id": "9237", "label": "play_radio", "locale": "en-US", "text": "turn on the radio and play channel one hundred and six point nine"}
+{"id": "9323", "label": "play_radio", "locale": "en-US", "text": "start pandora"}
+{"id": "9694", "label": "play_audiobook", "locale": "en-US", "text": "resume the playback of a child called it"}
+{"id": "9726", "label": "play_audiobook", "locale": "en-US", "text": "stop audiobook"}
+{"id": "100", "label": "weather_query", "locale": "hi-IN", "text": "सप्ताह का पूर्वानुमान क्या है"}
+{"id": "10053", "label": "cooking_recipe", "locale": "hi-IN", "text": "मैं how pizza बनाऊं"}
+{"id": "10206", "label": "cooking_recipe", "locale": "hi-IN", "text": "olly चावल कैसे बनाए जाते हैं"}
+{"id": "10381", "label": "play_game", "locale": "hi-IN", "text": "मेरे लिए शतरंज की बिसात लगाओ"}
+{"id": "10403", "label": "play_game", "locale": "hi-IN", "text": "खेलों को खोलो"}
+{"id": "10451", "label": "lists_query", "locale": "hi-IN", "text": "मैं आज क्या करने जा रहा हूँ"}
+{"id": "10494", "label": "lists_remove", "locale": "hi-IN", "text": "स्टेशनरी से पेंसिल हटाओ"}
+{"id": "10501", "label": "lists_createoradd", "locale": "hi-IN", "text": "मेरी grocery list में ब्रोक्कोलि जोड़ो"}
+{"id": "10513", "label": "lists_createoradd", "locale": "hi-IN", "text": "मैं इस हफ्ते की शॉपिंग सूची बनाना चाहता हूँ"}
+{"id": "10655", "label": "lists_remove", "locale": "hi-IN", "text": "पार्टी टाइम वाली सूची को हटा दो"}
+{"id": "10756", "label": "lists_remove", "locale": "hi-IN", "text": "ख़रीदारी की सूची साफ़ करें"}
+{"id": "1076", "label": "music_dislikeness", "locale": "hi-IN", "text": "रॉक मेटल मत चलाओ"}
+{"id": "10931", "label": "lists_query", "locale": "hi-IN", "text": "मेरी प्लेलिस्ट में क्या है"}
+{"id": "11029", "label": "lists_createoradd", "locale": "hi-IN", "text": "सूची में ऐड करो"}
+{"id": "11270", "label": "play_podcasts", "locale": "hi-IN", "text": "अगला पॉडकास्ट चालू करो"}
+{"id": "11339", "label": "play_podcasts", "locale": "hi-IN", "text": "मेरा सबसे ज्यादा देखा गया पॉडकास्ट चलाओ"}
+{"id": "11460", "label": "play_podcasts", "locale": "hi-IN", "text": "मैं खेल पॉडकास्ट सुनना चाहता हूँ"}
+{"id": "1151", "label": "iot_cleaning", "locale": "hi-IN", "text": "वैक्यूम क्लीनर शुरू करें"}
+{"id": "11570", "label": "recommendation_events", "locale": "hi-IN", "text": "मेरे शहर के आसपास क्या हो रहा है"}
+{"id": "11612", "label": "recommendation_events", "locale": "hi-IN", "text": "मुंबई में कौन से गन शो होते हैं"}
+{"id": "11628", "label": "recommendation_locations", "locale": "hi-IN", "text": "दिल्ली में फ़ार्मेसी कहाँ है"}
+{"id": "11677", "label": "recommendation_locations", "locale": "hi-IN", "text": "मुझे दिल्ली के रेस्टोरेंट्स दिखाओ"}
+{"id": "11733", "label": "recommendation_movies", "locale": "hi-IN", "text": "कैसी है नई फिल्म कबीर सिंह"}
+{"id": "11796", "label": "recommendation_locations", "locale": "hi-IN", "text": "छठी गली के पास किस बार में सबसे किफ़ायती पेय हैं"}
+{"id": "11862", "label": "recommendation_movies", "locale": "hi-IN", "text": "मेरे लिए एक फिल्म का सुझाव दो"}
+{"id": "11999", "label": "recommendation_events", "locale": "hi-IN", "text": "मुझे मेरे शहर में आज के सभी कार्यक्रम बताओ"}
+{"id": "1202", "label": "datetime_query", "locale": "hi-IN", "text": "दिल्ली में वर्तमान समय"}
+{"id": "122", "label": "general_joke", "locale": "hi-IN", "text": "एक हंसी भेजो मेरे रास्ते"}
+{"id": "12244", "label": "transport_taxi", "locale": "hi-IN", "text": "एक बजे फिल्म जाने के लिए एक टैक्सी बुक करें"}
+{"id": "12245", "label": "transport_query", "locale": "hi-IN", "text": "मुंबई से दिल्ली के लिए अगली ट्रेन कब है"}
+{"id": "12281", "label": "transport_ticket", "locale": "hi-IN", "text": "कृपया पुणे से अहमदाबाद के लिए रेलगाड़ी टिकट बुक करें"}
+{"id": "12377", "label": "transport_taxi", "locale": "hi-IN", "text": "मुझे एक ऊबर प्राप्त करें"}
+{"id": "124", "label": "general_joke", "locale": "hi-IN", "text": "ओली मुझे एक चुटकुला सुनाओ"}
+{"id": "12536", "label": "transport_ticket", "locale": "hi-IN", "text": "मेरे लिए दिल्ली के लिए एक रेल टिकट बुक करो"}
+{"id": "12634", "label": "transport_query", "locale": "hi-IN", "text": "मुंबई के लिए अगली रेलगाड़ी कब जा रही है"}
+{"id": "12689", "label": "transport_ticket", "locale": "hi-IN", "text": "आज सुबह आठ बजे यहाँ से मुंबई के लिए एक train ticket book करे"}
+{"id": "12693", "label": "transport_traffic", "locale": "hi-IN", "text": "मेरे आमतौर पर काम के लिए जाने वाले रास्ते पर ट्रैफिक कैसा है"}
+{"id": "12736", "label": "transport_traffic", "locale": "hi-IN", "text": "रोड में ट्रैफिक"}
+{"id": "12818", "label": "transport_query", "locale": "hi-IN", "text": "शिकागो के लिए ट्रेन का टिकट कितना है"}
+{"id": "12838", "label": "transport_traffic", "locale": "hi-IN", "text": "अभी यातायात कैसा है"}
+{"id": "1300", "label": "audio_volume_up", "locale": "hi-IN", "text": "तेज"}
+{"id": "13122", "label": "qa_maths", "locale": "hi-IN", "text": "दस का भाज्य क्या है"}
+{"id": "13412", "label": "qa_maths", "locale": "hi-IN", "text": "फोर प्लस फाइव क्या है"}
+{"id": "13516", "label": "qa_factoid", "locale": "hi-IN", "text": "व्हेल बड़ी क्यों होती हैं"}
+{"id": "13591", "label": "qa_factoid", "locale": "hi-IN", "text": "पश्चिमी महाराष्ट्र की राजधानी क्या है"}
+{"id": "13681", "label": "qa_factoid", "locale": "hi-IN", "text": "जितिन प्रसाद कितने नाटकों में रहा है"}
+{"id": "13714", "label": "qa_definition", "locale": "hi-IN", "text": "आम क्या है"}
+{"id": "14", "label": "iot_hue_lighton", "locale": "hi-IN", "text": "और अँधेरा छा गया"}
+{"id": "14189", "label": "qa_stock", "locale": "hi-IN", "text": "विप्रो के स्टॉक की कीमत क्या है"}
+{"id": "14190", "label": "qa_stock", "locale": "hi-IN", "text": "टाटा मोटर्स का स्टॉक इन दिनों कितना है"}
+{"id": "14228", "label": "qa_currency", "locale": "hi-IN", "text": "भारत में अमेरिकी डॉलर का मूल्य कितना है"}
+{"id": "14591", "label": "qa_definition", "locale": "hi-IN", "text": "मुझे एक टेलीविजन सर्किट का विवरण दें"}
+{"id": "14599", "label": "qa_currency", "locale": "hi-IN", "text": "मुद्रा विनिमय"}
+{"id": "14757", "label": "qa_maths", "locale": "hi-IN", "text": "छब्बीस को दो भागों में विभाजित करें"}
+{"id": "14874", "label": "qa_stock", "locale": "hi-IN", "text": "सत्यम कंप्यूटर के लिए स्टॉक मूल्य की जाँच करें"}
+{"id": "14963", "label": "general_quirky", "locale": "hi-IN", "text": "इंटरनेट प्लीज"}
+{"id": "14995", "label": "qa_definition", "locale": "hi-IN", "text": "स्थिति का क्या अर्थ है"}
+{"id": "1516", "label": "takeaway_order", "locale": "hi-IN", "text": "डोमिनोज से चीज के साथ पिज्जा खरीदें"}
+{"id": "15225", "label": "social_query", "locale": "hi-IN", "text": "मुझे नवीनतम सूचनाएं दिखाएं"}
+{"id": "15298", "label": "social_query", "locale": "hi-IN", "text": "olly चर्चित सोशल मीडिया विषय क्या हैं"}
+{"id": "15337", "label": "social_post", "locale": "hi-IN", "text": "इस वीडियो को फेसबुक पर पोस्ट करें"}
+{"id": "15350", "label": "social_post", "locale": "hi-IN", "text": "मैं टेस्को से नाखुश हूं कृपया मेरी मदद करें"}
+{"id": "1554", "label": "iot_hue_lightoff", "locale": "hi-IN", "text": "बत्तियाँ बंद करो"}
+{"id": "15651", "label": "social_post", "locale": "hi-IN", "text": "ग्राहक सेवा को report भेजो"}
+{"id": "1579", "label": "general_joke", "locale": "hi-IN", "text": "मेरे लिए बेसबॉल से सम्बंधित एक चुटकुला खोजो"}
+{"id": "15948", "label": "email_querycontact", "locale": "hi-IN", "text": "संपर्क खोलें और रोहन सिंह को कॉल करें"}
+{"id": "15963", "label": "email_query", "locale": "hi-IN", "text": "क्या मेरे पास सचिन से कोई नया ईमेल है"}
+{"id": "16225", "label": "email_addcontact", "locale": "hi-IN", "text": "कॉन्टेक्ट्स खोलो"}
+{"id": "16373", "label": "email_query", "locale": "hi-IN", "text": "क्या मुझे ट्रैकिंग नंबरों वाला कोई ईमेल प्राप्त हुआ है"}
+{"id": "1639", "label": "audio_volume_down", "locale": "hi-IN", "text": "कृपया वॉल्यूम कम करें"}
+{"id": "1640", "label": "audio_volume_up", "locale": "hi-IN", "text": "olly इसे बढ़ाओ"}
+{"id": "16470", "label": "email_addcontact", "locale": "hi-IN", "text": "कृपया इस ईमेल को मेरे संपर्कों में जोड़ें"}
+{"id": "16559", "label": "email_sendemail", "locale": "hi-IN", "text": "त्रिलोकी को रिप्लाई करो जवाब के साथ चार सौ तीस जो उसके ईमेल से उसने भेजा था आज सुबह"}
+{"id": "16797", "label": "email_querycontact", "locale": "hi-IN", "text": "ओला का phone number क्या है यह मेरे संपर्क में है"}
+{"id": "16883", "label": "email_sendemail", "locale": "hi-IN", "text": "राम को एक ईमेल भेजें पूछें कि वह आज रात किस समय घर आएगा"}
+{"id": "17054", "label": "email_addcontact", "locale": "hi-IN", "text": "देवेंद्र से मेरे संपर्कों में बस एक नया ईमेल जोड़ें"}
+{"id": "171", "label": "takeaway_query", "locale": "hi-IN", "text": "ओली क्या वे घर deliver"}
+{"id": "1803", "label": "news_query", "locale": "hi-IN", "text": "आज इंडियन प्रीमियर लीग में कौन सी टीमें खेल रही हैं"}
+{"id": "1808", "label": "music_query", "locale": "hi-IN", "text": "मुझे अरिजीत सिंह का संगीत पसंद है"}
+{"id": "1874", "label": "music_likeness", "locale": "hi-IN", "text": "चल रही सूची में गीत जोड़ें"}
+{"id": "1924", "label": "iot_cleaning", "locale": "hi-IN", "text": "वैक्यूम क्लीनर चालू करें"}
+{"id": "1995", "label": "play_music", "locale": "hi-IN", "text": "सनम बैंड को चालू करो"}
+{"id": "2007", "label": "play_music", "locale": "hi-IN", "text": "कृपया तुम ही हो चलाओ"}
+{"id": "2075", "label": "iot_hue_lightup", "locale": "hi-IN", "text": "मुझे और रोशनी चाहिए"}
+{"id": "2206", "label": "audio_volume_mute", "locale": "hi-IN", "text": "अब से मूक"}
+{"id": "2309", "label": "datetime_convert", "locale": "hi-IN", "text": "इंडियन मानक समय में सुबह के सात बज रहे हैं"}
+{"id": "2540", "label": "iot_hue_lightchange", "locale": "hi-IN", "text": "कमरे की बत्ती को नीला बनाना"}
+{"id": "2566", "label": "iot_wemo_off", "locale": "hi-IN", "text": "मेरा वेमो सॉकेट बंद करो"}
+{"id": "2647", "label": "music_settings", "locale": "hi-IN", "text": "क्या आप कृपया अर्जीत सिंह के लिए एक पेंडोरा चैनल बना सकते हैं"}
+{"id": "2673", "label": "alarm_query", "locale": "hi-IN", "text": "क्या मुझे अपने अगले डॉक्टर के नियुक्ति के लिए रिमाइंडर अलार्म सेट करना याद है"}
+{"id": "2774", "label": "iot_hue_lightoff", "locale": "hi-IN", "text": "lights को बंद करो"}
+{"id": "2908", "label": "takeaway_query", "locale": "hi-IN", "text": "मुझे बताओ कि क्या के एफ सी बचाता है"}
+{"id": "3029", "label": "music_dislikeness", "locale": "hi-IN", "text": "मुझे इस गीत से नफरत है"}
+{"id": "3103", "label": "music_dislikeness", "locale": "hi-IN", "text": "यह गाना फिर से मत चलाना"}
+{"id": "3184", "label": "iot_wemo_on", "locale": "hi-IN", "text": "जूस को देना बंद करो"}
+{"id": "3213", "label": "alarm_set", "locale": "hi-IN", "text": "उस समय के लिए एक नया अलार्म सेट करें"}
+{"id": "3444", "label": "datetime_query", "locale": "hi-IN", "text": "क्या यह दस है"}
+{"id": "3486", "label": "audio_volume_down", "locale": "hi-IN", "text": "कृपया आवाज़ कम करें"}
+{"id": "3522", "label": "iot_hue_lighton", "locale": "hi-IN", "text": "मेरी बालकनी की lights चालू करें"}
+{"id": "3543", "label": "iot_hue_lightchange", "locale": "hi-IN", "text": "मैं चाहता हूँ कि रोशनी थोड़ी और लाल हो"}
+{"id": "3550", "label": "play_music", "locale": "hi-IN", "text": "अरिजीत सिंह को चालू पर रखो"}
+{"id": "3590", "label": "audio_volume_up", "locale": "hi-IN", "text": "जोर से बोलो"}
+{"id": "3700", "label": "iot_hue_lightchange", "locale": "hi-IN", "text": "प्रतिशत पर रोशनी"}
+{"id": "3762", "label": "iot_hue_lightup", "locale": "hi-IN", "text": "रोशनी बढ़ाएं"}
+{"id": "3774", "label": "iot_wemo_off", "locale": "hi-IN", "text": "स्मार्ट सॉकेट अक्षम करें"}
+{"id": "3809", "label": "audio_volume_down", "locale": "hi-IN", "text": "स्पीकर वॉल्यूम धीमा करें"}
+{"id": "3884", "label": "alarm_query", "locale": "hi-IN", "text": "सूची वर्तमान सेट अलार्म"}
+{"id": "4155", "label": "audio_volume_other", "locale": "hi-IN", "text": "वॉल्यूम को पैंतीस प्रतिशत में बदलें"}
+{"id": "4201", "label": "iot_wemo_on", "locale": "hi-IN", "text": "सिसका सॉकेट चालू करो"}
+{"id": "4268", "label": "music_settings", "locale": "hi-IN", "text": "सूची में अगले गीत पर जाएँ"}
+{"id": "4272", "label": "iot_coffee", "locale": "hi-IN", "text": "मेरी कॉफ़ी ठंडी है कृपया और कॉफ़ी बना दो"}
+{"id": "4283", "label": "iot_hue_lightup", "locale": "hi-IN", "text": "इस कमरे में उजाला बढ़ाएं"}
+{"id": "4412", "label": "weather_query", "locale": "hi-IN", "text": "मुंबई में मौसम कैसा है"}
+{"id": "442", "label": "news_query", "locale": "hi-IN", "text": "समाचार में क्या हो रहा है"}
+{"id": "4443", "label": "iot_coffee", "locale": "hi-IN", "text": "कॉफ़ी मशीन को तीन बजे स्टार्ट कर दो"}
+{"id": "4524", "label": "weather_query", "locale": "hi-IN", "text": "olly आज का मौसम पूर्वानुमान क्या है"}
+{"id": "4544", "label": "takeaway_order", "locale": "hi-IN", "text": "सीज़निमग अलटन द फ्राई और पेय के रूप में स्प्राइट के साथ बारह पीस पालक पनीर कॉम्बो ऑर्डर करें"}
+{"id": "46", "label": "general_greet", "locale": "hi-IN", "text": "क्या चल रहा है ओली"}
+{"id": "4618", "label": "iot_wemo_on", "locale": "hi-IN", "text": "स्मार्ट सॉकेट सक्षम करें"}
+{"id": "4653", "label": "audio_volume_mute", "locale": "hi-IN", "text": "स्पीकरों को को म्यूट करने के लिए सेट करें"}
+{"id": "4671", "label": "music_likeness", "locale": "hi-IN", "text": "मैं वास्तव में इस गाने का आनंद ले रहा हूं"}
+{"id": "47", "label": "datetime_query", "locale": "hi-IN", "text": "भारत में समय क्या है"}
+{"id": "4851", "label": "alarm_query", "locale": "hi-IN", "text": "क्या मेरा अलार्म लगा हुआ है"}
+{"id": "4921", "label": "alarm_remove", "locale": "hi-IN", "text": "मेरा पहला अलार्म बंद करो"}
+{"id": "5103", "label": "alarm_remove", "locale": "hi-IN", "text": "olly सभी फुटबॉल का अभ्यास अलार्म रद्द करें"}
+{"id": "5332", "label": "datetime_convert", "locale": "hi-IN", "text": "दिल्ली और मुंबई के बीच का समय"}
+{"id": "5333", "label": "datetime_convert", "locale": "hi-IN", "text": "नोएडा और लखनऊ के बीच समय का अंतर"}
+{"id": "5396", "label": "iot_wemo_off", "locale": "hi-IN", "text": "सॉकेट को बंद कर दो"}
+{"id": "5635", "label": "alarm_set", "locale": "hi-IN", "text": "सुनिश्चित करें कि मुझे सुबह छह बजे उठना है"}
+{"id": "5812", "label": "audio_volume_other", "locale": "hi-IN", "text": "डिफ़ॉल्ट ऑडियो सेटिंग सेट करें"}
+{"id": "5919", "label": "news_query", "locale": "hi-IN", "text": "बुलेट ट्रेन प्रस्ताव पर नवीनतम अपडेट क्या है"}
+{"id": "5988", "label": "iot_hue_lightdim", "locale": "hi-IN", "text": "कृपया बत्तियों को कम सेटिंग में समायोजित करें"}
+{"id": "6015", "label": "iot_hue_lightdim", "locale": "hi-IN", "text": "रोशनी की चमक कम करें"}
+{"id": "6083", "label": "alarm_set", "locale": "hi-IN", "text": "आज के लिए सुबह दस बजे अलार्म बनाएं"}
+{"id": "6134", "label": "music_query", "locale": "hi-IN", "text": "पता करो यह कौन सा गाना है और मुझे नाम बताओ"}
+{"id": "6578", "label": "general_quirky", "locale": "hi-IN", "text": "प्यार"}
+{"id": "6878", "label": "calendar_set", "locale": "hi-IN", "text": "शुक्रवार को दोपहर ढाई बजे लेखा विभाग के साथ मेरी मीटिंग शेड्यूल करो"}
+{"id": "6980", "label": "calendar_query", "locale": "hi-IN", "text": "मुझे करने के लिए सूची दें"}
+{"id": "7061", "label": "calendar_set", "locale": "hi-IN", "text": "अमित के साथ मेरी शुक्रवार की बैठक से चौबीस घंटे पहले मुझे एक अनुस्मारक दें"}
+{"id": "761", "label": "music_query", "locale": "hi-IN", "text": "मैं इस गाने के बारे में जानना चाहता हूँ"}
+{"id": "7711", "label": "calendar_set", "locale": "hi-IN", "text": "अरे मेरी अन्य सभी मीटिंग रद्द करो और दो मार्च के लिए कॉल करो क्योंकि यह हरीश का जन्मदिन है इसे अपने कैलेंडर में एक आयोजन के रूप में टैग करें"}
+{"id": "7891", "label": "calendar_remove", "locale": "hi-IN", "text": "आज रात का खाना रद्द करें"}
+{"id": "804", "label": "audio_volume_mute", "locale": "hi-IN", "text": "अरे siri स्पीकर को म्यूट कर दो"}
+{"id": "8853", "label": "calendar_remove", "locale": "hi-IN", "text": "मेरी अगली गतिविधि साफ़ करें"}
+{"id": "8856", "label": "calendar_remove", "locale": "hi-IN", "text": "कैलेंडर में सभी ईवेंट हटाएं"}
+{"id": "9107", "label": "calendar_query", "locale": "hi-IN", "text": "तीसरे जून को ज़ैच ब्राउन कॉन्सर्ट किस समय शुरू होता है"}
+{"id": "9237", "label": "play_radio", "locale": "hi-IN", "text": "रेडियो चालू करें और चैनल एक सौ छह दशमलव नौ चलाएं"}
+{"id": "9323", "label": "play_radio", "locale": "hi-IN", "text": "jio music शुरू करो"}
+{"id": "9694", "label": "play_audiobook", "locale": "hi-IN", "text": "यह कोई जाने ना फिर से शुरू करो"}
+{"id": "9726", "label": "play_audiobook", "locale": "hi-IN", "text": "ऑडियोबुक बंद करो"}

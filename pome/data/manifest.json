@@ -1,0 +1,51 @@
+{
+  "datasets": {
+    "banking77": {
+      "licence": "cc-by-4.0",
+      "repo": "PolyAI/banking77",
+      "revision": "1846984189f2bc0ac51c6fc3a600fa9e1714e0c6",
+      "source_sha256": {
+        "b77": "1f40f777c33f0edfa6c530ff84fe2878db6490838c12d22d036f626948905341"
+      }
+    },
+    "clinc150": {
+      "licence": "cc-by-3.0",
+      "repo": "clinc/clinc_oos",
+      "revision": "155b9c710419136e17307b80d0a13e68cd46b4ec",
+      "source_sha256": {
+        "clinc": "3e60e45b25bf86543aa5df8ba4fcc674114164e6184f0197690648c2908d0102"
+      }
+    },
+    "massive": {
+      "licence": "cc-by-4.0",
+      "repo": "AmazonScience/massive",
+      "revision": "ed58ac423a2f4121720918bf5301577edce4ffd3",
+      "source_sha256": {
+        "en": "c418da9a5f3a7425b5cf44941bcea032a31040dbda2da85e0dd9323785c7731e",
+        "hi": "f09ebfb9519169e5920785a1d6225d5d352c7de4a002235af99765147d219875"
+      }
+    }
+  },
+  "retrieved_at": "2026-11-22T08:56:58Z",
+  "samples": {
+    "banking77.jsonl": {
+      "rows": 300,
+      "sha256": "802133cfc8b9f69dd68dd90e57c95ddf5babb171fbb50cfccfe57ab0f57ed89c"
+    },
+    "clinc150.jsonl": {
+      "rows": 250,
+      "sha256": "f070aeffdb63db7b6e7b2f6e098ba20e0ea8094be3a1501cb2ed5d290ee5f62d"
+    },
+    "massive.jsonl": {
+      "rows": 300,
+      "sha256": "76435b20d9abdfb079f159edce1f30db371e57e629cf3592405b59642d555c35"
+    }
+  },
+  "seed": 20261122,
+  "sizes": {
+    "banking77": 300,
+    "clinc_in": 150,
+    "clinc_oos": 100,
+    "massive": 150
+  }
+}

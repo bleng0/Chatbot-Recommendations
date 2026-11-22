@@ -1,0 +1,250 @@
+{"id": "clinc-1015", "is_oos": false, "label": "next_song", "text": "next song"}
+{"id": "clinc-1040", "is_oos": false, "label": "transactions", "text": "how much was my last target trip"}
+{"id": "clinc-1063", "is_oos": false, "label": "restaurant_suggestion", "text": "can you suggest a french restaurant"}
+{"id": "clinc-1080", "is_oos": false, "label": "rewards_balance", "text": "x card has earned how many points"}
+{"id": "clinc-111", "is_oos": false, "label": "definition", "text": "i'd like to know what bitcoin means"}
+{"id": "clinc-1123", "is_oos": false, "label": "pay_bill", "text": "i want to pay my bill through the app"}
+{"id": "clinc-1164", "is_oos": false, "label": "spending_history", "text": "what did i spend on beer last month"}
+{"id": "clinc-1170", "is_oos": false, "label": "pto_request_status", "text": "did my vacation get approval"}
+{"id": "clinc-1205", "is_oos": false, "label": "credit_score", "text": "what is my credit score number"}
+{"id": "clinc-1250", "is_oos": false, "label": "new_card", "text": "how do i apply for american express"}
+{"id": "clinc-1285", "is_oos": false, "label": "lost_luggage", "text": "my luggage has been misplaced"}
+{"id": "clinc-1295", "is_oos": false, "label": "repeat", "text": "would you repeat what you said earlier"}
+{"id": "clinc-1334", "is_oos": false, "label": "mpg", "text": "tell me about this car's highway mpg"}
+{"id": "clinc-1352", "is_oos": false, "label": "oil_change_when", "text": "when is my car due for its next oil change"}
+{"id": "clinc-1393", "is_oos": false, "label": "yes", "text": "yes, this is true"}
+{"id": "clinc-1428", "is_oos": false, "label": "travel_suggestion", "text": "can you throw out some suggestions to me of places to travel to"}
+{"id": "clinc-145", "is_oos": false, "label": "meaning_of_life", "text": "is there meaning to life"}
+{"id": "clinc-1452", "is_oos": false, "label": "insurance", "text": "tell me about my health benefits"}
+{"id": "clinc-1498", "is_oos": false, "label": "todo_list_update", "text": "you can take dishes off my todo list"}
+{"id": "clinc-1506", "is_oos": false, "label": "reminder", "text": "read my reminder list"}
+{"id": "clinc-153", "is_oos": false, "label": "insurance_change", "text": "i really would like to get a new insurance plan"}
+{"id": "clinc-1545", "is_oos": false, "label": "change_speed", "text": "talk faster"}
+{"id": "clinc-1572", "is_oos": false, "label": "tire_pressure", "text": "i gotta know how low are my tires on air"}
+{"id": "clinc-1597", "is_oos": false, "label": "no", "text": "that's wrong"}
+{"id": "clinc-1631", "is_oos": false, "label": "apr", "text": "is my apr rate better than most"}
+{"id": "clinc-1650", "is_oos": false, "label": "nutrition_info", "text": "tell me nutritional info for brocoli"}
+{"id": "clinc-1691", "is_oos": false, "label": "calendar", "text": "what do i have planned for 3/5"}
+{"id": "clinc-1713", "is_oos": false, "label": "uber", "text": "i need to go downtown with 2 people; can you get me an uber"}
+{"id": "clinc-1748", "is_oos": false, "label": "calculator", "text": "tell me what 1875 plus 3459 equals"}
+{"id": "clinc-1789", "is_oos": false, "label": "date", "text": "what will tomorrow be on the calendar"}
+{"id": "clinc-1803", "is_oos": false, "label": "carry_on", "text": "how many bags can i carry-on"}
+{"id": "clinc-1844", "is_oos": false, "label": "pto_used", "text": "how much of my pto is left"}
+{"id": "clinc-1867", "is_oos": false, "label": "schedule_maintenance", "text": "where can i go to have my tires checked out"}
+{"id": "clinc-1890", "is_oos": false, "label": "travel_notification", "text": "i will be traveling to lima alert my bank"}
+{"id": "clinc-1933", "is_oos": false, "label": "sync_device", "text": "pair yourself to my phone if you can"}
+{"id": "clinc-1958", "is_oos": false, "label": "thank_you", "text": "thank you for your assistance"}
+{"id": "clinc-197", "is_oos": false, "label": "find_phone", "text": "can you help me hunt for my missing cellphone"}
+{"id": "clinc-1986", "is_oos": false, "label": "roll_dice", "text": "please roll twelve sided dice"}
+{"id": "clinc-2024", "is_oos": false, "label": "food_last", "text": "does tofu last long in the freezer before it goes bad"}
+{"id": "clinc-2062", "is_oos": false, "label": "cook_time", "text": "how long does it take to cook steaks"}
+{"id": "clinc-2089", "is_oos": false, "label": "reminder_update", "text": "i would like you to remind me to do something"}
+{"id": "clinc-2101", "is_oos": false, "label": "report_lost_card", "text": "i lost my card, what do i do next"}
+{"id": "clinc-2150", "is_oos": false, "label": "ingredient_substitution", "text": "if i use applesauce instead of oil, will that mess it up"}
+{"id": "clinc-2165", "is_oos": false, "label": "make_call", "text": "i need you to call the phone company for me"}
+{"id": "clinc-2208", "is_oos": false, "label": "alarm", "text": "can you wake me up at noon"}
+{"id": "clinc-2242", "is_oos": false, "label": "todo_list", "text": "is it possible to read my to-do list again"}
+{"id": "clinc-2272", "is_oos": false, "label": "change_accent", "text": "change voice to female"}
+{"id": "clinc-230", "is_oos": false, "label": "travel_alert", "text": "find travel alerts for haiti"}
+{"id": "clinc-2302", "is_oos": false, "label": "w2", "text": "i wanna get my w-2 form"}
+{"id": "clinc-2328", "is_oos": false, "label": "bill_due", "text": "i need to find out how to check the due date for the water bill"}
+{"id": "clinc-2347", "is_oos": false, "label": "calories", "text": "what is the total number of calories in this pizza"}
+{"id": "clinc-2397", "is_oos": false, "label": "damaged_card", "text": "i would like to report a damaged card that was burnt"}
+{"id": "clinc-2429", "is_oos": false, "label": "restaurant_reviews", "text": "does olive garden have good reviews"}
+{"id": "clinc-2455", "is_oos": false, "label": "routing", "text": "where do i go if i am seeking the routing number of dallas capital"}
+{"id": "clinc-2468", "is_oos": false, "label": "do_you_have_pets", "text": "what kind of animals do you own"}
+{"id": "clinc-2497", "is_oos": false, "label": "schedule_meeting", "text": "i need assistance scheduling a meeting"}
+{"id": "clinc-2523", "is_oos": false, "label": "gas_type", "text": "can you tell me what gas this car takes"}
+{"id": "clinc-2556", "is_oos": false, "label": "plug_type", "text": "will i require a plug converter when i visit kenya"}
+{"id": "clinc-2587", "is_oos": false, "label": "tire_change", "text": "how soon till i need to change my tires"}
+{"id": "clinc-260", "is_oos": false, "label": "pto_request", "text": "i need to use pto on october 5th to october 10th"}
+{"id": "clinc-2625", "is_oos": false, "label": "exchange_rate", "text": "look up the rate of exchange between pesos and usd"}
+{"id": "clinc-2640", "is_oos": false, "label": "next_holiday", "text": "on what day is our next free day"}
+{"id": "clinc-2676", "is_oos": false, "label": "change_volume", "text": "volume to 4"}
+{"id": "clinc-2701", "is_oos": false, "label": "who_do_you_work_for", "text": "who is responsible for your employment"}
+{"id": "clinc-2748", "is_oos": false, "label": "credit_limit", "text": "how much can i use on my visa"}
+{"id": "clinc-2784", "is_oos": false, "label": "how_busy", "text": "how busy is cheesecake factory right now"}
+{"id": "clinc-2801", "is_oos": false, "label": "accept_reservations", "text": "do you have any idea if the flying wing does reservations"}
+{"id": "clinc-2847", "is_oos": false, "label": "order_status", "text": "what's up with my order"}
+{"id": "clinc-2877", "is_oos": false, "label": "pin_change", "text": "what exactly is my pin"}
+{"id": "clinc-2882", "is_oos": false, "label": "goodbye", "text": "it was great to speak with you"}
+{"id": "clinc-2923", "is_oos": false, "label": "account_blocked", "text": "why can't i use my money market account"}
+{"id": "clinc-2940", "is_oos": false, "label": "what_song", "text": "i'd like to know what song this is"}
+{"id": "clinc-298", "is_oos": false, "label": "improve_credit_score", "text": "can i hurt my credit rating if i open several credit cards in a short time frame"}
+{"id": "clinc-2988", "is_oos": false, "label": "international_fees", "text": "will i be charged a transaction fee on my discover card in cuba"}
+{"id": "clinc-3008", "is_oos": false, "label": "last_maintenance", "text": "did i take my car to the mechanics recently"}
+{"id": "clinc-3040", "is_oos": false, "label": "meeting_schedule", "text": "are there meetings from 1 to 5 pm"}
+{"id": "clinc-306", "is_oos": false, "label": "fun_fact", "text": "what is some trivia about frog"}
+{"id": "clinc-3073", "is_oos": false, "label": "ingredients_list", "text": "what do i need to use to make lasagna"}
+{"id": "clinc-3091", "is_oos": false, "label": "report_fraud", "text": "i would like to report fraudulent activity on my chase card"}
+{"id": "clinc-3127", "is_oos": false, "label": "measurement_conversion", "text": "i need to know the conversion between teaspoons and tablespoons"}
+{"id": "clinc-3160", "is_oos": false, "label": "smart_home", "text": "oven set it to 350"}
+{"id": "clinc-3201", "is_oos": false, "label": "book_hotel", "text": "can you find me a good reviewed hotel in japan"}
+{"id": "clinc-3234", "is_oos": false, "label": "current_location", "text": "show me where i am on the map please"}
+{"id": "clinc-3261", "is_oos": false, "label": "weather", "text": "what is happening with the weather in austin"}
+{"id": "clinc-3289", "is_oos": false, "label": "taxes", "text": "do you know my state tax total"}
+{"id": "clinc-33", "is_oos": false, "label": "transfer", "text": "i would like help moving money from one account to another"}
+{"id": "clinc-3326", "is_oos": false, "label": "min_payment", "text": "look up the lowest amount i can pay on my electricity bill"}
+{"id": "clinc-3347", "is_oos": false, "label": "whisper_mode", "text": "go into whisper mode until the plane lands"}
+{"id": "clinc-3388", "is_oos": false, "label": "cancel", "text": "abort mission"}
+{"id": "clinc-3391", "is_oos": false, "label": "international_visa", "text": "do i need a visa for south korea"}
+{"id": "clinc-3447", "is_oos": false, "label": "vaccines", "text": "if i travel abroad, do i need vaccinations"}
+{"id": "clinc-3452", "is_oos": false, "label": "pto_balance", "text": "how many vacation days do i still have available"}
+{"id": "clinc-349", "is_oos": false, "label": "change_language", "text": "i'd like to use you using russian"}
+{"id": "clinc-3509", "is_oos": false, "label": "directions", "text": "find the closest cvs near galleria mall"}
+{"id": "clinc-3534", "is_oos": false, "label": "spelling", "text": "i need to know how to spell \"miranda"}
+{"id": "clinc-3562", "is_oos": false, "label": "greeting", "text": "let me know how you are doing"}
+{"id": "clinc-3593", "is_oos": false, "label": "reset_settings", "text": "revert to original settings"}
+{"id": "clinc-361", "is_oos": false, "label": "payday", "text": "can you tell me the date of my last check"}
+{"id": "clinc-3616", "is_oos": false, "label": "what_is_your_name", "text": "who do i have the pleasure of speaking with"}
+{"id": "clinc-3636", "is_oos": false, "label": "direct_deposit", "text": "bank options direct deposit"}
+{"id": "clinc-3660", "is_oos": false, "label": "interest_rate", "text": "what's my bank of america account getting in interest"}
+{"id": "clinc-3715", "is_oos": false, "label": "credit_limit_change", "text": "who do i need to contact to ask for a credit limit increase on my discover card"}
+{"id": "clinc-3738", "is_oos": false, "label": "what_are_your_hobbies", "text": "what do you engage in during your free time"}
+{"id": "clinc-3777", "is_oos": false, "label": "book_flight", "text": "schedule a flight from pittsburgh to arizona on delta"}
+{"id": "clinc-3800", "is_oos": false, "label": "shopping_list", "text": "are carrots added to the grocery list"}
+{"id": "clinc-3830", "is_oos": false, "label": "text", "text": "text steve and tell him i am running late"}
+{"id": "clinc-3863", "is_oos": false, "label": "bill_balance", "text": "how much is due for my water bill"}
+{"id": "clinc-3875", "is_oos": false, "label": "share_location", "text": "make my location available with david and kate"}
+{"id": "clinc-3917", "is_oos": false, "label": "redeem_rewards", "text": "how can i get my rewards for my master card"}
+{"id": "clinc-3955", "is_oos": false, "label": "play_music", "text": "turn on metallicas greatest hits"}
+{"id": "clinc-3971", "is_oos": false, "label": "calendar_update", "text": "cancel event scheduled for this afternoon"}
+{"id": "clinc-398", "is_oos": false, "label": "replacement_card_duration", "text": "what is amount of time it takes to get a new credit card i lost mine recently"}
+{"id": "clinc-4004", "is_oos": false, "label": "are_you_a_bot", "text": "your a bot aren't you"}
+{"id": "clinc-4041", "is_oos": false, "label": "gas", "text": "how full is the gas tank"}
+{"id": "clinc-4074", "is_oos": false, "label": "expiration_date", "text": "what is the date when my visa card will expire"}
+{"id": "clinc-4097", "is_oos": false, "label": "update_playlist", "text": "i want to put this on my rock playlist"}
+{"id": "clinc-4123", "is_oos": false, "label": "cancel_reservation", "text": "please cancel my reservation for 5 at red robin"}
+{"id": "clinc-4162", "is_oos": false, "label": "tell_joke", "text": "tell me a good joke"}
+{"id": "clinc-4185", "is_oos": false, "label": "change_ai_name", "text": "i want to rename you joe"}
+{"id": "clinc-4210", "is_oos": false, "label": "how_old_are_you", "text": "your birthday please"}
+{"id": "clinc-4244", "is_oos": false, "label": "car_rental", "text": "how many places in dallas can i rent a car"}
+{"id": "clinc-426", "is_oos": false, "label": "time", "text": "tell me the time in san francisco, please"}
+{"id": "clinc-4289", "is_oos": false, "label": "jump_start", "text": "what is the process for jump starting my car"}
+{"id": "clinc-4308", "is_oos": false, "label": "meal_suggestion", "text": "what kind of indian would you recommend"}
+{"id": "clinc-4322", "is_oos": false, "label": "recipe", "text": "how do i get started making homemade pizza dough"}
+{"id": "clinc-4361", "is_oos": false, "label": "income", "text": "please tell me what amount i'm earning"}
+{"id": "clinc-4408", "is_oos": false, "label": "order", "text": "what is the price of bluetooth speakers on amazon"}
+{"id": "clinc-4420", "is_oos": false, "label": "traffic", "text": "please tell me how traffic from the new jersey turnpike into the lincoln tunnel looks currently"}
+{"id": "clinc-4461", "is_oos": false, "label": "order_checks", "text": "i'm out of my checks i need some new ones"}
+{"id": "clinc-4476", "is_oos": false, "label": "card_declined", "text": "i need to know why my card got declined"}
+{"id": "clinc-473", "is_oos": false, "label": "application_status", "text": "how far has my application for the hsbc card proceeded till now"}
+{"id": "clinc-484", "is_oos": false, "label": "flight_status", "text": "what's the status of my american airlines flight"}
+{"id": "clinc-529", "is_oos": false, "label": "flip_coin", "text": "flip coin, heads!"}
+{"id": "clinc-561", "is_oos": false, "label": "change_user_name", "text": "please go ahead and change my name"}
+{"id": "clinc-597", "is_oos": false, "label": "where_are_you_from", "text": "are you from around here"}
+{"id": "clinc-619", "is_oos": false, "label": "shopping_list_update", "text": "on my shopping list, remove eggs"}
+{"id": "clinc-650", "is_oos": false, "label": "what_can_i_ask_you", "text": "tell me what you can do for me"}
+{"id": "clinc-670", "is_oos": false, "label": "maybe", "text": "it's definitely a maybe for that"}
+{"id": "clinc-7", "is_oos": false, "label": "translate", "text": "how would one say cruiser in china"}
+{"id": "clinc-710", "is_oos": false, "label": "oil_change_how", "text": "put together a list of instructions for me on how to change the oil in my car"}
+{"id": "clinc-725", "is_oos": false, "label": "restaurant_reservation", "text": "i need a table for 3 at olive garden for 7"}
+{"id": "clinc-774", "is_oos": false, "label": "balance", "text": "how much does my bank account have"}
+{"id": "clinc-79", "is_oos": false, "label": "timer", "text": "set a timer for 10 minutes"}
+{"id": "clinc-801", "is_oos": false, "label": "confirm_reservation", "text": "find my reservation for steve at crucere's and confirm it, please"}
+{"id": "clinc-835", "is_oos": false, "label": "freeze_account", "text": "i am hoping you can put a stop on my bank account"}
+{"id": "clinc-843", "is_oos": false, "label": "rollover_401k", "text": "i want to transfer my 401k"}
+{"id": "clinc-891", "is_oos": false, "label": "who_made_you", "text": "tell me who made you please"}
+{"id": "clinc-910", "is_oos": false, "label": "distance", "text": "is it going to be much longer until i reach the bank"}
+{"id": "clinc-944", "is_oos": false, "label": "user_name", "text": "what name do you have for me"}
+{"id": "clinc-976", "is_oos": false, "label": "timezone", "text": "what is the timezone for san francisco"}
+{"id": "clinc-4503", "is_oos": true, "label": "oos", "text": "can you dim the brightness of my screen"}
+{"id": "clinc-4528", "is_oos": true, "label": "oos", "text": "can you tell me what credit cards i have open"}
+{"id": "clinc-4530", "is_oos": true, "label": "oos", "text": "what is the population of south africa"}
+{"id": "clinc-4539", "is_oos": true, "label": "oos", "text": "is anything being newscasted about the threat of famine in chadu"}
+{"id": "clinc-4544", "is_oos": true, "label": "oos", "text": "close all internet tabs"}
+{"id": "clinc-4545", "is_oos": true, "label": "oos", "text": "can you sell stocks for me"}
+{"id": "clinc-4549", "is_oos": true, "label": "oos", "text": "read text"}
+{"id": "clinc-4552", "is_oos": true, "label": "oos", "text": "may i finish washing then i give you please"}
+{"id": "clinc-4556", "is_oos": true, "label": "oos", "text": "did the supreme court nominee get approvedu"}
+{"id": "clinc-4591", "is_oos": true, "label": "oos", "text": "when is the next full moon"}
+{"id": "clinc-4593", "is_oos": true, "label": "oos", "text": "why is the sky blue"}
+{"id": "clinc-4597", "is_oos": true, "label": "oos", "text": "who invented custardo"}
+{"id": "clinc-4600", "is_oos": true, "label": "oos", "text": "can you tell me how to get gum out of my rug"}
+{"id": "clinc-4601", "is_oos": true, "label": "oos", "text": "how can i get a better rate on my card"}
+{"id": "clinc-4638", "is_oos": true, "label": "oos", "text": "how much data does my phone have left this month"}
+{"id": "clinc-4649", "is_oos": true, "label": "oos", "text": "does dhl deliver to my address"}
+{"id": "clinc-4651", "is_oos": true, "label": "oos", "text": "is there a better bus route i should be taking"}
+{"id": "clinc-4670", "is_oos": true, "label": "oos", "text": "create a contact labeled mom"}
+{"id": "clinc-4672", "is_oos": true, "label": "oos", "text": "does centurytel offer any better plans than the one i'm on"}
+{"id": "clinc-4676", "is_oos": true, "label": "oos", "text": "is there an alternate bus stop close to my home i can use"}
+{"id": "clinc-4680", "is_oos": true, "label": "oos", "text": "can i use direct deposit for my tax refund"}
+{"id": "clinc-4694", "is_oos": true, "label": "oos", "text": "i am looking for a suit for work"}
+{"id": "clinc-4718", "is_oos": true, "label": "oos", "text": "give me information about the element carbon and its reactions with hydrogen"}
+{"id": "clinc-4739", "is_oos": true, "label": "oos", "text": "can you tell me the best time to visit downtown when driving"}
+{"id": "clinc-4752", "is_oos": true, "label": "oos", "text": "how do i make money"}
+{"id": "clinc-4753", "is_oos": true, "label": "oos", "text": "can you give me some stress management tips"}
+{"id": "clinc-4759", "is_oos": true, "label": "oos", "text": "how do i change my windshield wipers"}
+{"id": "clinc-4766", "is_oos": true, "label": "oos", "text": "what are the best personal finance practices"}
+{"id": "clinc-4809", "is_oos": true, "label": "oos", "text": "what should i wear to hike"}
+{"id": "clinc-4823", "is_oos": true, "label": "oos", "text": "where is te lawrence"}
+{"id": "clinc-4837", "is_oos": true, "label": "oos", "text": "how can i get help for my mental health"}
+{"id": "clinc-4840", "is_oos": true, "label": "oos", "text": "when was the term \"zombie\" first used"}
+{"id": "clinc-4850", "is_oos": true, "label": "oos", "text": "give me a suggestion for roofers"}
+{"id": "clinc-4859", "is_oos": true, "label": "oos", "text": "where is the closest architecture college"}
+{"id": "clinc-4869", "is_oos": true, "label": "oos", "text": "download all the photos off my phone into the cloud"}
+{"id": "clinc-4878", "is_oos": true, "label": "oos", "text": "what's the chemical composition of a fart"}
+{"id": "clinc-4892", "is_oos": true, "label": "oos", "text": "what's the best make-up to cover a black eye"}
+{"id": "clinc-4893", "is_oos": true, "label": "oos", "text": "send me videos of how to do a smoky eye"}
+{"id": "clinc-4900", "is_oos": true, "label": "oos", "text": "what bands are touring in my city this week"}
+{"id": "clinc-4901", "is_oos": true, "label": "oos", "text": "i need for you to look up some of the major gods in mythology"}
+{"id": "clinc-4908", "is_oos": true, "label": "oos", "text": "i want to buy some nintendo switch game"}
+{"id": "clinc-4916", "is_oos": true, "label": "oos", "text": "tell me what pokemon is"}
+{"id": "clinc-4920", "is_oos": true, "label": "oos", "text": "why did a bunch of christians go off murdering muslims in the middle ages"}
+{"id": "clinc-4944", "is_oos": true, "label": "oos", "text": "what films are in the running for best song at this year's oscars"}
+{"id": "clinc-4972", "is_oos": true, "label": "oos", "text": "give me a list of the top three landscaping companies nearby"}
+{"id": "clinc-4975", "is_oos": true, "label": "oos", "text": "what's a good blouse to wear with pink shoes"}
+{"id": "clinc-4996", "is_oos": true, "label": "oos", "text": "look up how to apply cream to smooth itchiness"}
+{"id": "clinc-5005", "is_oos": true, "label": "oos", "text": "when is the best time of year for pruning"}
+{"id": "clinc-5008", "is_oos": true, "label": "oos", "text": "create a pamphlet on albert einsteins childhood"}
+{"id": "clinc-5016", "is_oos": true, "label": "oos", "text": "tell me more about bill gates"}
+{"id": "clinc-5042", "is_oos": true, "label": "oos", "text": "where is the best place to mine for gold"}
+{"id": "clinc-5045", "is_oos": true, "label": "oos", "text": "find out when green book was created"}
+{"id": "clinc-5046", "is_oos": true, "label": "oos", "text": "who wrote green book"}
+{"id": "clinc-5051", "is_oos": true, "label": "oos", "text": "latest hair styles for long natural hair"}
+{"id": "clinc-5052", "is_oos": true, "label": "oos", "text": "show video of hair styling tips"}
+{"id": "clinc-5062", "is_oos": true, "label": "oos", "text": "what's the roi doing arbitrage with ebay"}
+{"id": "clinc-5103", "is_oos": true, "label": "oos", "text": "what's the latest vc funded company"}
+{"id": "clinc-5114", "is_oos": true, "label": "oos", "text": "send me a motivational quote everyday for the next week"}
+{"id": "clinc-5130", "is_oos": true, "label": "oos", "text": "see if there is a recipe to make a casserole without any dairy"}
+{"id": "clinc-5151", "is_oos": true, "label": "oos", "text": "give me a list of tax attorneys that practice in my city"}
+{"id": "clinc-5152", "is_oos": true, "label": "oos", "text": "tell me how i can file a pleading in circuit court"}
+{"id": "clinc-5160", "is_oos": true, "label": "oos", "text": "do a job search on monstercom for jobs in the tech field in arlington, va"}
+{"id": "clinc-5178", "is_oos": true, "label": "oos", "text": "what's the best price on a gray xl ll bean men's parka"}
+{"id": "clinc-5208", "is_oos": true, "label": "oos", "text": "what's the amusement park like"}
+{"id": "clinc-5211", "is_oos": true, "label": "oos", "text": "what is the cost of four double a batteries"}
+{"id": "clinc-5217", "is_oos": true, "label": "oos", "text": "search all movies created by disney in the 1980's"}
+{"id": "clinc-5219", "is_oos": true, "label": "oos", "text": "mickey mouse is a huge part of disney"}
+{"id": "clinc-5239", "is_oos": true, "label": "oos", "text": "what do i wear on my feet when it rains"}
+{"id": "clinc-5248", "is_oos": true, "label": "oos", "text": "find out where i can buy a barbie doll for my niece"}
+{"id": "clinc-5255", "is_oos": true, "label": "oos", "text": "can you find \"were the millers\" on hulu"}
+{"id": "clinc-5261", "is_oos": true, "label": "oos", "text": "how many hits have i done today"}
+{"id": "clinc-5267", "is_oos": true, "label": "oos", "text": "look up the operating hours of my local park on weekends"}
+{"id": "clinc-5275", "is_oos": true, "label": "oos", "text": "find out who the best appliance repairman is for the downtown area"}
+{"id": "clinc-5278", "is_oos": true, "label": "oos", "text": "find directions to the sunshine car wash from my house"}
+{"id": "clinc-5285", "is_oos": true, "label": "oos", "text": "how much does it cost to get two jackets dry cleaned"}
+{"id": "clinc-5290", "is_oos": true, "label": "oos", "text": "do sets of 25 set-ups each morning til you have completed your goal"}
+{"id": "clinc-5293", "is_oos": true, "label": "oos", "text": "what's a good stretch to do to limber up"}
+{"id": "clinc-5299", "is_oos": true, "label": "oos", "text": "what should i take for a cold"}
+{"id": "clinc-5307", "is_oos": true, "label": "oos", "text": "send me a quote from a motivational speaker twice a day"}
+{"id": "clinc-5311", "is_oos": true, "label": "oos", "text": "how much does it cost to use the parking garage downtown"}
+{"id": "clinc-5328", "is_oos": true, "label": "oos", "text": "i'd like to hire someone to wash my car"}
+{"id": "clinc-5334", "is_oos": true, "label": "oos", "text": "find me a graphic tutorial on writing longhand"}
+{"id": "clinc-5347", "is_oos": true, "label": "oos", "text": "please replay the last five minutes"}
+{"id": "clinc-5364", "is_oos": true, "label": "oos", "text": "forward the text i just got from henry to giselle"}
+{"id": "clinc-5368", "is_oos": true, "label": "oos", "text": "how much does gun ammunition cost"}
+{"id": "clinc-5372", "is_oos": true, "label": "oos", "text": "get me a list of the best savings account rates right now"}
+{"id": "clinc-5389", "is_oos": true, "label": "oos", "text": "can you look at what average reviews say about the new windows phone on amazon for me"}
+{"id": "clinc-5393", "is_oos": true, "label": "oos", "text": "can you tell me what happened to han solo in episode 4"}
+{"id": "clinc-5407", "is_oos": true, "label": "oos", "text": "what's the best way to drown a witch"}
+{"id": "clinc-5411", "is_oos": true, "label": "oos", "text": "what are the rules for chess"}
+{"id": "clinc-5419", "is_oos": true, "label": "oos", "text": "what was the latest tremor on the richter scale"}
+{"id": "clinc-5420", "is_oos": true, "label": "oos", "text": "get me articles on earthquake preparedness"}
+{"id": "clinc-5425", "is_oos": true, "label": "oos", "text": "what is global warming"}
+{"id": "clinc-5435", "is_oos": true, "label": "oos", "text": "can i get a starter course for the trumpet"}
+{"id": "clinc-5436", "is_oos": true, "label": "oos", "text": "how many keys does a xylophone have"}
+{"id": "clinc-5457", "is_oos": true, "label": "oos", "text": "what is the nature of the big bang theory"}
+{"id": "clinc-5459", "is_oos": true, "label": "oos", "text": "do we actually have a soul"}
+{"id": "clinc-5466", "is_oos": true, "label": "oos", "text": "what teams are playing right now"}
+{"id": "clinc-5467", "is_oos": true, "label": "oos", "text": "is it too late to upgrade to first class"}
+{"id": "clinc-5476", "is_oos": true, "label": "oos", "text": "how much time is left on my laundry"}
