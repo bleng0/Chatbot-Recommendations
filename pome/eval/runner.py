@@ -5,9 +5,11 @@ key pool -> Gemini -> ledger.record() -> cache.put(). Records come back in ITEM 
 (asyncio.gather keeps order), so runs line up item by item for the bootstrap.
 Non-2xx results after the pool's retries are errors: not billed, not cached.
 offline=True: no API calls; returns records only for items already in the cache.
+build_prompt / label_key: tasks other than intent classification (FAQ) bring their own
+prompt and the JSON key their answer is read from.
 """
 import asyncio
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 from pome.eval.cache import ResponseCache
@@ -50,19 +52,22 @@ async def run_task(*, task: str, items: Sequence[Item], labels: Sequence[str], a
                    config_id: str, model_id: str, temperature: float, run_idx: int,
                    in_price_per_1m: float, out_price_per_1m: float, pool: KeyPool,
                    transport: Transport, ledger: SpendLedger, cache: ResponseCache,
-                   concurrency: int, tier: str = "paid", offline: bool = False
-                   ) -> list[Record]:
+                   concurrency: int, tier: str = "paid", offline: bool = False,
+                   build_prompt: Callable[[Item], str] | None = None,
+                   label_key: str = "label") -> list[Record]:
     sem = asyncio.Semaphore(concurrency)
 
     def rec(item: Item, h: str, v: dict, *, cached: bool) -> Record:
-        pred = (parse_label(v["text"], labels, allow_oos=allow_oos) if v["status"] < 300
+        pred = (parse_label(v["text"], labels, allow_oos=allow_oos, key=label_key)
+                if v["status"] < 300
                 else ERROR)
         return Record(task, config_id, run_idx, item.id, item.label, pred, h, temperature,
                       v["in_tokens"], v["out_tokens"], v["thought_tokens"], v["key_index"],
                       v["retries"], v["status"], v["finish_reason"], cached)
 
     async def one(item: Item) -> Record | None:
-        prompt = intent_prompt(item.text, labels, allow_oos=allow_oos)
+        prompt = (build_prompt(item) if build_prompt
+                  else intent_prompt(item.text, labels, allow_oos=allow_oos))
         h = prompt_sha256(prompt)
         hit = cache.get(config_id, h, run_idx)
         if hit is not None:

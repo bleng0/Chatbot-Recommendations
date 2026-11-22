@@ -9,6 +9,7 @@ import re
 from collections.abc import Sequence
 
 OOS = "out_of_scope"
+NONE = "none"  # FAQ: no approved answer covers the question
 INVALID = "__invalid__"
 _OBJ = re.compile(r"\{[^{}]*\}")
 
@@ -27,12 +28,25 @@ def prompt_sha256(prompt: str) -> str:
     return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
 
-def parse_label(raw: str, labels: Sequence[str], *, allow_oos: bool) -> str:
+def faq_prompt(question: str, kb: Sequence[tuple[str, str]]) -> str:
+    """Pick the approved FAQ answer that answers the customer's question, in any language.
+    The knowledge base holds the English approved answers only (no questions), so a match
+    needs understanding, not string overlap."""
+    return ("You are a customer-care assistant for a bank. Below are the approved answers.\n"
+            + "\n".join(f"{fid}: {answer}" for fid, answer in kb) + "\n\n"
+            "The customer's question may be in English, Hindi or Hinglish. Choose the one "
+            "approved answer that correctly answers it. If none of them answers the "
+            f'question, choose "{NONE}".\n'
+            f'Reply with JSON only, in the form {{"faq_id": "<id>"}} or {{"faq_id": "{NONE}"}}.\n\n'
+            f"Customer question: {question}")
+
+
+def parse_label(raw: str, labels: Sequence[str], *, allow_oos: bool, key: str = "label") -> str:
     match = _OBJ.search(raw or "")
     if not match:
         return INVALID
     try:
-        label = json.loads(match.group(0)).get("label")
+        label = json.loads(match.group(0)).get(key)
     except (json.JSONDecodeError, AttributeError):
         return INVALID
     if isinstance(label, str) and (label in labels or (allow_oos and label == OOS)):

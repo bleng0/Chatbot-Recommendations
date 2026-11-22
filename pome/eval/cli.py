@@ -20,9 +20,8 @@ from pathlib import Path
 import httpx
 
 from pome.eval.cache import ResponseCache
-from pome.eval.datasets import TASKS, load_task
+from pome.eval.datasets import FAQ_TASKS, TASKS, load_task
 from pome.eval.runner import Record, estimate_from_records, run_task
-from pome.eval.tasks import intent_prompt
 from pome.providers.gemini import make_transport
 from pome.providers.keypool import KeyPool, Transport, load_keys, read_dotenv
 from pome.providers.spend import SpendLedger, call_cost
@@ -41,7 +40,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
          transport: Transport | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--configs", required=True)
-    ap.add_argument("--tasks", default=",".join(TASKS))
+    ap.add_argument("--tasks", default=",".join(TASKS + FAQ_TASKS))
     ap.add_argument("--head", type=int)
     ap.add_argument("--runs", type=int, default=1)
     ap.add_argument("--temperature", type=float, default=1.0)
@@ -64,8 +63,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
             print(f"{c.config_id}: no paid price in the registry; refusing (spend unverifiable)")
             return 2
     tasks = [load_task(t, a.head) for t in a.tasks.split(",")]
-    prompts = [intent_prompt(i.text, t.labels, allow_oos=t.allow_oos)
-               for t in tasks for i in t.items] * a.runs
+    prompts = [t.build_prompt(i) for t in tasks for i in t.items] * a.runs
     ledger = SpendLedger(a.out / "spend_ledger.jsonl")
     worst = {c.config_id: 0.0 if a.tier == "free" else
              worst_case_cost(prompts, price(c.pricing.input_per_1m), price(c.pricing.output_per_1m))
@@ -86,7 +84,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     pool = KeyPool(keys, base_cooldown=15.0, max_cooldown=60.0)
     print(f"key pool: {pool!r}")
     cache = ResponseCache(a.out / "cache.jsonl")
-    full_calls = sum(len(load_task(t).items) for t in TASKS) * FULL_RUNS
+    full_calls = sum(len(load_task(t).items) for t in TASKS + FAQ_TASKS) * FULL_RUNS
 
     async def go(send: Transport) -> None:
         for c in configs:
@@ -100,7 +98,8 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
                         temperature=a.temperature, run_idx=run_idx, in_price_per_1m=pin,
                         out_price_per_1m=pout, pool=pool, transport=send, ledger=ledger,
                         cache=cache, concurrency=a.concurrency, tier=a.tier,
-                        offline=a.cached_only)
+                        offline=a.cached_only, build_prompt=t.build_prompt,
+                        label_key=t.label_key)
                     path = a.out / "records" / c.config_id / f"{t.name}_run{run_idx}.jsonl"
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text("".join(json.dumps(asdict(r), ensure_ascii=False) + "\n"

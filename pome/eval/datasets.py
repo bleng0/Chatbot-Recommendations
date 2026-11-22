@@ -10,14 +10,16 @@ head=N (quick runs) takes items round-robin by label (one per label before any s
 in file order within a label; for clinc150 half OOS, half in-scope.
 """
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 from pome.eval.runner import Item
-from pome.eval.tasks import OOS
+from pome.eval.tasks import NONE, OOS, faq_prompt, intent_prompt
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 TASKS = ("banking77", "clinc150", "massive_en", "massive_hi")
+FAQ_TASKS = ("faq_en", "faq_hi", "faq_hinglish")
 
 
 @dataclass(frozen=True)
@@ -27,6 +29,13 @@ class Task:
     labels: list[str]
     allow_oos: bool
     strata: list[str]
+    prompt: Callable[[Item], str] | None = None
+    label_key: str = "label"
+
+    def build_prompt(self, item: Item) -> str:
+        if self.prompt is not None:
+            return self.prompt(item)
+        return intent_prompt(item.text, self.labels, allow_oos=self.allow_oos)
 
 
 def _round_robin(rows: list[dict], head: int | None, key: str = "label") -> list[dict]:
@@ -70,4 +79,16 @@ def load_task(name: str, head: int | None = None) -> Task:
         chosen = en if name == "massive_en" else [by_id[r["id"]] for r in en]
         items = [Item(r["id"], r["text"], r["label"]) for r in chosen]
         return Task(name, items, labels, False, [i.label for i in items])
-    raise ValueError(f"unknown task {name!r}; expected one of {TASKS}")
+    if name in FAQ_TASKS:
+        lang = name.removeprefix("faq_")
+        rows = _rows("faq_pilot.jsonl")
+        if head is not None:  # keep the 4:1 answerable : unanswerable mix
+            una = [r for r in rows if not r["answerable"]][: max(1, head // 5)]
+            rows = [r for r in rows if r["answerable"]][: head - len(una)] + una
+        kb = [(r["faq_id"], r["answer"]) for r in _rows("faq_pilot.jsonl") if r["answerable"]]
+        items = [Item(r["id"], r["q"][lang], r["faq_id"] or NONE) for r in rows]
+        labels = [fid for fid, _ in kb] + [NONE]
+        return Task(name, items, labels, False,
+                    ["answerable" if i.label != NONE else "unanswerable" for i in items],
+                    prompt=lambda item: faq_prompt(item.text, kb), label_key="faq_id")
+    raise ValueError(f"unknown task {name!r}; expected one of {TASKS + FAQ_TASKS}")
