@@ -82,17 +82,21 @@ with tab_cost:
                                      hovertemplate="%{x:,} tickets: $%{y:,.0f}<extra>"
                                      + cid + "</extra>"))
             fig.add_annotation(x=points[-1], y=ys[-1], text=cid, showarrow=False,
-                               xanchor="left", font={"size": 11})
+                               xanchor="right", yanchor="bottom", yshift=4, font={"size": 11})
         budget = float(profile.gates["G11"].value)
         fig.add_hline(y=budget, line={"dash": "dash", "width": 1, "color": "#888"},
-                      annotation_text=f"G11 budget ${budget:,.0f}")
-        fig.add_vline(x=int(volume), line={"width": 1, "color": "#bbb"},
-                      annotation_text="selected volume")
-        fig.update_layout(height=420, margin={"r": 180, "t": 30},
+                      annotation_text=f"G11 budget ${budget:,.0f}",
+                      annotation_position="bottom left")
+        fig.add_vline(x=int(volume), line={"width": 1, "dash": "dot", "color": "#888"},
+                      annotation_text=f"selected: {int(volume):,}",
+                      annotation_position="bottom right")
+        fig.update_layout(height=420, margin={"r": 20, "t": 30},
                           xaxis_title="Tickets per month", yaxis_title="USD per month (MODELED)",
                           hovermode="x unified", legend={"orientation": "h", "y": -0.2})
-        fig.update_yaxes(rangemode="tozero", gridcolor="#eee")
-        fig.update_xaxes(gridcolor="#eee")
+        grid = "rgba(128,128,128,0.25)"
+        top = max(budget, *(max(ys) for ys in curves.values()))
+        fig.update_yaxes(range=[0, top * 1.12], gridcolor=grid)  # headroom for line labels
+        fig.update_xaxes(range=[0, points[-1]], gridcolor=grid)
         st.plotly_chart(fig, width="stretch")
         sh = snap.values.get(f"{SELFHOST}.cost.monthly_usd")
         for cid in curves:
