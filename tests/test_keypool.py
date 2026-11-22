@@ -220,3 +220,25 @@ def test_keys_never_appear_in_repr_logs_or_errors(caplog):
     for secret in KEYS.values():
         assert secret not in blob
     assert "#1" in caplog.text and "#2" in caplog.text  # the index is logged instead
+
+
+# ---- Gemini reports a bad key as 400, not 401/403 (observed 2026-11-22) ----------------
+
+INVALID_KEY = Response(400, {"error": {"code": 400, "status": "INVALID_ARGUMENT",
+                                       "message": "API key not valid. Please pass a valid API key."}})
+
+
+def test_gemini_invalid_key_400_disables_the_key_and_retries_on_the_next():
+    pool, _ = make_pool(2)
+    t = FakeTransport({KEYS[1]: [INVALID_KEY]})
+    res = run(pool.request(t, {}))
+    assert res.ok and res.key_index == 2 and res.retries == 1
+    run(pool.request(t, {}))
+    assert t.calls == [KEYS[1], KEYS[2], KEYS[2]]
+
+
+def test_other_400s_are_returned_not_retried():
+    pool, _ = make_pool(2)
+    bad = Response(400, {"error": {"message": "Invalid JSON payload received."}})
+    res = run(pool.request(FakeTransport({KEYS[1]: [bad]}), {}))
+    assert res.response.status == 400 and res.key_index == 1 and res.retries == 0

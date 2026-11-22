@@ -93,6 +93,13 @@ def _retry_after(resp: Response) -> float | None:
     return None
 
 
+def _invalid_key(resp: Response) -> bool:
+    """Gemini answers a bad key with 400 INVALID_ARGUMENT "API key not valid", not 401/403
+    (observed 2026-11-22 on generativelanguage.googleapis.com)."""
+    err = resp.body.get("error") if isinstance(resp.body, dict) else None
+    return isinstance(err, dict) and "API key not valid" in str(err.get("message", ""))
+
+
 class KeyPool:
     def __init__(
         self,
@@ -161,7 +168,7 @@ class KeyPool:
                 key, wait = self._take()
             resp = await transport(key.secret, payload)
             status = resp.status
-            if status in (401, 403):
+            if status in (401, 403) or (status == 400 and _invalid_key(resp)):
                 self._disable(key, status)
             elif status == 429 or status >= 500:
                 self._cool(key, status, _retry_after(resp))
