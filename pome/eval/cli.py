@@ -6,6 +6,8 @@ the API. With it, the ledger refuses the run if spent + worst case > cap. After 
 prints measured mean tokens and the cost of the full plan (all items x 3 runs).
 Worst case = ceil(prompt chars / 4) input tokens + 1000 output tokens per call.
 Keys come from .env via the key pool; only key indices are ever printed.
+--tier free: Google charges nothing, so the ledger records $0 (tokens and list price kept)
+and configs without a paid price (Gemma) are allowed.
 """
 import argparse
 import asyncio
@@ -46,24 +48,31 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--out", type=Path, default=ROOT / "runs")
     ap.add_argument("--approve-spend", action="store_true")
+    ap.add_argument("--tier", choices=("paid", "free"), default="paid")
     a = ap.parse_args(argv)
 
     from pome.registry.loader import load_registry
     registry = {c.config_id: c for c in load_registry()}
     configs = [registry[c] for c in a.configs.split(",")]
+    def price(ev) -> float:
+        return 0.0 if ev is None else ev.value
+
     for c in configs:
-        if c.pricing.input_per_1m is None or c.pricing.output_per_1m is None:
+        if a.tier == "paid" and (c.pricing.input_per_1m is None or c.pricing.output_per_1m is None):
             print(f"{c.config_id}: no paid price in the registry; refusing (spend unverifiable)")
             return 2
     tasks = [load_task(t, a.head) for t in a.tasks.split(",")]
     prompts = [intent_prompt(i.text, t.labels, allow_oos=t.allow_oos)
                for t in tasks for i in t.items] * a.runs
     ledger = SpendLedger(a.out / "spend_ledger.jsonl")
-    worst = {c.config_id: worst_case_cost(prompts, c.pricing.input_per_1m.value,
-                                          c.pricing.output_per_1m.value) for c in configs}
+    worst = {c.config_id: 0.0 if a.tier == "free" else
+             worst_case_cost(prompts, price(c.pricing.input_per_1m), price(c.pricing.output_per_1m))
+             for c in configs}
     print(f"{len(prompts)} calls per config; worst-case ${sum(worst.values()):.4f} "
           f"({', '.join(f'{k} ${v:.4f}' for k, v in worst.items())}); "
           f"ledger spent ${ledger.spent():.4f} of ${ledger.cap:.2f}")
+    if a.tier == "free":
+        print("free tier: $0 charged; ledger keeps tokens and list prices")
     if not a.approve_spend:
         print("dry estimate only: re-run with --approve-spend to call the API")
         return 2
@@ -77,7 +86,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
 
     async def go(send: Transport) -> None:
         for c in configs:
-            pin, pout = c.pricing.input_per_1m.value, c.pricing.output_per_1m.value
+            pin, pout = price(c.pricing.input_per_1m), price(c.pricing.output_per_1m)
             recs: list[Record] = []
             for t in tasks:
                 for run_idx in range(a.runs):
@@ -86,7 +95,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
                         config_id=c.config_id, model_id=c.model_id,
                         temperature=a.temperature, run_idx=run_idx, in_price_per_1m=pin,
                         out_price_per_1m=pout, pool=pool, transport=send, ledger=ledger,
-                        cache=cache, concurrency=a.concurrency)
+                        cache=cache, concurrency=a.concurrency, tier=a.tier)
                     path = a.out / "records" / c.config_id / f"{t.name}_run{run_idx}.jsonl"
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text("".join(json.dumps(asdict(r), ensure_ascii=False) + "\n"
@@ -102,7 +111,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
                                              out_price_per_1m=pout)
                 print(f"{c.config_id}: {len(ok)} ok, {errors} errors; measured mean tokens "
                       f"in {mi:.0f} / out {mo:.0f} (thinking {mt:.0f}); full plan "
-                      f"{full_calls} calls = ${full:.2f} at ${pin}/{pout} per 1M")
+                      f"{full_calls} calls = ${full:.2f} at list ${pin}/{pout} per 1M")
             else:
                 print(f"{c.config_id}: 0 ok, {errors} errors")
 

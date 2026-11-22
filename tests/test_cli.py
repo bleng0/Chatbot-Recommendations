@@ -51,3 +51,14 @@ def test_refuses_unpriced_configs(tmp_path, capsys):
                    "--out", str(tmp_path), "--approve-spend"],
                   env={"LLM_API_KEY": "k"}, transport=fake)
     assert rc == 2 and "no paid price" in capsys.readouterr().out
+
+
+def test_free_tier_allows_unpriced_configs_and_charges_nothing(tmp_path, capsys):
+    rc = cli.main(["--configs", "gemma4-26b-api-global,gem25f-api-global", "--tasks",
+                   "banking77", "--head", "2", "--out", str(tmp_path), "--tier", "free",
+                   "--approve-spend"], env={"LLM_API_KEY": "k"}, transport=fake)
+    assert rc == 0
+    rows = [json.loads(x) for x in (tmp_path / "spend_ledger.jsonl").read_text().splitlines()]
+    assert len(rows) == 4 and {r["tier"] for r in rows} == {"free"}
+    assert sum(r["cost_usd"] for r in rows) == 0.0
+    assert "free tier: $0 charged" in capsys.readouterr().out

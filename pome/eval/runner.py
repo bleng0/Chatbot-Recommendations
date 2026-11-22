@@ -49,7 +49,7 @@ async def run_task(*, task: str, items: Sequence[Item], labels: Sequence[str], a
                    config_id: str, model_id: str, temperature: float, run_idx: int,
                    in_price_per_1m: float, out_price_per_1m: float, pool: KeyPool,
                    transport: Transport, ledger: SpendLedger, cache: ResponseCache,
-                   concurrency: int) -> list[Record]:
+                   concurrency: int, tier: str = "paid") -> list[Record]:
     sem = asyncio.Semaphore(concurrency)
 
     def rec(item: Item, h: str, v: dict, *, cached: bool) -> Record:
@@ -77,7 +77,8 @@ async def run_task(*, task: str, items: Sequence[Item], labels: Sequence[str], a
         g = parse_response(res.response.body or {})
         ledger.record(config_id=config_id, run_id=f"{task}/run{run_idx}",
                       key_index=res.key_index, in_tokens=g.in_tokens, out_tokens=g.out_tokens,
-                      in_price_per_1m=in_price_per_1m, out_price_per_1m=out_price_per_1m)
+                      in_price_per_1m=in_price_per_1m, out_price_per_1m=out_price_per_1m,
+                      tier=tier)
         value = {"text": g.text, "in_tokens": g.in_tokens, "out_tokens": g.out_tokens,
                  "thought_tokens": g.thought_tokens, "key_index": res.key_index,
                  "retries": res.retries, "status": res.response.status,

@@ -74,6 +74,7 @@ class SpendEntry:
     out_price_per_1m: float
     cost_usd: float
     recorded_at: str
+    tier: str = "paid"
     unit: str = "usd"
     provenance: str = "measured"
 
@@ -119,15 +120,18 @@ class SpendLedger:
             raise SpendCapExceeded(f"spend cap reached: ${spent:.4f} of ${self._cap:.2f}")
 
     def record(self, *, config_id: str, run_id: str, key_index: int, in_tokens: int | None,
-               out_tokens: int | None, in_price_per_1m: float, out_price_per_1m: float
-               ) -> SpendEntry:
+               out_tokens: int | None, in_price_per_1m: float, out_price_per_1m: float,
+               tier: str = "paid") -> SpendEntry:
+        if tier not in ("free", "paid"):
+            raise ValueError(f"tier must be 'free' or 'paid', got {tier!r}")
         tin, tout = _tokens("in_tokens", in_tokens), _tokens("out_tokens", out_tokens)
+        list_cost = call_cost(tin, tout, in_price_per_1m, out_price_per_1m)
         entry = SpendEntry(
             config_id=config_id, run_id=run_id, key_index=int(key_index),
             in_tokens=tin, out_tokens=tout,
             in_price_per_1m=in_price_per_1m, out_price_per_1m=out_price_per_1m,
-            cost_usd=call_cost(tin, tout, in_price_per_1m, out_price_per_1m),
-            recorded_at=self._clock().isoformat(),
+            cost_usd=0.0 if tier == "free" else list_cost,
+            recorded_at=self._clock().isoformat(), tier=tier,
         )
         line = json.dumps(asdict(entry), sort_keys=True) + "\n"
         with self._lock:

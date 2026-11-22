@@ -144,3 +144,20 @@ def test_ensure_room_tolerates_float_noise_at_the_cap(tmp_path):
         rec(led, in_tok=1_000_000)  # 0.1 + 0.1 + 0.1 = 0.30000000000000004 or 0.2999...
     with pytest.raises(SpendCapExceeded):
         led.ensure_room()
+
+
+def test_free_tier_calls_record_zero_charge_but_keep_tokens_and_list_price(tmp_path):
+    led = ledger(tmp_path)
+    entry = led.record(config_id="gem25f-api-global", run_id="r1", key_index=1,
+                       in_tokens=1_000_000, out_tokens=0, in_price_per_1m=0.30,
+                       out_price_per_1m=2.50, tier="free")
+    assert entry.cost_usd == 0.0 and entry.tier == "free" and entry.in_tokens == 1_000_000
+    assert entry.in_price_per_1m == 0.30  # list price kept for the cost model
+    assert led.spent() == 0.0
+
+
+def test_tier_must_be_free_or_paid(tmp_path):
+    with pytest.raises(ValueError):
+        ledger(tmp_path).record(config_id="c", run_id="r", key_index=1, in_tokens=1,
+                                out_tokens=1, in_price_per_1m=0.1, out_price_per_1m=0.1,
+                                tier="promo")
