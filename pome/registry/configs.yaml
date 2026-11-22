@@ -35,23 +35,6 @@ configs:
       commercial_use: null
     notes: "Mid Flash tier chosen by owner."
 
-  - config_id: gem4argon-api-global
-    model_id: gemini-4-argon
-    version: "alias; no pinned version string on the pricing page"
-    host: "Gemini API (AI Studio, paid tier)"
-    region: "global (no regional processing commitment found)"
-    serving: managed
-    quant: "n/a (vendor-managed)"
-    evaluation_mode: measured
-    pricing:
-      input_per_1m: {value: 2.00, unit: usd_per_1m_tokens, provenance: vendor-doc, source: "https://aistudio.google.com/docs/pricing", retrieved_at: "2026-11-22T13:30:00+05:30"}
-      output_per_1m: {value: 10.00, unit: usd_per_1m_tokens, provenance: vendor-doc, source: "https://aistudio.google.com/docs/pricing", retrieved_at: "2026-11-22T13:30:00+05:30"}
-    deployment:
-      region_processing: null
-      retention_days: *ret55
-      commercial_use: null
-    notes: "Measured after the spend cap was raised to $20 (eval ~ $7.20). Price rises on 2026-12-01 per the pricing page: run before then."
-
   - config_id: gemma4-26b-api-global
     model_id: gemma-4-26b-a4b-it
     version: "alias listed at ai.google.dev/gemma/docs/core/gemma_on_gemini_api"

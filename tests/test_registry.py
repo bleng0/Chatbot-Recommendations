@@ -11,11 +11,10 @@ def configs():
     return {c.config_id: c for c in load_registry()}
 
 
-def test_registry_has_the_five_agreed_configs(configs):
+def test_registry_has_the_four_agreed_configs(configs):
     assert sorted(configs) == [
         "gem25f-api-global",
         "gem25fl-api-global",
-        "gem4argon-api-global",
         "gemma4-26b-api-global",
         "gemma4-26b-vllm-in-bf16",
     ]
@@ -24,7 +23,6 @@ def test_registry_has_the_five_agreed_configs(configs):
 def test_model_ids_match_verified_docs(configs):
     assert configs["gem25fl-api-global"].model_id == "gemini-2.5-flash-lite"
     assert configs["gem25f-api-global"].model_id == "gemini-2.5-flash"
-    assert configs["gem4argon-api-global"].model_id == "gemini-4-argon"
     assert configs["gemma4-26b-api-global"].model_id == "gemma-4-26b-a4b-it"
     assert configs["gemma4-26b-vllm-in-bf16"].model_id == "gemma-4-26b-a4b-it"
 
@@ -34,7 +32,6 @@ def test_model_ids_match_verified_docs(configs):
     [
         ("gem25fl-api-global", 0.10, 0.40),
         ("gem25f-api-global", 0.30, 2.50),
-        ("gem4argon-api-global", 2.00, 10.00),
     ],
 )
 def test_prices_match_dated_pricing_page(configs, cid, in_p, out_p):
