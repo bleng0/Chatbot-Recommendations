@@ -88,3 +88,25 @@ def test_estimate_scales_measured_mean_tokens_to_planned_calls(tmp_path):
     recs = run(tmp_path, Fake(ANS))
     est = estimate_from_records(recs, calls=2820, in_price_per_1m=2.0, out_price_per_1m=10.0)
     assert est == pytest.approx(2820 * (100 * 2.0 + 5 * 10.0) / 1e6)
+
+
+def test_offline_mode_returns_only_cached_items_and_never_calls(tmp_path):
+    first = Fake(ANS)
+    async def one_item():
+        return await run_task(
+            task="intent", items=ITEMS[:1], labels=LABELS, allow_oos=True, config_id="cfg",
+            model_id="m", temperature=1.0, run_idx=0, in_price_per_1m=0.1,
+            out_price_per_1m=0.4, pool=KeyPool({1: "k"}), transport=first,
+            ledger=SpendLedger(tmp_path / "spend.jsonl"),
+            cache=ResponseCache(tmp_path / "cache.jsonl"), concurrency=1)
+    asyncio.run(one_item())
+    never = Fake(ANS)
+    async def offline():
+        return await run_task(
+            task="intent", items=ITEMS, labels=LABELS, allow_oos=True, config_id="cfg",
+            model_id="m", temperature=1.0, run_idx=0, in_price_per_1m=0.1,
+            out_price_per_1m=0.4, pool=KeyPool({1: "k"}), transport=never,
+            ledger=SpendLedger(tmp_path / "spend.jsonl"),
+            cache=ResponseCache(tmp_path / "cache.jsonl"), concurrency=1, offline=True)
+    recs = asyncio.run(offline())
+    assert [r.item_id for r in recs] == ["i1"] and recs[0].cached and never.calls == 0

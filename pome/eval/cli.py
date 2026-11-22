@@ -49,6 +49,8 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     ap.add_argument("--out", type=Path, default=ROOT / "runs")
     ap.add_argument("--approve-spend", action="store_true")
     ap.add_argument("--tier", choices=("paid", "free"), default="paid")
+    ap.add_argument("--cached-only", action="store_true",
+                    help="no API calls: write records for items already in the cache")
     a = ap.parse_args(argv)
 
     from pome.registry.loader import load_registry
@@ -73,10 +75,11 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
           f"ledger spent ${ledger.spent():.4f} of ${ledger.cap:.2f}")
     if a.tier == "free":
         print("free tier: $0 charged; ledger keeps tokens and list prices")
-    if not a.approve_spend:
+    if not a.approve_spend and not a.cached_only:
         print("dry estimate only: re-run with --approve-spend to call the API")
         return 2
-    ledger.approve(sum(worst.values()))
+    if not a.cached_only:
+        ledger.approve(sum(worst.values()))
 
     keys = load_keys(env if env is not None else read_dotenv(ROOT / ".env"))
     # Free-tier limits reset every minute: cap cooldowns at 60 s so the pool never stalls.
@@ -96,7 +99,8 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
                         config_id=c.config_id, model_id=c.model_id,
                         temperature=a.temperature, run_idx=run_idx, in_price_per_1m=pin,
                         out_price_per_1m=pout, pool=pool, transport=send, ledger=ledger,
-                        cache=cache, concurrency=a.concurrency, tier=a.tier)
+                        cache=cache, concurrency=a.concurrency, tier=a.tier,
+                        offline=a.cached_only)
                     path = a.out / "records" / c.config_id / f"{t.name}_run{run_idx}.jsonl"
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text("".join(json.dumps(asdict(r), ensure_ascii=False) + "\n"
