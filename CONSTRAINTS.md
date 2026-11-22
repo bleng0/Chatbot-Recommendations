@@ -47,7 +47,7 @@ Gate rules:
 | Gemini API spend, all eval + load runs, all keys combined | ≤ $20.00 total (raised from $5.00 by owner, 2026-11-22) | `pome/providers/spend.py` ledger; run refuses to start if estimate + spent > cap; hard-stops when the ledger reaches cap |
 | Pre-run approval | estimate shown from dated prices, owner says yes | executor |
 | Response cache | every API response cached by (config_id, prompt_hash, run_idx); rerun = $0 | `tests/test_cache.py` |
-| Load tests | paid-tier key only, public benchmark data only | key-pool tier flag |
+| API tier, all eval + load runs | free tier (owner decision 2026-11-22: all keys are free-tier; use free for everything). Public benchmark data only, because free-tier content may be used to improve Google products. Ledger records $0 charged, tokens and list prices kept | `spend.py` tier field, `--tier free` |
 | Claude weekly usage | ≤ 55% working, 60% hard | owner reports `/usage` each slice |
 
 ## C. Engineering bar
