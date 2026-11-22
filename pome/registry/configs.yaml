@@ -60,6 +60,8 @@ configs:
     serving: vLLM
     quant: bf16
     evaluation_mode: modeled
+    provider: none
+    quality_from: gemma4-26b-ollama-local-q4
     pricing:
       input_per_1m: null
       output_per_1m: null
@@ -68,3 +70,21 @@ configs:
       retention_days: {value: 0, unit: days, provenance: modeled, source: "design assumption: vLLM configured not to persist prompts or outputs", formula: "retention is operator-enforced, not validated by this project", retrieved_at: "2026-11-22T13:30:00+05:30"}
       commercial_use: *apache
     notes: "No GPU available: throughput, latency and cost are modeled. Quality is carried over from the hosted copy of the same weights (SPEC A7). GPU $/h is fetched in slice 7."
+
+  - config_id: gemma4-26b-ollama-local-q4
+    model_id: gemma-4-26b-a4b-it
+    version: "Ollama tag gemma4:26b (Q4_K_M, 16-19 GB), https://ollama.com/library/gemma4"
+    host: "local Ollama on the owner's laptop (quality measurement only)"
+    region: "local machine"
+    serving: Ollama
+    quant: Q4_K_M
+    evaluation_mode: measured
+    provider: ollama
+    pricing:
+      input_per_1m: null
+      output_per_1m: null
+    deployment:
+      region_processing: null
+      retention_days: null
+      commercial_use: *apache
+    notes: "Quality source for the self-hosted config: same weights, 4-bit, thinking off. Laptop latency is not used for G8/G9. Not a deployment option itself."

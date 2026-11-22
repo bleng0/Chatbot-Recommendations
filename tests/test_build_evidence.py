@@ -12,6 +12,7 @@ from pome.selection.engine import select
 
 NOW = datetime(2026, 11, 22, 12, 0, tzinfo=UTC)
 FL, GEMMA, VLLM = "gem25f-api-global", "gemma4-26b-api-global", "gemma4-26b-vllm-in-bf16"
+OLLAMA = "gemma4-26b-ollama-local-q4"
 
 
 def write(root, cid, task, rows):
@@ -91,15 +92,22 @@ def test_deployment_values_keep_registry_provenance(tmp_path, reg):
 
 
 def test_selfhost_quality_is_carried_over_as_modeled(tmp_path, reg):
-    write(tmp_path, GEMMA, "banking77", rows_perfect(MIN_ITEMS))
+    write(tmp_path, OLLAMA, "banking77", rows_perfect(MIN_ITEMS))
     ev = build_evidence(reg, tmp_path, load_profile(), NOW)
-    own = ev[f"{GEMMA}.intent.banking77.macro_f1"]
+    own = ev[f"{OLLAMA}.intent.banking77.macro_f1"]
     carried = ev[f"{VLLM}.intent.banking77.macro_f1"]
     assert own.provenance == "measured" and carried.provenance == "modeled"
-    assert carried.value == own.value and GEMMA in carried.source
+    assert carried.value == own.value and OLLAMA in carried.source
     assert f"{VLLM}.cost.monthly_usd" not in ev  # needs GPU price and throughput
-    assert carried.formula and GEMMA in carried.formula
+    assert carried.formula and OLLAMA in carried.formula
     build_snapshot(ev, NOW)  # every modeled value must validate (formula required)
+
+
+def test_carry_over_follows_quality_from_not_the_model_id(tmp_path, reg):
+    write(tmp_path, GEMMA, "banking77", rows_perfect(MIN_ITEMS))  # same weights, other host
+    ev = build_evidence(reg, tmp_path, load_profile(), NOW)
+    assert f"{GEMMA}.intent.banking77.macro_f1" in ev
+    assert f"{VLLM}.intent.banking77.macro_f1" not in ev
 
 
 def test_empty_records_dir_gives_only_registry_evidence(tmp_path, reg):

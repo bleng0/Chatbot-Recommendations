@@ -11,13 +11,19 @@ def configs():
     return {c.config_id: c for c in load_registry()}
 
 
-def test_registry_has_the_four_agreed_configs(configs):
+def test_registry_has_the_five_agreed_configs(configs):
     assert sorted(configs) == [
         "gem25f-api-global",
         "gem35fl-api-global",
         "gemma4-26b-api-global",
+        "gemma4-26b-ollama-local-q4",
         "gemma4-26b-vllm-in-bf16",
     ]
+
+
+def test_selfhost_quality_comes_from_the_local_ollama_run(configs):
+    assert configs["gemma4-26b-vllm-in-bf16"].quality_from == "gemma4-26b-ollama-local-q4"
+    assert configs["gemma4-26b-ollama-local-q4"].provider == "ollama"
 
 
 def test_model_ids_match_verified_docs(configs):

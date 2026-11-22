@@ -24,6 +24,7 @@ from pome.eval.datasets import FAQ_TASKS, TASKS, load_task
 from pome.eval.runner import Record, estimate_from_records, run_task
 from pome.providers.gemini import make_transport
 from pome.providers.keypool import KeyPool, Transport, load_keys, read_dotenv
+from pome.providers.ollama import make_ollama_transport
 from pome.providers.spend import SpendLedger, call_cost
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -48,6 +49,9 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     ap.add_argument("--out", type=Path, default=ROOT / "runs")
     ap.add_argument("--approve-spend", action="store_true")
     ap.add_argument("--tier", choices=("paid", "free"), default="paid")
+    ap.add_argument("--provider", choices=("gemini", "ollama"), default="gemini",
+                    help="ollama: local model, no keys, $0, no spend approval needed")
+    ap.add_argument("--ollama-model", default="gemma4:26b")
     ap.add_argument("--cached-only", action="store_true",
                     help="no API calls: write records for items already in the cache")
     a = ap.parse_args(argv)
@@ -57,6 +61,13 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     configs = [registry[c] for c in a.configs.split(",")]
     def price(ev) -> float:
         return 0.0 if ev is None else ev.value
+
+    wrong = [c.config_id for c in configs if c.provider != a.provider]
+    if wrong:
+        print(f"{wrong}: registry provider differs from --provider {a.provider}; refusing")
+        return 2
+    if a.provider == "ollama":  # local model: nothing is billed
+        a.tier, a.approve_spend = "free", True
 
     for c in configs:
         if a.tier == "paid" and (c.pricing.input_per_1m is None or c.pricing.output_per_1m is None):
@@ -79,7 +90,8 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     if not a.cached_only:
         ledger.approve(sum(worst.values()))
 
-    keys = load_keys(env if env is not None else read_dotenv(ROOT / ".env"))
+    keys = ({0: "local"} if a.provider == "ollama" else
+            load_keys(env if env is not None else read_dotenv(ROOT / ".env")))
     # Free-tier limits reset every minute: cap cooldowns at 60 s so the pool never stalls.
     pool = KeyPool(keys, base_cooldown=15.0, max_cooldown=60.0)
     print(f"key pool: {pool!r}")
@@ -124,7 +136,8 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     else:
         async def live() -> None:
             async with httpx.AsyncClient() as client:
-                await go(make_transport(client))
+                await go(make_ollama_transport(client, model=a.ollama_model)
+                         if a.provider == "ollama" else make_transport(client))
         asyncio.run(live())
     print(f"ledger spent ${ledger.spent():.4f} of ${ledger.cap:.2f}")
     return 0

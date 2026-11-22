@@ -108,9 +108,9 @@ def build_evidence(registry: list[ConfigEntry], root: Path, profile: Profile, no
                     retrieved_at=now, formula=b.formula)
     hosted = {c.model_id: c.config_id for c in registry if c.evaluation_mode == "measured"}
     for cfg in registry:
-        if cfg.evaluation_mode != "modeled" or cfg.model_id not in hosted:
+        src_id = cfg.quality_from or hosted.get(cfg.model_id)
+        if cfg.evaluation_mode != "modeled" or src_id is None:
             continue
-        src_id = hosted[cfg.model_id]
         for key, v in list(ev.items()):
             if key.startswith(f"{src_id}.") and ".deploy." not in key and ".cost." not in key:
                 ev[f"{cfg.config_id}.{key.removeprefix(src_id + '.')}"] = EvidenceValue(

@@ -34,6 +34,8 @@ class ConfigEntry(BaseModel):
     serving: str
     quant: str
     evaluation_mode: Literal["measured", "priced_only", "modeled"]
+    provider: Literal["gemini", "ollama", "none"] = "gemini"
+    quality_from: str | None = None  # modeled configs: config whose measured quality is carried
     pricing: Pricing
     deployment: Deployment
     notes: str = ""
