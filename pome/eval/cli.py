@@ -3,7 +3,7 @@
 
 Without --approve-spend it prints a worst-case estimate and exits (rc 2) without calling
 the API. With it, the ledger refuses the run if spent + worst case > cap. After running it
-prints measured mean tokens and the cost of the full plan (all items x 3 runs).
+prints measured mean tokens and the cost of the full plan (all items x 1 run).
 Worst case = ceil(prompt chars / 4) input tokens + 1000 output tokens per call.
 Keys come from .env via the key pool; only key indices are ever printed.
 --tier free: Google charges nothing, so the ledger records $0 (tokens and list price kept)
@@ -29,7 +29,7 @@ from pome.providers.spend import SpendLedger, call_cost
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 WORST_OUT_TOKENS = 1000
-FULL_RUNS = 3
+FULL_RUNS = 1  # CONSTRAINTS A: one run per config (owner decision 2026-11-22)
 
 
 def worst_case_cost(prompts: Sequence[str], in_price: float, out_price: float) -> float:
@@ -45,7 +45,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     ap.add_argument("--head", type=int)
     ap.add_argument("--runs", type=int, default=1)
     ap.add_argument("--temperature", type=float, default=1.0)
-    ap.add_argument("--concurrency", type=int, default=4)
+    ap.add_argument("--concurrency", type=int, default=7)
     ap.add_argument("--out", type=Path, default=ROOT / "runs")
     ap.add_argument("--approve-spend", action="store_true")
     ap.add_argument("--tier", choices=("paid", "free"), default="paid")
@@ -79,7 +79,8 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     ledger.approve(sum(worst.values()))
 
     keys = load_keys(env if env is not None else read_dotenv(ROOT / ".env"))
-    pool = KeyPool(keys)
+    # Free-tier limits reset every minute: cap cooldowns at 60 s so the pool never stalls.
+    pool = KeyPool(keys, base_cooldown=15.0, max_cooldown=60.0)
     print(f"key pool: {pool!r}")
     cache = ResponseCache(a.out / "cache.jsonl")
     full_calls = sum(len(load_task(t).items) for t in TASKS) * FULL_RUNS
