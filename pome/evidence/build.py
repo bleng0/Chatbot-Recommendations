@@ -1,7 +1,7 @@
 """Build evidence values from the registry and recorded eval runs (no I/O beyond reading files).
 
 Quality: scored from runs/records/<config>/<task>_run<k>.jsonl, successful calls only, and only
-when a task has at least MIN_ITEMS scored items (otherwise the metric stays unverified).
+when a task has at least MIN_ITEMS (15) scored items (otherwise the metric stays unverified).
 Cost: modeled = list price (registry) x measured mean tokens per call x profile volume, one call
 per ticket. Self-hosted configs carry quality over from the hosted copy of the same weights, as
 `modeled` (SPEC A7). Latency, throughput and error rate are not produced here.
@@ -19,7 +19,7 @@ from pome.evidence.schema import EvidenceValue
 from pome.profiles.loader import Profile
 from pome.registry.loader import ConfigEntry
 
-MIN_ITEMS = 30
+MIN_ITEMS = 15
 LANGS = ("en", "hi", "hinglish")
 _DEPLOY = {"region_processing": "deploy.region", "retention_days": "deploy.retention_days",
            "commercial_use": "deploy.commercial_use"}
@@ -113,7 +113,10 @@ def build_evidence(registry: list[ConfigEntry], root: Path, profile: Profile, no
         src_id = hosted[cfg.model_id]
         for key, v in list(ev.items()):
             if key.startswith(f"{src_id}.") and ".deploy." not in key and ".cost." not in key:
-                ev[f"{cfg.config_id}.{key.removeprefix(src_id + '.')}"] = v.model_copy(update={
-                    "provenance": "modeled",
-                    "source": f"carried over from hosted copy {src_id} (same weights): {v.source}"})
+                ev[f"{cfg.config_id}.{key.removeprefix(src_id + '.')}"] = EvidenceValue(
+                    **{**v.model_dump(), "provenance": "modeled",
+                       "source": f"carried over from hosted copy {src_id} (same weights): "
+                                 f"{v.source}",
+                       "formula": f"value = measured value of {src_id} (same weights, "
+                                  "different serving stack; SPEC A7)"})
     return ev

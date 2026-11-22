@@ -14,14 +14,14 @@ def configs():
 def test_registry_has_the_four_agreed_configs(configs):
     assert sorted(configs) == [
         "gem25f-api-global",
-        "gem25fl-api-global",
+        "gem35fl-api-global",
         "gemma4-26b-api-global",
         "gemma4-26b-vllm-in-bf16",
     ]
 
 
 def test_model_ids_match_verified_docs(configs):
-    assert configs["gem25fl-api-global"].model_id == "gemini-2.5-flash-lite"
+    assert configs["gem35fl-api-global"].model_id == "gemini-3.5-flash-lite"
     assert configs["gem25f-api-global"].model_id == "gemini-2.5-flash"
     assert configs["gemma4-26b-api-global"].model_id == "gemma-4-26b-a4b-it"
     assert configs["gemma4-26b-vllm-in-bf16"].model_id == "gemma-4-26b-a4b-it"
@@ -30,7 +30,7 @@ def test_model_ids_match_verified_docs(configs):
 @pytest.mark.parametrize(
     "cid,in_p,out_p",
     [
-        ("gem25fl-api-global", 0.10, 0.40),
+        ("gem35fl-api-global", 0.30, 2.50),
         ("gem25f-api-global", 0.30, 2.50),
     ],
 )
@@ -48,13 +48,13 @@ def test_gemma_api_has_no_paid_price(configs):
 
 
 def test_hosted_gemini_retention_is_55_days_from_usage_policy(configs):
-    r = configs["gem25fl-api-global"].deployment.retention_days
+    r = configs["gem35fl-api-global"].deployment.retention_days
     assert r.value == 55 and r.provenance == "vendor-doc"
     assert r.source == "https://ai.google.dev/gemini-api/docs/usage-policies"
 
 
 def test_missing_region_evidence_is_unverified_not_assumed(configs):
-    for cid in ("gem25fl-api-global", "gem25f-api-global", "gemma4-26b-api-global"):
+    for cid in ("gem35fl-api-global", "gem25f-api-global", "gemma4-26b-api-global"):
         assert configs[cid].deployment.region_processing is None
 
 

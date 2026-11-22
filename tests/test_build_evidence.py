@@ -98,6 +98,8 @@ def test_selfhost_quality_is_carried_over_as_modeled(tmp_path, reg):
     assert own.provenance == "measured" and carried.provenance == "modeled"
     assert carried.value == own.value and GEMMA in carried.source
     assert f"{VLLM}.cost.monthly_usd" not in ev  # needs GPU price and throughput
+    assert carried.formula and GEMMA in carried.formula
+    build_snapshot(ev, NOW)  # every modeled value must validate (formula required)
 
 
 def test_empty_records_dir_gives_only_registry_evidence(tmp_path, reg):

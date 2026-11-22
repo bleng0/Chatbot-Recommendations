@@ -16,7 +16,7 @@ async def fake(secret, payload):
 
 
 def args(tmp_path, *extra):
-    return ["--configs", "gem25fl-api-global", "--tasks", "banking77,clinc150", "--head", "4",
+    return ["--configs", "gem35fl-api-global", "--tasks", "banking77,clinc150", "--head", "4",
             "--out", str(tmp_path), *extra]
 
 
@@ -40,8 +40,8 @@ def test_runs_records_spend_and_reports_measured_estimate(tmp_path, capsys):
     assert rc == 0
     assert "sk-test-AAAA" not in out
     assert SpendLedger(tmp_path / "spend_ledger.jsonl").spent() == pytest.approx(
-        8 * (800 * 0.10 + 6 * 0.40) / 1e6)
-    rows = (tmp_path / "records" / "gem25fl-api-global" / "banking77_run0.jsonl").read_text()
+        8 * (800 * 0.30 + 6 * 2.50) / 1e6)  # gem35fl list price 0.30 / 2.50
+    rows = (tmp_path / "records" / "gem35fl-api-global" / "banking77_run0.jsonl").read_text()
     assert len(rows.splitlines()) == 4
     assert "measured mean tokens" in out and "full plan" in out
 

@@ -1,22 +1,22 @@
 # Verified 2026-11-22 from official pages. null = evidence missing = "unverified".
 # Prices: Standard paid tier, USD per 1M text tokens, prompts <= 200k.
 configs:
-  - config_id: gem25fl-api-global
-    model_id: gemini-2.5-flash-lite
+  - config_id: gem35fl-api-global
+    model_id: gemini-3.5-flash-lite
     version: "alias; no pinned version string on the pricing page"
-    host: "Gemini API (AI Studio, paid tier)"
+    host: "Gemini API (AI Studio)"
     region: "global (no regional processing commitment found)"
     serving: managed
     quant: "n/a (vendor-managed)"
     evaluation_mode: measured
     pricing:
-      input_per_1m: &fl_in {value: 0.10, unit: usd_per_1m_tokens, provenance: vendor-doc, source: "https://aistudio.google.com/docs/pricing", retrieved_at: "2026-11-22T13:30:00+05:30"}
-      output_per_1m: &fl_out {value: 0.40, unit: usd_per_1m_tokens, provenance: vendor-doc, source: "https://aistudio.google.com/docs/pricing", retrieved_at: "2026-11-22T13:30:00+05:30"}
+      input_per_1m: {value: 0.30, unit: usd_per_1m_tokens, provenance: vendor-doc, source: "https://aistudio.google.com/docs/pricing", retrieved_at: "2026-11-22T18:40:00+05:30"}
+      output_per_1m: {value: 2.50, unit: usd_per_1m_tokens, provenance: vendor-doc, source: "https://aistudio.google.com/docs/pricing", retrieved_at: "2026-11-22T18:40:00+05:30"}
     deployment:
       region_processing: null
       retention_days: &ret55 {value: 55, unit: days, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/docs/usage-policies", retrieved_at: "2026-11-22T13:30:00+05:30"}
       commercial_use: null
-    notes: "Retention 55 days for abuse monitoring. Terms say business use is intended but no explicit commercial-use grant was read, so G14 stays unverified."
+    notes: "Replaces gemini-2.5-flash-lite (2.5 models are limited to projects that already used them since 2026-09-18, see docs/research/evidence-plan.md). Has a free tier; Batch is free on the free tier. Not yet evaluated: priced only."
 
   - config_id: gem25f-api-global
     model_id: gemini-2.5-flash

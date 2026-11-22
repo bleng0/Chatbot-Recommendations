@@ -30,7 +30,7 @@ def constraints_section_a():
 
 def test_profile_gates_equal_constraints_md_section_a():
     expected = constraints_section_a()
-    assert len(expected) == 14
+    assert len(expected) == 12  # G12, G13 dropped for the proof of concept
     profile = load_profile()
     assert set(profile.gates) == set(expected)
     for gid, (op, val) in expected.items():

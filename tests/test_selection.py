@@ -7,11 +7,17 @@ import pytest
 
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import SnapshotHashMismatch, build_snapshot
-from pome.profiles.loader import load_profile
+from pome.profiles.loader import Gate, load_profile
 from pome.selection.engine import InvalidProfile, required_keys, select
 
 NOW = datetime(2026, 11, 22, 8, 0, tzinfo=UTC)
-PROFILE = load_profile()
+LENIENT = load_profile()  # banking_mvp as shipped: no G12/G13 (owner decision 2026-11-22)
+# Strict profile = banking_mvp plus the optional deployment gates, for the full-gate rules below.
+PROFILE = LENIENT.model_copy(update={"gates": {
+    **LENIENT.gates,
+    "G12": Gate(op="required", value=True, unit="bool"),
+    "G13": Gate(op="<=", value=30, unit="days"),
+}})
 
 
 def ev(value, prov="measured", unit="ratio"):
@@ -291,7 +297,7 @@ def test_profile_missing_a_gate_is_rejected_clearly():
 
 def test_profile_with_wrong_op_is_rejected_clearly():
     gates = dict(PROFILE.gates)
-    gates["G1"] = gates["G12"]  # op 'required' on a threshold gate
+    gates["G1"] = gates["G14"]  # op 'required' on a threshold gate
     with pytest.raises(InvalidProfile, match="G1"):
         select(snap(passing("a")), PROFILE.model_copy(update={"gates": gates}))
 
@@ -326,3 +332,51 @@ def test_equal_margins_with_float_noise_still_fall_through_to_p95():
     d = select(snap(a, b), PROFILE)
     assert verdict(d, "a").quality_margin == verdict(d, "b").quality_margin
     assert d.recommended == "a"
+
+
+# ---- 6. proof-of-concept leniency (owner decision 2026-11-22) -------------------------
+
+def test_shipped_profile_has_no_region_or_retention_gate():
+    assert "G12" not in LENIENT.gates and "G13" not in LENIENT.gates
+
+
+def test_without_g12_g13_global_region_and_55_day_retention_do_not_block():
+    a = passing("a")
+    a["a.deploy.region"] = ev("global", "vendor-doc", unit="region")
+    a["a.deploy.retention_days"] = ev(55, "vendor-doc", unit="days")
+    d = select(snap(a), LENIENT)
+    assert d.recommended == "a" and verdict(d, "a").status == "eligible"
+    assert {g.gate for g in verdict(d, "a").gates} == set(LENIENT.gates)
+
+
+def test_profile_without_a_core_gate_is_still_rejected():
+    gates = {k: v for k, v in LENIENT.gates.items() if k != "G1"}
+    with pytest.raises(InvalidProfile, match="G1"):
+        select(snap(passing("a")), LENIENT.model_copy(update={"gates": gates}))
+
+
+SERVING = ["a.serving.p95_ms", "a.serving.sustainable_rps", "a.serving.error_pct"]
+
+
+def test_missing_serving_evidence_is_not_tested_and_does_not_block():
+    d = select(snap(passing("a"), drop=SERVING), LENIENT)
+    v = verdict(d, "a")
+    assert v.status == "eligible" and d.recommended == "a"
+    assert {g.gate: g.status for g in v.gates}["G8"] == "not_tested"
+    assert v.not_tested == ["G8", "G9", "G10"]
+    assert v.missing == SERVING and v.p95_ms is None
+
+
+def test_not_tested_config_ranks_after_equal_cost_config_with_serving_evidence():
+    d = select(snap(passing("a"), passing("b"), drop=SERVING), LENIENT)
+    assert d.recommended == "b"
+
+
+def test_invalid_serving_evidence_is_still_unverified():
+    d = select(snap(passing("a"), override={"a.serving.p95_ms": ev(-1.0, unit="ms")}), LENIENT)
+    assert verdict(d, "a").status == "unverified"
+
+
+def test_failing_serving_evidence_still_rejects():
+    d = select(snap(passing("a", p95=5000.0)), LENIENT)
+    assert verdict(d, "a").status == "rejected"

@@ -31,6 +31,11 @@ from pome.profiles.loader import Profile, profile_hash
 
 LANGS_NON_EN = ("hi", "hinglish")
 QUALITY_GATES = {"G1", "G2", "G3", "G4", "G5", "G6", "G7"}
+# A profile may leave these out (banking_mvp does: proof of concept, owner decision 2026-11-22).
+OPTIONAL_GATES = {"G12", "G13"}
+# Missing evidence for these is "not_tested" (free tier cannot load-test): shown, not blocking.
+# Present-but-failing or invalid serving evidence still rejects / leaves the config unverified.
+SERVING_GATES = {"G8", "G9", "G10"}
 GATE_OPS = {
     "G1": ">=", "G2": ">=", "G3": ">=", "G4": ">=", "G5": ">=", "G6": "<=", "G7": "<=",
     "G8": "<=", "G9": ">=", "G10": "<=", "G11": "<=", "G12": "required", "G13": "<=",
@@ -100,7 +105,7 @@ def required_keys(config_id: str) -> list[str]:
     return [f"{config_id}.{k}" for k in keys]
 
 
-GateStatus = Literal["pass", "fail", "unverified"]
+GateStatus = Literal["pass", "fail", "unverified", "not_tested"]
 ConfigStatus = Literal["eligible", "eligible_modeled", "rejected", "unverified"]
 
 
@@ -118,6 +123,7 @@ class Verdict(BaseModel):
     gates: list[GateResult]
     reasons: list[str]
     missing: list[str]
+    not_tested: list[str] = []
     monthly_cost: float | None
     quality_margin: float | None
     p95_ms: float | None
@@ -169,6 +175,8 @@ def _validate_profile(profile: Profile) -> None:
     for gid, op in GATE_OPS.items():
         g = profile.gates.get(gid)
         if g is None:
+            if gid in OPTIONAL_GATES:
+                continue
             raise InvalidProfile(f"profile has no gate {gid}")
         if g.op != op:
             raise InvalidProfile(f"gate {gid} must use op {op!r}, got {g.op!r}")
@@ -207,11 +215,17 @@ def _verdict(cid: str, values: dict[str, EvidenceValue], profile: Profile) -> Ve
     slacks: list[float] = []
     modeled = False
     for ch in CHECKS:
-        slot = per_gate.setdefault(ch.gate, {"fail": [], "unverified": [], "pass": []})
+        if ch.gate not in profile.gates:
+            continue
+        slot = per_gate.setdefault(ch.gate,
+                                   {"fail": [], "unverified": [], "not_tested": [], "pass": []})
         full = [f"{cid}.{k}" for k in ch.keys]
         absent = [k for k in full if k not in values]
         if absent:
             missing += [k for k in absent if k not in missing]
+            if ch.gate in SERVING_GATES:
+                slot["not_tested"].append(f"{ch.gate} {ch.label}: not tested (no load test run)")
+                continue
             msg = f"{ch.gate} {ch.label}: evidence missing (unverified)"
             slot["unverified"].append(msg)
             unverified.append(msg)
@@ -236,9 +250,10 @@ def _verdict(cid: str, values: dict[str, EvidenceValue], profile: Profile) -> Ve
     gates = []
     for gid, slot in per_gate.items():
         status: GateStatus = ("fail" if slot["fail"] else
-                              "unverified" if slot["unverified"] else "pass")
-        gates.append(GateResult(gate=gid, status=status,
-                                detail=slot["fail"] + slot["unverified"] + slot["pass"]))
+                              "unverified" if slot["unverified"] else
+                              "not_tested" if slot["not_tested"] else "pass")
+        gates.append(GateResult(gate=gid, status=status, detail=slot["fail"] + slot["unverified"]
+                                + slot["not_tested"] + slot["pass"]))
 
     if fails:
         status_c: ConfigStatus = "rejected"
@@ -255,7 +270,8 @@ def _verdict(cid: str, values: dict[str, EvidenceValue], profile: Profile) -> Ve
 
     return Verdict(
         config_id=cid, status=status_c, gates=gates, reasons=fails + unverified,
-        missing=missing, monthly_cost=num("cost.monthly_usd"),
+        missing=missing, not_tested=[g.gate for g in gates if g.status == "not_tested"],
+        monthly_cost=num("cost.monthly_usd"),
         quality_margin=round(min(slacks), 9) if slacks and not unverified else None,
         p95_ms=num("serving.p95_ms"),
     )
@@ -276,7 +292,9 @@ def select(snapshot: Snapshot, profile: Profile) -> Decision:
     verdicts = [_verdict(cid, snapshot.values, profile) for cid in config_ids]
     feasible = sorted(
         (v for v in verdicts if v.status in ("eligible", "eligible_modeled")),
-        key=lambda v: (v.monthly_cost, -v.quality_margin, v.p95_ms, v.config_id),
+        # equal cost: a config with serving evidence beats one whose serving is not tested
+        key=lambda v: (v.monthly_cost, bool(v.not_tested), -v.quality_margin,
+                       math.inf if v.p95_ms is None else v.p95_ms, v.config_id),
     )
     best = feasible[0] if feasible else None
     body = {

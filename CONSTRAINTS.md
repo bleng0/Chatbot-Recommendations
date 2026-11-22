@@ -10,6 +10,10 @@ and lands in its own commit, never alongside the code that was failing.
 
 ## A. Decision gates (product bar, profile `banking_mvp`)
 
+Proof-of-concept scope (owner decision 2026-11-22): G12 (data processed in India) and G13
+(provider retention ≤ 30 days) are dropped from `banking_mvp`. The engine still supports them
+as optional gates for a stricter profile; the app reports region and retention as information.
+
 A config is `eligible` only if every gate passes. A gate whose evidence is missing is
 `unverified`, never `pass`. Evidence marked `modeled` can pass a gate but the config is
 flagged `eligible (modeled)` and the UI says so.
@@ -27,18 +31,21 @@ flagged `eligible (modeled)` and the UI says so.
 | G9 | Sustainable throughput (p95 ≤ G8 and error rate ≤ G10) | ≥ 8 req/s | measured / modeled | Profile peak |
 | G10 | Error rate after retries, at that concurrency | ≤ 1.0% | measured / modeled | Default: errors above 1% at peak are visible to customers |
 | G11 | Monthly cost at 100,000 tickets/month, measured avg tokens | ≤ $1,500 | measured tokens × vendor-doc prices; self-host modeled | Owner default |
-| G12 | Data processed in India (documented regional ML-processing commitment) | required | vendor-doc | Owner default; no document = unverified |
-| G13 | Provider retention of prompts/outputs | ≤ 30 days | vendor-doc | Owner default |
 | G14 | Licence/terms permit commercial use | required | vendor-doc | Owner default |
 
 Gate rules:
 - Quality gates (G1–G7) compare the **point estimate of 1 run** (Phase 1 prototype, owner decision 2026-11-22: simplify, no multi-hour runs; was 3 runs). Bootstrap 95%
   CIs are shown next to them but don't decide pass/fail. A CI that crosses the threshold
   is flagged "marginal".
+- G8–G10: if no load test was run (free tier cannot load-test), the gate is `not tested`:
+  shown in the app, does not block selection. At equal cost a config with serving evidence
+  ranks first. Serving evidence that is present but fails or is invalid still counts.
+- Minimum sample: a quality metric needs at least 15 scored items (successful calls) to be
+  used; below that it stays unverified (owner decision 2026-11-22, was 30).
 - G8–G10: pass if at least one tested concurrency level reaches ≥ 8 req/s with p95 ≤ 3000 ms
   and errors ≤ 1%.
 - G11 ticket definition: SPEC A4.
-- Not legal certification: G12–G14 record documented evidence only.
+- Not legal certification: G14 records documented evidence only.
 
 ## B. Spend and usage limits
 

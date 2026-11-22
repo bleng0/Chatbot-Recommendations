@@ -1,4 +1,5 @@
 # Thresholds mirror CONSTRAINTS.md section A and are checked by tests/test_profile.py.
+# G12 (India region) and G13 (retention) dropped for the proof of concept, owner 2026-11-22.
 name: banking_mvp
 tasks: [intent, oos, faq]
 languages: [en, hi, hinglish]
@@ -17,6 +18,4 @@ gates:
   G9:  {op: ">=", value: 8, unit: req_per_s}
   G10: {op: "<=", value: 1.0, unit: percent}
   G11: {op: "<=", value: 1500, unit: usd_per_month}
-  G12: {op: required, value: true, unit: bool}
-  G13: {op: "<=", value: 30, unit: days}
   G14: {op: required, value: true, unit: bool}
