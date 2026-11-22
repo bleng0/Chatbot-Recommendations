@@ -20,3 +20,44 @@ SPEC.md
 lcov.info
 coverage.lcov
 pome/data/.cache/
+
+# ---- Next.js app (from origin/main) ----
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# local agent skills (installed per machine, not part of the app)
+.opencode/skills/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# environment files
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

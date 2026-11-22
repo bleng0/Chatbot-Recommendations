@@ -1,0 +1,15 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pome-web:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    # To pass runtime configuration, create a .env file next to this one and
+    # uncomment the following line:
+    # env_file:
+    #   - .env
