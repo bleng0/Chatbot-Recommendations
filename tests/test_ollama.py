@@ -60,11 +60,11 @@ async def fake_ollama(secret, payload):
 
 
 def test_cli_ollama_needs_no_keys_and_no_spend_approval_and_records_zero_cost(tmp_path, capsys):
-    rc = cli.main(["--configs", "gemma4-26b-ollama-local-q4", "--provider", "ollama",
+    rc = cli.main(["--configs", "gemma4-12b-ollama-local-q4", "--provider", "ollama",
                    "--tasks", "banking77", "--head", "3", "--out", str(tmp_path)],
                   env={}, transport=fake_ollama)
     assert rc == 0
-    rows = (tmp_path / "records" / "gemma4-26b-ollama-local-q4" / "banking77_run0.jsonl"
+    rows = (tmp_path / "records" / "gemma4-12b-ollama-local-q4" / "banking77_run0.jsonl"
             ).read_text().splitlines()
     assert len(rows) == 3
     spent = [json.loads(x)["cost_usd"] for x in

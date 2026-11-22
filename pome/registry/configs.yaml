@@ -52,16 +52,16 @@ configs:
       commercial_use: &apache {value: true, unit: bool, provenance: vendor-doc, source: "https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html", retrieved_at: "2026-11-22T13:30:00+05:30"}
     notes: "Pricing page lists Gemma 4 with a free tier and no paid price. Free-tier content may be used to improve Google products, so only public benchmark data is sent."
 
-  - config_id: gemma4-26b-vllm-in-bf16
-    model_id: gemma-4-26b-a4b-it
-    version: "open weights, Apache 2.0"
+  - config_id: gemma4-12b-vllm-in-bf16
+    model_id: gemma-4-12b
+    version: "open weights; Hugging Face instruct ID not confirmed on ai.google.dev/gemma/docs/core (2026-11-22)"
     host: "self-hosted GPU (India region)"
     region: India
     serving: vLLM
     quant: bf16
     evaluation_mode: modeled
     provider: none
-    quality_from: gemma4-26b-ollama-local-q4
+    quality_from: gemma4-12b-ollama-local-q4
     pricing:
       input_per_1m: null
       output_per_1m: null
@@ -69,11 +69,11 @@ configs:
       region_processing: {value: "India", unit: region, provenance: modeled, source: "design assumption: operator deploys in an India-region GPU instance", formula: "region is a deployment choice, not validated by this project", retrieved_at: "2026-11-22T13:30:00+05:30"}
       retention_days: {value: 0, unit: days, provenance: modeled, source: "design assumption: vLLM configured not to persist prompts or outputs", formula: "retention is operator-enforced, not validated by this project", retrieved_at: "2026-11-22T13:30:00+05:30"}
       commercial_use: *apache
-    notes: "No GPU available: throughput, latency and cost are modeled. Quality is carried over from the hosted copy of the same weights (SPEC A7). GPU $/h is fetched in slice 7."
+    notes: "Switched from Gemma 4 26B to 12B (owner decision 2026-11-22: the 26B does not fit the owner's laptop for the quality run). Google lists ~26.7 GB to load 12B weights at bf16 (incl. 20% overhead, excl. KV cache), https://ai.google.dev/gemma/docs/core. No GPU available: throughput, latency and cost are modeled. Quality is carried over from the local Ollama run (4-bit) of the same model."
 
-  - config_id: gemma4-26b-ollama-local-q4
-    model_id: gemma-4-26b-a4b-it
-    version: "Ollama tag gemma4:26b (Q4_K_M, 16-19 GB), https://ollama.com/library/gemma4"
+  - config_id: gemma4-12b-ollama-local-q4
+    model_id: gemma-4-12b
+    version: "Ollama tag gemma4:12b (Q4_K_M, 7.7-8.0 GB), https://ollama.com/library/gemma4"
     host: "local Ollama on the owner's laptop (quality measurement only)"
     region: "local machine"
     serving: Ollama

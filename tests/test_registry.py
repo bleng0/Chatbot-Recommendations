@@ -15,22 +15,23 @@ def test_registry_has_the_five_agreed_configs(configs):
     assert sorted(configs) == [
         "gem25f-api-global",
         "gem35fl-api-global",
+        "gemma4-12b-ollama-local-q4",
+        "gemma4-12b-vllm-in-bf16",
         "gemma4-26b-api-global",
-        "gemma4-26b-ollama-local-q4",
-        "gemma4-26b-vllm-in-bf16",
     ]
 
 
 def test_selfhost_quality_comes_from_the_local_ollama_run(configs):
-    assert configs["gemma4-26b-vllm-in-bf16"].quality_from == "gemma4-26b-ollama-local-q4"
-    assert configs["gemma4-26b-ollama-local-q4"].provider == "ollama"
+    assert configs["gemma4-12b-vllm-in-bf16"].quality_from == "gemma4-12b-ollama-local-q4"
+    assert configs["gemma4-12b-ollama-local-q4"].provider == "ollama"
 
 
 def test_model_ids_match_verified_docs(configs):
     assert configs["gem35fl-api-global"].model_id == "gemini-3.5-flash-lite"
     assert configs["gem25f-api-global"].model_id == "gemini-2.5-flash"
     assert configs["gemma4-26b-api-global"].model_id == "gemma-4-26b-a4b-it"
-    assert configs["gemma4-26b-vllm-in-bf16"].model_id == "gemma-4-26b-a4b-it"
+    assert configs["gemma4-12b-vllm-in-bf16"].model_id == "gemma-4-12b"
+    assert configs["gemma4-12b-ollama-local-q4"].model_id == "gemma-4-12b"
 
 
 @pytest.mark.parametrize(
@@ -75,7 +76,7 @@ def test_registry_never_claims_measured(configs):
 
 
 def test_selfhost_deployment_values_are_modeled_or_vendor_doc(configs):
-    d = configs["gemma4-26b-vllm-in-bf16"].deployment
+    d = configs["gemma4-12b-vllm-in-bf16"].deployment
     assert d.region_processing.provenance == "modeled"
     assert d.retention_days.provenance == "modeled"
     assert d.commercial_use.provenance == "vendor-doc"

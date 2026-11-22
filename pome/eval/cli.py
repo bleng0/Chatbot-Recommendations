@@ -51,7 +51,7 @@ def main(argv: Sequence[str] | None = None, *, env: Mapping[str, str] | None = N
     ap.add_argument("--tier", choices=("paid", "free"), default="paid")
     ap.add_argument("--provider", choices=("gemini", "ollama"), default="gemini",
                     help="ollama: local model, no keys, $0, no spend approval needed")
-    ap.add_argument("--ollama-model", default="gemma4:26b")
+    ap.add_argument("--ollama-model", default="gemma4:12b")
     ap.add_argument("--cached-only", action="store_true",
                     help="no API calls: write records for items already in the cache")
     a = ap.parse_args(argv)

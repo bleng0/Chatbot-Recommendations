@@ -11,8 +11,8 @@ from pome.registry.loader import load_registry
 from pome.selection.engine import select
 
 NOW = datetime(2026, 11, 22, 12, 0, tzinfo=UTC)
-FL, GEMMA, VLLM = "gem25f-api-global", "gemma4-26b-api-global", "gemma4-26b-vllm-in-bf16"
-OLLAMA = "gemma4-26b-ollama-local-q4"
+FL, GEMMA, VLLM = "gem25f-api-global", "gemma4-26b-api-global", "gemma4-12b-vllm-in-bf16"
+OLLAMA = "gemma4-12b-ollama-local-q4"
 
 
 def write(root, cid, task, rows):
