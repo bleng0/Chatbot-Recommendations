@@ -1,4 +1,4 @@
-"""POME decision-support app. Run: uv run streamlit run pome/app/home.py
+"""POME decision-support app. Run: uv run python -m streamlit run pome/app/home.py
 
 Replays recorded evaluation results (runs/records); never calls an LLM API.
 """

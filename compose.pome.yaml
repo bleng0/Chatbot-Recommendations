@@ -1,0 +1,11 @@
+# POME decision app. Run: docker compose -f compose.pome.yaml up --build
+# Then open http://localhost:8501
+services:
+  pome:
+    build:
+      context: .
+      dockerfile: Dockerfile.pome
+    image: pome-app:local
+    ports:
+      - "127.0.0.1:8501:8501"
+    restart: unless-stopped

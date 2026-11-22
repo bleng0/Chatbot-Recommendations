@@ -1,0 +1,9 @@
+# Build context for Dockerfile.pome only (BuildKit reads <Dockerfile>.dockerignore).
+# Allow-list: everything is excluded except what the image needs.
+*
+!pyproject.toml
+!uv.lock
+!pome/
+!runs/records/
+**/__pycache__
+**/*.pyc
