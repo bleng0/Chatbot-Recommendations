@@ -1,0 +1,15 @@
+# secrets
+.env
+
+# python
+__pycache__/
+.venv/
+*.pyc
+.pytest_cache/
+
+# planning / agent-instruction files (kept local only)
+PLAN.md
+CLAUDE.md
+KICKOFF_PROMPT.md
+SPEC.md
+*.pptx
