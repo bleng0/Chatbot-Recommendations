@@ -37,6 +37,11 @@ def _hash(schema_version: str, created_at: AwareDatetime,
     return hashlib.sha256(_canonical(schema_version, created_at, values).encode()).hexdigest()
 
 
+def content_hash(snapshot: "Snapshot") -> str:
+    """Recompute the SHA256 of a snapshot's content (ignores the stored sha256 field)."""
+    return _hash(snapshot.schema_version, snapshot.created_at, snapshot.values)
+
+
 class Snapshot(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
