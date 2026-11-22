@@ -13,3 +13,9 @@ CLAUDE.md
 KICKOFF_PROMPT.md
 SPEC.md
 *.pptx
+
+# tooling output
+.ruff_cache/
+.coverage
+lcov.info
+coverage.lcov

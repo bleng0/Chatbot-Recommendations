@@ -1,0 +1,22 @@
+# Thresholds mirror CONSTRAINTS.md section A and are checked by tests/test_profile.py.
+name: banking_mvp
+tasks: [intent, oos, faq]
+languages: [en, hi, hinglish]
+volume_tickets_per_month: 100000
+peak_rps: 8
+region: India
+gates:
+  G1:  {op: ">=", value: 0.80, unit: ratio}
+  G2:  {op: ">=", value: 0.85, unit: ratio}
+  G3:  {op: ">=", value: 0.80, unit: ratio}
+  G4:  {op: ">=", value: 0.80, unit: ratio}
+  G5:  {op: ">=", value: 0.80, unit: ratio}
+  G6:  {op: "<=", value: 0.10, unit: ratio_gap}
+  G7:  {op: "<=", value: 0.10, unit: ratio_gap}
+  G8:  {op: "<=", value: 3000, unit: ms}
+  G9:  {op: ">=", value: 8, unit: req_per_s}
+  G10: {op: "<=", value: 1.0, unit: percent}
+  G11: {op: "<=", value: 1500, unit: usd_per_month}
+  G12: {op: required, value: true, unit: bool}
+  G13: {op: "<=", value: 30, unit: days}
+  G14: {op: required, value: true, unit: bool}
