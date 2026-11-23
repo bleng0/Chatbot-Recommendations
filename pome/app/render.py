@@ -137,16 +137,6 @@ def _details(summary: str, lines: list[tuple[str, str]]) -> str:
             f'<div class="dx"><dl>{inner}</dl></div></details>')
 
 
-def gate_info_table(rows: list[dict[str, str]]) -> str:
-    body = "".join(
-        f'<tr><th scope="row" class="cid">{escape(r["gate"])}</th>'
-        f'<td class="gi">{escape(r["checks"])}</td><td class="num">{escape(r["pass_if"])}</td></tr>'
-        for r in rows)
-    return (f'<div class="tw"><table class="gi-t"><thead><tr><th scope="col">Gate</th>'
-            f'<th scope="col">What it checks</th><th scope="col">Passes if</th></tr></thead>'
-            f"<tbody>{body}</tbody></table></div>")
-
-
 def config_fan(items: list[dict], focus: str) -> str:
     """Configurations tab: a horizontal fan of config cards (the focused one sharp, the rest
     blurred) above that config's build steps. Static text only in the script."""
@@ -279,6 +269,7 @@ _CSS = """
 html{-webkit-font-smoothing:antialiased}
 .tally{margin:.75rem 0 0;font-size:.9375rem;color:var(--muted)}
 .tally .kn{font-weight:500;color:var(--text)}
+.hl{color:var(--accent);background:linear-gradient(transparent 62%,rgba(43,207,206,.35) 0);padding:0 .1em}
 h1{font-size:2rem!important;line-height:1.2!important;max-width:40ch}
 ::selection{background:var(--sel);color:var(--seltext)}
 *{scrollbar-color:var(--line) transparent}

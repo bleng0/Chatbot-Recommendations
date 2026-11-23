@@ -64,10 +64,10 @@ with st.sidebar:
                               step=10_000, help="Staff and tooling to run your own GPUs.")
     ops = float(ops_inr) / float(USD_INR.value)
     st.header("Tweak mode")
-    kept = st.pills("Gates to check against", GATES, selection_mode="multi", default=GATES,
-                    format_func=display_gate, help="Off = what-if view; official result unchanged.")
-    st.caption("Click a gate to switch it off.")
-    off = tuple(g for g in GATES if g not in (kept or []))
+    st.caption("Switch a gate off to see a what-if view; the official result is unchanged.")
+    off = tuple(g for g, row in zip(GATES, gate_info_rows(profile), strict=True)
+                if not st.toggle(f"{row['gate']} · {row['checks']}", value=True,
+                                 key=f"gate_{g}", help=f"Passes if {row['pass_if']}"))
 
 default_usd = float(profile.gates["G11"].value)
 # the default INR budget maps back to the exact banking_mvp value, so the official hash holds
@@ -78,9 +78,8 @@ scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd
 snap, d = decide(scenario)
 wi = decide_what_if(snap, scenario, off) if off else None
 
-st.title("Which model and hosting should a bank's support bot use?")
-st.html(f'<p class="note">{render.icon("info")}Replaying recorded evaluation results. No live '
-        f'API calls are made. Every number carries its provenance badge.</p>')
+st.html('<h1>Which <span class="hl">model</span> and <span class="hl">hosting plan</span> '
+        'should you use?</h1>')
 st.html(render.answer(relabel(answer_line(d, snap, profile)), recommended=bool(d.recommended)))
 counts = [("configurations", len(d.verdicts)),
           ("eligible" if any(v.status == "eligible" for v in d.verdicts)
@@ -102,15 +101,13 @@ if wi:
 
 ids = {c.config_id for c in registry}
 
-tab_gates, tab_info, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
-    ["Gates", "Gate information", "Cost", "Evidence", "Deployment variants", "Configurations"])
-
-with tab_info:
-    st.html(render.gate_info_table(gate_info_rows(profile)))
+tab_gates, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
+    ["Gates", "Cost", "Evidence", "Deployment variants", "Configurations"])
 
 with tab_gates:
     sort_by = st.segmented_control(
-        "Sort by", ["Status", "Monthly cost", "Error rate", "Name"], default="Status")
+        "Sort by", ["Status", "Monthly cost", "Error rate"], default="Status")
+    order = st.segmented_control("Order", ["Ascending", "Descending"], default="Ascending")
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
     wi_status = {v.config_id: v.status for v in wi.verdicts} if wi else None
     budget_usd = max_spend_usd
@@ -128,8 +125,8 @@ with tab_gates:
         rows.sort(key=lambda r: _val(r["config"], "cost.monthly_usd") or inf)
     elif sort_by == "Error rate":
         rows.sort(key=lambda r: _val(r["config"], "serving.error_pct") or inf)
-    elif sort_by == "Name":
-        rows.sort(key=lambda r: r["config"])
+    if order == "Descending":
+        rows.reverse()
     st.html(render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
                               labels={g: display_gate(g) for g in GATES}, error=error_cells))
     no_ev = sorted(ids - {r["config"] for r in rows})
