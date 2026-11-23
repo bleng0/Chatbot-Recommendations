@@ -160,7 +160,9 @@ None of these models can claim "99% accuracy". Every modeled value needs its err
 
 ## Sources by gate (all 20 configs; retrieved 2026-11-22 and 2026-11-23)
 
-Every source behind a gate value the app shows, grouped by gate. `measured` (self-tested) = a run record; `vendor-doc` = a provider, price or study page; `modeled` = a formula whose inputs and their sources are listed in `pome/registry/gapfill.yaml`. Proxies reuse the self-tested run of the named model. G11 (monthly cost) is checked against the user's max monthly spend in the app.
+Every source behind a gate value the app shows, grouped by gate. `measured` (self-tested) = a run record; `vendor-doc` = a provider, price or study page; `modeled` = a formula whose inputs and their sources are listed in `pome/registry/gapfill.yaml`. Proxies reuse the self-tested run of the named model. G11 (monthly cost) is checked against the user's max monthly spend in the app, and G10 (error rate) against the user's max error rate; both are sidebar settings, not gate columns.
+
+Gate ids here are the internal ids used in the code and CONSTRAINTS.md. On screen (since 2026-11-23) the gates are numbered without gaps, each with a short name: G1 Intent, G2 Out-of-scope, G3 No over-refusal, G4 FAQ accuracy, G5 FAQ decline, G6 Hindi gap, G7 Hinglish gap, G8 Latency, G9 Capacity, and internal G14 shows as G10 Licence. G12 and G13 are not in `banking_mvp` (owner decision 2026-11-22); their sources are kept for reference.
 
 ### G1: Understands which banking request the customer means
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)

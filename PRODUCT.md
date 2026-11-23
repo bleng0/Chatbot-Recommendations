@@ -17,30 +17,39 @@ Success: a reviewer can trust the decision because each number shows its provena
 same inputs always give the same decision hash.
 
 ## Positioning
-Every value is MEASURED by POME, published by a vendor or study, or MODELED from a stated
-formula, and the screen says which. A gate with missing evidence is "unverified", never "pass".
+Every value is SELF-TESTED (a recorded run), published by a vendor or study, or MODELED from a
+stated formula, and the screen says which. A gate with missing evidence is "unverified", never "pass".
 
 ## Operating Context
 Streamlit app (pome/app/home.py) that replays recorded results from runs/records. Shown live in
-a demo and opened by reviewers on laptops; dark and light themes follow the system setting.
+a demo and opened by reviewers on laptops. Gossamer light theme only (owner, 2026-11-23); costs
+shown in INR at the RBI reference rate noted in the footer.
 
 ## Capabilities and Constraints
 - Replay only: the UI never calls an LLM API, even when a key is present (owner, 2026-11-23).
-- Tweak mode (owner, 2026-11-23): reviewers switch gates off to see a what-if result. The
-  official decision always uses banking_mvp unchanged and stays on top; thresholds are never
-  edited.
+- Tweak mode (owner, 2026-11-23): reviewers switch gates off in the sidebar, or move a gate's
+  threshold with the vertical slider above its column in the Gates table, to see a what-if
+  result. The recommendation always uses banking_mvp unchanged and stays on top. A config that
+  passes only because a threshold was loosened is labelled "Not recommended".
+- Wording (owner, 2026-11-23): the screen says "recommended", never "official"; "self-tested",
+  never the project name as tester; gates are numbered G1-G10 on screen with a short name each
+  (Intent, Out-of-scope, No over-refusal, FAQ accuracy, FAQ decline, Hindi gap, Hinglish gap,
+  Latency, Capacity, Licence); error limit and max monthly spend are sidebar settings.
 - Provenance rules in CLAUDE.md section 2 are binding: a badge next to every number, no
   invented data.
 
 ## Evidence on Hand
-runs/records (measured eval runs), pome/registry/configs.yaml (20 configs, published sources
-with retrieval dates). No load tests were run: G8-G10 show "not tested".
+runs/records (self-tested eval runs), pome/registry/configs.yaml (20 configs, published sources
+with retrieval dates), pome/registry/gapfill.yaml (proxies and formulas for every gate key that
+was not self-tested, so every gate has a value; none is labelled self-tested unless a run exists).
+No load tests were run: serving figures are published or modeled.
 
 ## Product Principles
-1. The official answer comes first, in one sentence.
+1. The answer comes first: the question names the model and the hosting plan, and the answer
+   box fills exactly those two slots, then the monthly cost.
 2. Provenance is visible, never implied.
 3. Missing evidence is shown as missing.
-4. Exploration never changes the official decision.
+4. Exploration never changes the recommendation.
 
 ## Accessibility & Inclusion
 WCAG 2.1 AA contrast for text in both themes; status never by colour alone (icon + word);

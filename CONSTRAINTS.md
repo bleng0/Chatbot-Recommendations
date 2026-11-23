@@ -1,6 +1,6 @@
 # Constraints — POME Phase 1
 
-Last reviewed: 2026-11-22 · Status: DRAFT, awaiting owner approval (frozen on approval)
+Last reviewed: 2026-11-23 · Status: DRAFT, awaiting owner approval (frozen on approval)
 
 These numbers are committed before any scoring. They do not get weakened to make a
 config pass or a test go green. Any change needs the owner's explicit approval in chat
@@ -17,7 +17,13 @@ as optional gates for a stricter profile; the app reports region and retention a
 A config is `eligible` only if every gate passes. A gate whose evidence is missing is
 `unverified`, never `pass`. Evidence marked `modeled` can pass a gate but the config is
 flagged `eligible (modeled)` and the UI says so.
-What-if profiles may omit gates for exploration only; the official recommendation always uses banking_mvp as written.
+What-if profiles may omit gates or move a gate's threshold, for exploration only (owner
+decision 2026-11-23); the recommendation always uses banking_mvp as written and its hash never
+changes. Moved thresholds live only in the app session and never edit this file or the profile.
+A config that passes only because a threshold was moved looser than recommended is labelled
+"Not recommended" with the gate and the recommended value; the what-if suggestion is the
+cheapest config that stays valid at the recommended thresholds, and a "Not recommended" one only
+when nothing else passes. The app says "recommended" (not "official") for the banking_mvp values.
 On screen (owner decision 2026-11-23) G10 and G11 are sidebar settings and the remaining gates
 are numbered G1-G10 without gaps (G14 shows as G10); ids in this file and the code are unchanged.
 Gap fill (owner decision 2026-11-23, replaces D2): a gate key POME did not measure is filled
