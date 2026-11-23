@@ -22,7 +22,7 @@ def test_every_profile_gate_has_a_one_phrase_criterion():
 def test_gate_info_rows_show_the_threshold_with_budget_in_inr():
     rows = {r["gate"]: r for r in gate_info_rows(load_profile())}
     assert rows["G1"]["pass_if"] == "≥ 0.80"
-    assert rows["G14"]["pass_if"] == "required"
+    assert rows["G10"]["pass_if"] == "required"
 
 
 def test_more_self_host_gpu_options_each_with_a_sourced_price():
@@ -59,3 +59,22 @@ def test_no_visible_text_says_pome_tested_it():
     shown += " ".join(c.notes for c in load_registry()) + " ".join(BADGE.values())
     assert "POME" not in shown and "MEASURED" not in BADGE.values()
     assert "self-tested" in shown.lower()
+
+
+def test_shown_gates_are_numbered_without_gaps():
+    from pome.app.views import SHOWN_GATES, display_gate, relabel
+    assert [display_gate(g) for g in SHOWN_GATES] == [f"G{i}" for i in range(1, 11)]
+    assert display_gate("G14") == "G10"
+    assert relabel("G14 licence: fail; G10 error rate; G11 cost") == (
+        "G10 licence: fail; Error limit error rate; Budget cost")
+
+
+def test_error_limit_is_a_user_setting_and_peak_is_5():
+    from pome.app.scenario import Scenario, decide
+    p = load_profile()
+    assert p.peak_rps == 5
+    rows = [r["gate"] for r in gate_info_rows(p)]
+    assert "G10" in rows and len(rows) == 10          # display ids, G14 shown as G10
+    _, strict = decide(Scenario(max_error_pct=0.0))
+    _, default = decide(Scenario())
+    assert strict.decision_hash != default.decision_hash

@@ -181,14 +181,31 @@ GATE_INFO = {
     "G13": "Provider deletes customer data quickly",
     "G14": "Licence allows commercial use",
 }
+# Gates on screen are renumbered without gaps; G10 and G11 are sidebar settings instead.
+SETTINGS = {"G10", "G11"}
+SHOWN_GATES = ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G14"]
+_DISPLAY = {g: f"G{i}" for i, g in enumerate(SHOWN_GATES, 1)} | {
+    "G10": "Error limit", "G11": "Budget"}
+
+
+def display_gate(g: str) -> str:
+    return _DISPLAY.get(g, g)
+
+
+def relabel(text: str) -> str:
+    """Swap internal gate ids in a sentence for the ids shown on screen."""
+    import re
+    return re.sub(r"\bG(\d+)\b", lambda m: display_gate(m.group(0)), text)
+
+
 _UNIT_TXT = {"ratio": "", "ratio_gap": " gap", "ms": " ms", "req_per_s": " req/s",
              "percent": "%"}
 
 
 def gate_info_rows(profile: Profile) -> list[dict[str, str]]:
     rows = []
-    # G11 is not shown as a gate: the user sets it as "Max monthly spend" in the sidebar
-    for g in sorted(set(profile.gates) - {"G11"}, key=lambda x: int(x[1:])):
+    # G10 and G11 are sidebar settings (error limit, max spend), not gates on screen
+    for g in sorted(set(profile.gates) - SETTINGS, key=lambda x: int(x[1:])):
         gate = profile.gates[g]
         if gate.op == "required":
             pass_if = "required"
@@ -201,5 +218,5 @@ def gate_info_rows(profile: Profile) -> list[dict[str, str]]:
                 num = f"{gate.value:.1f}"
             pass_if = (f"{gate.op.replace('<=', '≤').replace('>=', '≥')} {num}"
                        f"{_UNIT_TXT.get(gate.unit, '')}")
-        rows.append({"gate": g, "checks": GATE_INFO[g], "pass_if": pass_if})
+        rows.append({"gate": display_gate(g), "checks": GATE_INFO[g], "pass_if": pass_if})
     return rows

@@ -16,13 +16,16 @@ from pome.app.scenario import (
     decide_what_if,
 )
 from pome.app.views import (
+    SHOWN_GATES,
     USD_INR,
     answer_line,
     cost_curves,
+    display_gate,
     evidence_rows,
     gate_info_rows,
     gate_matrix,
     inr,
+    relabel,
     status_label,
     variant_rows,
 )
@@ -36,51 +39,48 @@ st.html(render.css("light"))
 profile = load_profile()
 registry = load_registry()
 by_id = {c.config_id: c for c in registry}
-# G11 (budget) is set by the user as "Max monthly spend", not shown as a gate
-GATES = sorted(set(profile.gates) - {"G11"}, key=lambda g: int(g[1:]))
+# G10 (error limit) and G11 (budget) are sidebar settings; the rest are gates, numbered 1-10
+GATES = SHOWN_GATES
 RATE = float(USD_INR.value)
 
 with st.sidebar:
     st.header("Scenario")
     volume = st.slider("Tickets per month", 10_000, 10_000_000,
                        profile.volume_tickets_per_month, step=10_000, format="%d")
-    st.caption("A ticket is one customer question the support bot handles, such as "
-               "\u201cwhy was my card declined?\u201d. Each ticket is one model call, so API "
-               "costs grow with tickets; a self-hosted GPU costs the same every month.")
+    st.caption("One ticket = one customer question = one model call.")
     max_spend_inr = st.number_input(
         "Max monthly spend, INR", 0, 10_00_00_000,
         round(float(profile.gates["G11"].value) * RATE), step=5_000,
-        help="The most you are willing to pay per month. Configurations that cost more "
-             "are rejected.")
+        help="Configs costing more are rejected.")
+    max_error = st.number_input(
+        "Max error rate after retries, %", 0.0, 100.0, float(profile.gates["G10"].value),
+        step=0.1, format="%.1f", help="Configs failing more requests are rejected.")
     gpu = st.selectbox("Self-host GPU (India price)", list(GPU_OPTIONS),
                        format_func=lambda k: GPU_OPTIONS[k].label)
     st.caption(GPU_OPTIONS[gpu].note)
-    gpus = st.number_input("GPUs (assumption, not load-tested)", 1, 64, 1)
-    ops_inr = st.number_input("Self-host ops cost, INR/month (owner input)", 0, 10_00_00_000, 0,
-                              step=10_000)
-    if ops_inr == 0:
-        st.caption("Ops cost is ₹0. Set it for a realistic self-host total.")
+    gpus = st.number_input("GPUs", 1, 64, 1, help="GPUs rented for self-hosting.")
+    ops_inr = st.number_input("Self-host ops cost, INR/month", 0, 10_00_00_000, 0,
+                              step=10_000, help="Staff and tooling to run your own GPUs.")
     ops = float(ops_inr) / float(USD_INR.value)
     st.header("Tweak mode")
     kept = st.pills("Gates to check against", GATES, selection_mode="multi", default=GATES,
-                    help="Switch gates off to explore. Thresholds never change, and the "
-                         "official decision always uses every banking_mvp gate.")
-    st.caption("Teal = checked. Click a gate to switch it off for a what-if view.")
-    off = tuple(sorted(set(GATES) - set(kept or []), key=lambda g: int(g[1:])))
+                    format_func=display_gate, help="Off = what-if view; official result unchanged.")
+    st.caption("Click a gate to switch it off.")
+    off = tuple(g for g in GATES if g not in (kept or []))
 
 default_usd = float(profile.gates["G11"].value)
 # the default INR budget maps back to the exact banking_mvp value, so the official hash holds
 max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
                  else float(max_spend_inr) / RATE)
 scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
-                    max_spend_usd=max_spend_usd)
+                    max_spend_usd=max_spend_usd, max_error_pct=float(max_error))
 snap, d = decide(scenario)
 wi = decide_what_if(snap, scenario, off) if off else None
 
 st.title("Which model and hosting should a bank's support bot use?")
 st.html(f'<p class="note">{render.icon("info")}Replaying recorded evaluation results. No live '
         f'API calls are made. Every number carries its provenance badge.</p>')
-st.html(render.answer(answer_line(d, snap, profile), recommended=bool(d.recommended)))
+st.html(render.answer(relabel(answer_line(d, snap, profile)), recommended=bool(d.recommended)))
 counts = [("configurations", len(d.verdicts)),
           ("eligible" if any(v.status == "eligible" for v in d.verdicts)
            else "eligible (modeled)", sum(v.status.startswith("eligible") for v in d.verdicts)),
@@ -91,10 +91,10 @@ st.html(f'<p class="hash">decision {d.decision_hash[:12]}… · snapshot '
         f'{d.snapshot_sha256[:12]}… · profile banking_mvp · same inputs, same hash</p>')
 
 if wi:
-    names = ", ".join(off)
+    names = ", ".join(display_gate(g) for g in off)
     st.html(f'<div class="wi"><h3>What-if ({names} off): <span class="muted">not the official '
             f'decision</span></h3>'
-            + render.answer(answer_line(wi, snap, what_if_profile(profile, off)),
+            + render.answer(relabel(answer_line(wi, snap, what_if_profile(profile, off))),
                             recommended=bool(wi.recommended), what_if=True)
             + f'<p class="hash">what-if decision {wi.decision_hash[:12]}… · thresholds of the '
               f'gates kept are unchanged</p></div>')
@@ -113,7 +113,8 @@ with tab_gates:
     budget_usd = max_spend_usd
     cost_cells = {k.split(".", 1)[0]: (inr(float(e.value)), float(e.value) > budget_usd)
                   for k, e in snap.values.items() if k.endswith(".cost.monthly_usd")}
-    st.html(render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells))
+    st.html(render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
+                              labels={g: display_gate(g) for g in GATES}))
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
         st.html(f'<p class="one">No evidence recorded yet: {", ".join(no_ev)}</p>')
@@ -122,7 +123,7 @@ with tab_gates:
     for v in d.verdicts:
         if v.config_id in ids and v.reasons:
             with st.expander(f"{v.config_id}: {status_label(v.status)}"):
-                st.markdown("\n".join(f"- {r}" for r in v.reasons))
+                st.markdown("\n".join(f"- {relabel(r)}" for r in v.reasons))
 
 with tab_cost:
     costs = {k.split(".", 1)[0]: e for k, e in snap.values.items()

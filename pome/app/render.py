@@ -96,9 +96,11 @@ def _chip(status: str) -> str:
 
 def gate_table(rows: list[dict], gates: list[str], off: set[str],
                what_if: dict[str, str] | None = None,
-               cost: dict[str, tuple[str, bool]] | None = None) -> str:
+               cost: dict[str, tuple[str, bool]] | None = None,
+               labels: dict[str, str] | None = None) -> str:
+    labels = labels or {}
     head = "".join(
-        f'<th scope="col" class="g{" off" if g in off else ""}">{g}'
+        f'<th scope="col" class="g{" off" if g in off else ""}">{escape(labels.get(g, g))}'
         f'{"<small>off</small>" if g in off else ""}</th>' for g in gates)
     wi_head = '<th scope="col">What-if</th>' if what_if is not None else ""
     if cost is not None:

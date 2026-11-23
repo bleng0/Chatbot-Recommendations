@@ -39,21 +39,20 @@ _AWS = ("https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/
         "ec2-ondemand-without-sec-sel/Asia%20Pacific%20(Mumbai)/Linux/index.json")
 GPU_OPTIONS: dict[str, GpuOption] = {
     "azure-ci-a100": GpuOption("Azure Central India, 1x A100 80GB (NC24ads_A100_v4)",
-                               "On-demand Linux; India region confirmed.", _price(5.142, _AZURE)),
+                               "On-demand, Central India.", _price(5.142, _AZURE)),
     "e2e-a100": GpuOption("E2E Networks, 1x A100 80GB",
-                          "Page shows no region or date; price excludes tax.",
+                          "Price excludes tax.",
                           _price(2.10, _E2E)),
     "e2e-l40s": GpuOption("E2E Networks, 1x L40S 48GB",
-                          "Page shows no region or date; price excludes tax. Fits the 12B at "
-                          "bf16 (Google lists ~26.7 GB to load the weights).", _price(1.20, _E2E)),
+                          "Price excludes tax.", _price(1.20, _E2E)),
     "e2e-h100": GpuOption("E2E Networks, 1x H100 80GB",
-                          "Page shows no region or date; price excludes tax.", _price(3.99, _E2E)),
+                          "Price excludes tax.", _price(3.99, _E2E)),
     "aws-mum-h100": GpuOption("AWS Mumbai, 1x H100 80GB (p5.4xlarge)",
-                              "On-demand Linux, ap-south-1.", _price(8.256, _AWS)),
+                              "On-demand, Mumbai.", _price(8.256, _AWS)),
     "azure-ci-h100": GpuOption("Azure Central India, 1x H100 NVL 94GB (NC40ads_H100_v5)",
-                               "On-demand Linux; India region confirmed.", _price(9.772, _AZURE)),
+                               "On-demand, Central India.", _price(9.772, _AZURE)),
     "aws-mum-4l40s": GpuOption("AWS Mumbai, 4x L40S 48GB (g6e.12xlarge)",
-                               "On-demand Linux; smallest L40S size in ap-south-1 has 4 GPUs.",
+                               "On-demand, Mumbai; 4 GPUs per machine.",
                                _price(12.601, _AWS)),
 }
 
@@ -65,6 +64,7 @@ class Scenario:
     gpus: int = 1
     ops_monthly_usd: float = 0.0
     max_spend_usd: float = 1500.0  # the user's monthly budget; it is the G11 threshold
+    max_error_pct: float = 1.0  # the user's error-rate limit; it is the G10 threshold
 
 
 def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
@@ -83,7 +83,8 @@ def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
 def _profile(s: Scenario) -> Profile:
     base = load_profile()
     gates = {**base.gates,
-             "G11": base.gates["G11"].model_copy(update={"value": float(s.max_spend_usd)})}
+             "G11": base.gates["G11"].model_copy(update={"value": float(s.max_spend_usd)}),
+             "G10": base.gates["G10"].model_copy(update={"value": float(s.max_error_pct)})}
     return base.model_copy(update={"volume_tickets_per_month": s.volume, "gates": gates})
 
 
