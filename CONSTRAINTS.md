@@ -51,7 +51,8 @@ Gate rules:
   is flagged "marginal".
 - G8–G10: if no load test was run (free tier cannot load-test), the gate is `not tested`:
   shown in the app, does not block selection. At equal cost a config with serving evidence
-  ranks first. Serving evidence that is present but fails or is invalid still counts.
+  ranks first. Since the gap fill (2026-11-23) every config has a published or modeled serving
+  value, so `not tested` does not appear for `banking_mvp` today. Serving evidence that is present but fails or is invalid still counts.
 - Minimum sample: a quality metric needs at least 15 scored items (successful calls) to be
   used; below that it stays unverified (owner decision 2026-11-22, was 30).
 - G8–G10: pass if at least one tested concurrency level reaches ≥ 5 req/s with p95 ≤ 20000 ms
@@ -88,7 +89,7 @@ Gate rules:
 | `select()` purity | no I/O, randomness or clock imports in `pome/selection/` | `tests/test_select_purity.py` (AST import scan) | every test run |
 | Determinism | same snapshot + profile → identical decision SHA256, twice | `tests/test_determinism.py` + live check at slice end | every slice end |
 | Provenance | every evidence value has value, unit, provenance ∈ {measured, vendor-doc, modeled}, source, retrieved_at | pydantic schema + `tests/test_schema.py` | every test run |
-| Secrets (external) | 0 findings | `gitleaks dir . --redact --no-banner` | before every commit |
+| Secrets (external) | 0 findings | `gitleaks git . --redact --no-banner` (commit history; owner ran it 2026-11-23, clean; 15 verified false positives on config IDs listed by fingerprint in `.gitleaksignore`) | before every push |
 | Gate thresholds in `profiles/banking_mvp.yaml` equal section A | exact match | `tests/test_constraints_sync.py` | every test run |
 
 ## D. Measured, not yet enforced
