@@ -152,16 +152,22 @@ USD_INR = EvidenceValue(
     retrieved_at=datetime(2026, 11, 23, 6, 30, tzinfo=UTC))
 
 
-def inr(usd: float, decimals: int = 0) -> str:
-    """USD amount shown as rupees with Indian digit grouping (₹1,39,195)."""
-    amount = round(float(usd) * float(USD_INR.value), decimals)
+def indian(n: float, decimals: int = 0) -> str:
+    """Indian digit grouping: 100000 -> 1,00,000."""
+    amount = round(float(n), decimals)
     whole, _, frac = f"{abs(amount):.{decimals}f}".partition(".")
     head, tail = whole[:-3], whole[-3:]
     while len(head) > 2:
         tail = f"{head[-2:]},{tail}"
         head = head[:-2]
     grouped = f"{head},{tail}" if head else tail
-    return ("-" if amount < 0 else "") + "₹" + grouped + (f".{frac}" if frac else "")
+    return ("-" if amount < 0 else "") + grouped + (f".{frac}" if frac else "")
+
+
+def inr(usd: float, decimals: int = 0) -> str:
+    """USD amount shown as rupees with Indian digit grouping (₹1,39,195)."""
+    amount = float(usd) * float(USD_INR.value)
+    return ("-" if round(amount, decimals) < 0 else "") + "₹" + indian(abs(amount), decimals)
 
 
 # One phrase per gate: what it checks, in the reviewer's words.
@@ -183,6 +189,10 @@ GATE_INFO = {
 }
 # Gates on screen are renumbered without gaps; G10 and G11 are sidebar settings instead.
 SETTINGS = {"G10", "G11"}
+# Short names shown under each gate number (table head, sliders, sidebar toggles).
+SHORT_NAME = {"G1": "Intent", "G2": "Out-of-scope", "G3": "No over-refusal", "G4": "FAQ accuracy",
+              "G5": "FAQ decline", "G6": "Hindi gap", "G7": "Hinglish gap", "G8": "Latency",
+              "G9": "Capacity", "G14": "Licence"}
 SHOWN_GATES = ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G14"]
 _DISPLAY = {g: f"G{i}" for i, g in enumerate(SHOWN_GATES, 1)} | {
     "G10": "Error limit", "G11": "Budget"}
@@ -254,3 +264,26 @@ def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sideb
         ("Route tickets", route),
         ("Watch cost and errors", "Set a monthly spend alert and retry failed calls once."),
     ]
+
+
+def tickets_options() -> list[int]:
+    """Log-spaced ticket volumes from 10,000 to 1 crore, rounded to tidy steps."""
+    out = set()
+    for i in range(61):
+        v = 10 ** (4 + 3 * i / 60)
+        step = 1_000 if v < 1e5 else 10_000 if v < 1e6 else 100_000
+        out.add(int(round(v / step) * step))
+    return sorted(out | {100_000})
+
+
+def what_if_pick(wi: Decision, not_rec: dict[str, list[str]]) -> tuple[str | None, bool]:
+    """The config a what-if suggests: the cheapest passing one that is valid at the
+    recommended thresholds; only if none, the cheapest that passes only by loosening.
+    Returns (config_id or None, picked_one_is_not_recommended)."""
+    passing = [v for v in wi.verdicts if v.status.startswith("eligible")]
+    cost = lambda v: (v.monthly_cost is None, v.monthly_cost or 0.0, v.config_id)
+    valid = sorted((v for v in passing if v.config_id not in not_rec), key=cost)
+    if valid:
+        return valid[0].config_id, False
+    flagged = sorted((v for v in passing if v.config_id in not_rec), key=cost)
+    return (flagged[0].config_id, True) if flagged else (None, False)

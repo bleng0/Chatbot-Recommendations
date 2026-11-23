@@ -17,6 +17,7 @@ from pome.app.scenario import (
 )
 from pome.app.sliders import current, gate_sliders, slider_specs
 from pome.app.views import (
+    SHORT_NAME,
     SHOWN_GATES,
     USD_INR,
     answer_line,
@@ -26,10 +27,13 @@ from pome.app.views import (
     evidence_rows,
     gate_info_rows,
     gate_matrix,
+    indian,
     inr,
     relabel,
     status_label,
+    tickets_options,
     variant_rows,
+    what_if_pick,
 )
 from pome.profiles.loader import load_profile, what_if_profile
 from pome.registry.loader import load_registry
@@ -47,8 +51,8 @@ RATE = float(USD_INR.value)
 
 with st.sidebar:
     st.header("Scenario")
-    volume = st.slider("Tickets per month", 10_000, 10_000_000,
-                       profile.volume_tickets_per_month, step=10_000, format="%d")
+    volume = st.select_slider("Tickets per month", tickets_options(),
+                              value=profile.volume_tickets_per_month, format_func=indian)
     st.caption("1 ticket = 1 customer question.")
     max_spend_inr = st.number_input(
         "Max monthly spend, INR", 0, 10_00_00_000,
@@ -65,31 +69,38 @@ with st.sidebar:
                               step=10_000, help="Staff and tooling to run your own GPUs.")
     ops = float(ops_inr) / float(USD_INR.value)
     st.header("Tweak mode")
-    st.caption("Switch a gate off to see a what-if view; the official result is unchanged.")
+    st.caption("Switch a gate off to see a what-if view; the recommendation is unchanged.")
     info = dict(zip(GATES, gate_info_rows(profile), strict=True))
     off = tuple(g for g, row in info.items()
-                if not st.toggle(f"{row['gate']} · {row['checks']}", value=True,
-                                 key=f"gate_{g}", help=f"Passes if {row['pass_if']}"))
+                if not st.toggle(f"{row['gate']} · {SHORT_NAME[g]}", value=True, key=f"gate_{g}",
+                                 help=f"{row['checks']}. Passes if {row['pass_if']}."))
 
 default_usd = float(profile.gates["G11"].value)
-# the default INR budget maps back to the exact banking_mvp value, so the official hash holds
+# the default INR budget maps back to the exact banking_mvp value, so the decision hash holds
 max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
                  else float(max_spend_inr) / RATE)
 scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
                     max_spend_usd=max_spend_usd, max_error_pct=float(max_error))
 snap, d = decide(scenario)
 
-st.html('<h1>Which <span class="hl">model</span> and <span class="hl">hosting plan</span> '
+st.html('<h1 class="q">Which <span class="k">model</span> and <span class="k">hosting plan</span> '
         'should you use?</h1>')
-st.html(render.answer(relabel(answer_line(d, snap, profile)), recommended=bool(d.recommended)))
-counts = [("configurations", len(d.verdicts)),
-          ("eligible" if any(v.status == "eligible" for v in d.verdicts)
-           else "eligible (modeled)", sum(v.status.startswith("eligible") for v in d.verdicts)),
-          ("rejected", sum(v.status == "rejected" for v in d.verdicts)),
-          ("gates checked", len(GATES))]
-st.html(render.stats(counts))
-st.html(f'<p class="hash">decision {d.decision_hash[:12]}… · snapshot '
-        f'{d.snapshot_sha256[:12]}… · profile banking_mvp · same inputs, same hash</p>')
+passing = sum(v.status.startswith("eligible") for v in d.verdicts)
+if d.recommended:
+    rec_cfg, rec_v = by_id[d.recommended], next(v for v in d.verdicts
+                                                if v.config_id == d.recommended)
+    st.html(render.answer_card(
+        model=rec_cfg.model_id, config=d.recommended,
+        host=rec_cfg.host.split(" (")[0], region=rec_cfg.region.split(" (")[0],
+        cost="no cost evidence" if rec_v.monthly_cost is None else inr(rec_v.monthly_cost),
+        modeled=rec_v.monthly_cost is not None, passing=passing, total=len(d.verdicts),
+        decision_hash=d.decision_hash[:12],
+        source="From published vendor data" if d.recommended_is_modeled else ""))
+else:
+    st.html(render.answer(relabel(answer_line(d, snap, profile)), recommended=False))
+    st.html(render.stats([("configurations", len(d.verdicts)),
+                          ("rejected", sum(v.status == "rejected" for v in d.verdicts))]))
+    st.html(f'<p class="hash">decision {d.decision_hash[:12]}… · same inputs, same hash</p>')
 
 wi_box = st.container()  # filled once the sliders in the Gates tab are read
 
@@ -99,33 +110,42 @@ tab_gates, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
     ["Gates", "Cost", "Evidence", "Deployment variants", "Configurations"])
 
 with tab_gates:
-    st.html('<p class="one">Gate thresholds: slide to explore. Looser than official marks '
-            'passing configs <b>Not recommended</b>; the official result never changes.</p>')
+    st.html('<p class="one">Slide a gate to explore. Configs that pass only because a gate is '
+            'looser than recommended are marked <b>Not recommended</b>; the recommendation above '
+            'never changes.</p>')
     moved = {g: v for g, v in current("gate_sliders").items()
              if g not in off and v != float(profile.gates[g].value)}
     wi, not_rec = (decide_sliders(snap, scenario, off, moved) if off or moved else (None, {}))
     if wi:
         parts = [f"{display_gate(g)} off" for g in off] + [
             f"{display_gate(g)} moved" for g in moved]
+        pick, flagged = what_if_pick(wi, not_rec)
+        cost_of = {v.config_id: v.monthly_cost for v in wi.verdicts}
+        if pick is None:
+            line = render.answer(relabel(answer_line(wi, snap, what_if_profile(profile, off, moved))),
+                                 recommended=False, what_if=True)
+        else:
+            c = cost_of[pick]
+            line = render.answer(f"Cheapest passing: {pick} at "
+                                 f"{'no cost evidence' if c is None else inr(c) + '/month'}",
+                                 recommended=True, what_if=True)
         why = ""
-        if wi.recommended in not_rec:
-            gs = ", ".join(f"{display_gate(g)} (official {info[g]['pass_if']})"
-                           for g in not_rec[wi.recommended])
-            why = (f'<p class="nr">Not recommended: {wi.recommended} passes only because '
-                   f'{gs} was loosened.</p>')
+        if flagged:
+            gs = ", ".join(f"{display_gate(g)} (recommended {info[g]['pass_if']})"
+                           for g in not_rec[pick])
+            why = (f'<p class="nr">Not recommended: {pick} passes only because {gs} was '
+                   f'loosened.</p>')
         wi_box.html(
             f'<div class="wi"><h3>What-if ({", ".join(parts)}): '
-            f'<span class="muted">not the official decision</span></h3>'
-            + render.answer(relabel(answer_line(wi, snap, what_if_profile(profile, off, moved))),
-                            recommended=bool(wi.recommended), what_if=True) + why
-            + f'<p class="hash">what-if decision {wi.decision_hash[:12]}…</p></div>')
+            f'<span class="muted">not the recommendation</span></h3>{line}{why}'
+            f'<p class="hash">what-if decision {wi.decision_hash[:12]}…</p></div>')
     sort_by = st.segmented_control(
         "Sort by", ["Status", "Monthly cost", "Error rate"], default="Status")
     order = st.segmented_control("Order", ["Ascending", "Descending"], default="Ascending")
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
     wi_status = ({v.config_id: ("not_recommended" if v.config_id in not_rec else v.status)
                   for v in wi.verdicts} if wi else None)
-    nr_notes = {cid: "; ".join(f"{display_gate(g)} official {info[g]['pass_if']}" for g in gs)
+    nr_notes = {cid: "; ".join(f"{display_gate(g)} recommended {info[g]['pass_if']}" for g in gs)
                 for cid, gs in not_rec.items()}
     budget_usd = max_spend_usd
 
@@ -144,9 +164,10 @@ with tab_gates:
         rows.sort(key=lambda r: _val(r["config"], "serving.error_pct") or inf)
     if order == "Descending":
         rows.reverse()
-    gate_sliders(slider_specs(profile, GATES, display_gate),
+    gate_sliders(slider_specs(profile, GATES, display_gate, SHORT_NAME),
                  render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
                                    labels={g: display_gate(g) for g in GATES},
+                                   short=SHORT_NAME,
                                    error=error_cells, notes=nr_notes),
                  render.css("light"), key="gate_sliders")
     no_ev = sorted(ids - {r["config"] for r in rows})

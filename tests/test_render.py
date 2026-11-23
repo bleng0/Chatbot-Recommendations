@@ -73,7 +73,9 @@ def test_status_cells_are_word_chips_coloured_by_status():
 def test_gate_table_can_show_a_monthly_cost_column_with_over_budget_marked():
     html = gate_table([ROW], ["G1", "G2"], set(), None,
                       cost={"a": ("₹1,500", True)})
-    assert '<td class="num cost over">₹1,500 <span class="ob">over budget</span></td>' in html
+    assert ('<td class="num r over" title="Over the monthly budget">'
+            '<span class="ic ic-warn" aria-hidden="true"></span>₹1,500'
+            '<span class="sr"> (over the monthly budget)</span></td>') in html
     assert "Monthly cost" in html
 
 
@@ -81,7 +83,9 @@ def test_gate_table_shows_hidden_setting_failures_in_red_columns():
     html = gate_table([ROW], ["G1", "G2"], set(), None,
                       cost={"a": ("₹1", False)}, error={"a": ("3.43%", True)})
     assert "Error rate" in html
-    assert '<td class="num cost over">3.43% <span class="ob">over limit</span></td>' in html
+    assert ('<td class="num r over" title="Over the error limit">'
+            '<span class="ic ic-warn" aria-hidden="true"></span>3.43%'
+            '<span class="sr"> (over the error limit)</span></td>') in html
 
 
 def test_config_table_is_compact_and_escaped():

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8"><title>Gate thresholds and results</title>
 <style>
 @font-face{font-family:"Fira Sans";font-weight:400;src:url("/app/static/fonts/fira-sans-latin-400-normal.woff2") format("woff2")}
 @font-face{font-family:"Fira Sans";font-weight:500;src:url("/app/static/fonts/fira-sans-latin-500-normal.woff2") format("woff2")}
@@ -7,64 +7,97 @@
 @font-face{font-family:"Fira Code";font-weight:400;src:url("/app/static/fonts/fira-code-latin-400-normal.woff2") format("woff2")}
 @font-face{font-family:"Fira Code";font-weight:500;src:url("/app/static/fonts/fira-code-latin-500-normal.woff2") format("woff2")}
 html,body{margin:0;background:transparent}
-body{font:14px/1.5 "Fira Sans",system-ui,sans-serif;color:#1C1D1F}
-tr.sl th{vertical-align:bottom;padding:.5rem .2rem .3rem;border-bottom:1px solid #CDCDCF;font-weight:400;background:#fff}
-tr.sl th.lab{text-align:left;padding-left:.75rem;vertical-align:middle}
-tr.sl .lt{display:block;font-weight:600;font-size:.8125rem}
-tr.sl .ls{display:block;font-size:.75rem;color:#5E6065;max-width:22ch}
-.sv{display:flex;flex-direction:column;align-items:center;gap:.15rem}
-.sv .v{font:500 12px "Fira Code",ui-monospace,monospace;color:#1C1D1F;white-space:nowrap}
-.sv.loose .v{color:#C23A17}
-.tk{position:relative;height:96px;width:28px;display:flex;justify-content:center}
-.tk input{writing-mode:vertical-lr;direction:rtl;height:96px;width:22px;margin:0;accent-color:#0B7372;cursor:pointer}
-.sv.loose input{accent-color:#EC4D25}
-.tk input:focus-visible{outline:2px solid #0B7372;outline-offset:2px;border-radius:4px}
-.mk{position:absolute;left:0;right:0;height:2px;background:#1C1D1F;pointer-events:none;border-radius:1px}
-.sv .o{font:400 11px "Fira Code",ui-monospace,monospace;color:#5E6065;white-space:nowrap}
-.sv .x{font-size:11px;color:#C23A17;min-height:1.2em;white-space:nowrap}
-.rs{margin-top:.4rem;font:inherit;font-size:.75rem;padding:.2rem .55rem;border:1px solid #CDCDCF;border-radius:6px;background:#fff;cursor:pointer;color:#1C1D1F}
-.rs:hover{border-color:#0B7372}
-.rs:focus-visible{outline:2px solid #0B7372;outline-offset:2px}
-.off-s{font-size:11px;color:#939599}
+body{font:14px/1.5 "Fira Sans",system-ui,sans-serif;color:#1C1D1F;font-variant-numeric:tabular-nums}
+::selection{background:rgba(43,207,206,.35)}
+tr.sl th{vertical-align:bottom;padding:.75rem .15rem .6rem;background:#FCFCFD;border-bottom:1px solid #CDCDCF;font-weight:400}
+tr.sl th.lab{padding-left:.75rem;vertical-align:middle;text-align:left}
+.lt{display:block;font-size:.8125rem;font-weight:600}
+.ls{display:block;font-size:.75rem;color:#5E6065;margin:.2rem 0 .6rem;max-width:30ch}
+.key{display:flex;gap:.9rem;font-size:.6875rem;color:#5E6065;margin-bottom:.6rem}
+.key i{display:inline-block;vertical-align:middle;margin-right:.3rem}
+.key .k1{width:12px;height:2px;background:#1C1D1F}
+.key .k2{width:12px;height:6px;border-radius:2px;background:rgba(236,77,37,.10);outline:1px solid rgba(236,77,37,.45)}
+.btn{font:inherit;font-size:.75rem;padding:.35rem .7rem;min-height:32px;border:1px solid #CDCDCF;border-radius:6px;background:#fff;color:#1C1D1F;cursor:pointer;transition:border-color 150ms}
+.btn:hover{border-color:#0B7372}.btn[disabled]{opacity:.45;cursor:default}
+.btn:focus-visible,.trk:focus-visible{outline:2px solid #0B7372;outline-offset:3px}
+.vs{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.val{font:500 .6875rem/1 "Fira Code",monospace;padding:.25rem .3rem;border-radius:4px;min-width:2.75rem;white-space:nowrap;text-align:center;border:1px solid transparent}
+.vs.loose .val{color:#C23A17;background:rgba(236,77,37,.10);border-color:rgba(236,77,37,.35)}
+.vs.tight .val{color:#0B7372;background:rgba(43,207,206,.12)}
+.trk{position:relative;width:24px;height:112px;margin:6px 0 8px;touch-action:none;cursor:pointer;border-radius:12px}
+.rail{position:absolute;left:10px;width:4px;top:0;bottom:0;border-radius:2px;background:#E3E3E5}
+.zone{position:absolute;left:8px;width:8px;border-radius:3px;background:rgba(236,77,37,.10);outline:1px solid rgba(236,77,37,.35)}
+.fill{position:absolute;left:10px;width:4px;bottom:0;border-radius:2px;background:#0B7372}
+.vs.loose .fill{background:#EC4D25}
+.notch{position:absolute;left:3px;width:18px;height:2px;margin-top:-1px;background:#1C1D1F;border-radius:1px}
+.thumb{position:absolute;left:3px;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:#fff;border:2px solid #0B7372;
+ box-shadow:0 1px 3px rgba(28,29,31,.25);transition:border-color 150ms,box-shadow 150ms}
+.vs.loose .thumb{border-color:#EC4D25}
+.trk:hover .thumb,.trk:focus-visible .thumb{box-shadow:0 0 0 5px rgba(43,207,206,.25),0 1px 3px rgba(28,29,31,.25)}
+.vs.loose .trk:hover .thumb{box-shadow:0 0 0 5px rgba(236,77,37,.18),0 1px 3px rgba(28,29,31,.25)}
+.rec{font:400 .6875rem "Fira Code",monospace;color:#5E6065;white-space:nowrap}
+.yn{font-size:.6875rem;color:#5E6065;display:block;padding-bottom:3rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style><style id="app"></style></head>
 <body><div id="root"></div>
+<script src="/app/static/js/anime.umd.min.js"></script>
 <script>
 const send=(type,data)=>window.parent.postMessage(Object.assign({isStreamlitMessage:true,type},data),"*");
-const cur={};let specs=[];
-const fmt=(sp,v)=>sp.unit==="ms"?`${(v/1000).toLocaleString("en-IN",{maximumFractionDigits:1})}s`
-  :sp.unit==="req_per_s"?`${v}/s`:Number(v).toFixed(2);
-const loose=(sp,v)=>sp.op===">="?v<sp.official:v>sp.official;
-const emit=()=>send("streamlit:setComponentValue",{value:Object.assign({},cur),dataType:"json"});
+const A=window.anime||null,reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cur={};let specs=[],args=null,timer=null,lastCells=null;
+const fmt=(s,v)=>s.unit==="ms"?`${(v/1000).toLocaleString("en-IN",{maximumFractionDigits:1})} s`:s.unit==="req_per_s"?`${v}/s`:Number(v).toFixed(2);
+const looser=(s,v)=>s.op===">="?v<s.official:v>s.official;
+const stricter=(s,v)=>s.op===">="?v>s.official:v<s.official;
+const emit=()=>{clearTimeout(timer);send("streamlit:setComponentValue",{value:Object.assign({},cur),dataType:"json"})};
+const emitSoon=()=>{clearTimeout(timer);timer=setTimeout(emit,450)};
 const height=()=>send("streamlit:setFrameHeight",{height:Math.ceil(document.getElementById("root").getBoundingClientRect().height)+4});
-function paint(sp,el){const v=cur[sp.id],l=loose(sp,v);el.classList.toggle("loose",l);
-  el.querySelector(".v").textContent=fmt(sp,v);el.querySelector(".x").textContent=l?"looser":"";
-  el.querySelector("input").setAttribute("aria-valuetext",`${fmt(sp,v)}${l?", looser than official "+fmt(sp,sp.official):""}`);}
-function slider(sp){const el=document.createElement("div");el.className="sv";
-  const pct=(sp.official-sp.min)/(sp.max-sp.min)*100;
-  el.innerHTML=`<span class="v"></span><div class="tk"><input type="range" min="${sp.min}" max="${sp.max}" step="${sp.step}" value="${cur[sp.id]}" aria-label="${sp.label} threshold" title="Official ${sp.op==='>='?'≥':'≤'} ${fmt(sp,sp.official)}"><span class="mk" style="bottom:calc(${pct}% - 1px)"></span></div><span class="o">${fmt(sp,sp.official)}</span><span class="x"></span>`;
-  const inp=el.querySelector("input");
-  inp.addEventListener("input",()=>{cur[sp.id]=Number(inp.value);paint(sp,el)});
-  inp.addEventListener("change",emit);paint(sp,el);return el;}
-function render(args){
+function slider(s){
+  const pct=v=>(v-s.min)/(s.max-s.min)*100;
+  const z=s.op===">="?{b:0,h:pct(s.official)}:{b:pct(s.official),h:100-pct(s.official)};
+  const el=document.createElement("div");el.className="vs";
+  el.innerHTML=`<span class="val"></span><div class="trk" role="slider" tabindex="0" aria-label="${s.label} ${s.short} threshold" aria-valuemin="${s.min}" aria-valuemax="${s.max}"><span class="rail"></span><span class="zone" style="bottom:${z.b}%;height:${z.h}%"></span><span class="fill"></span><span class="notch" style="top:${100-pct(s.official)}%"></span><span class="thumb"></span></div><span class="rec" title="Recommended ${s.op==='>='?'≥':'≤'} ${fmt(s,s.official)}">${fmt(s,s.official)}</span>`;
+  const trk=el.querySelector(".trk"),thumb=el.querySelector(".thumb"),fill=el.querySelector(".fill"),val=el.querySelector(".val");
+  const paint=()=>{const v=cur[s.id],p=pct(v);thumb.style.top=(100-p)+"%";fill.style.height=p+"%";val.textContent=fmt(s,v);
+    el.classList.toggle("loose",looser(s,v));el.classList.toggle("tight",stricter(s,v));trk.setAttribute("aria-valuenow",v);
+    trk.setAttribute("aria-valuetext",fmt(s,v)+(looser(s,v)?", looser than recommended "+fmt(s,s.official):stricter(s,v)?", stricter than recommended":", recommended"));};
+  const set=v=>{v=Math.min(s.max,Math.max(s.min,Math.round(v/s.step)*s.step));v=+v.toFixed(4);if(v===cur[s.id])return false;cur[s.id]=v;paint();
+    if(A&&!reduce)A.animate(val,{scale:[1.12,1],duration:260,ease:"outBack"});return true};
+  const fromY=y=>{const b=trk.getBoundingClientRect();return s.min+(1-(y-b.top)/b.height)*(s.max-s.min)};
+  trk.addEventListener("pointerdown",e=>{trk.setPointerCapture(e.pointerId);trk.focus();set(fromY(e.clientY));
+    const mv=e2=>set(fromY(e2.clientY));const up=()=>{trk.removeEventListener("pointermove",mv);trk.removeEventListener("pointerup",up);emit()};
+    trk.addEventListener("pointermove",mv);trk.addEventListener("pointerup",up)});
+  trk.addEventListener("keydown",e=>{const k=e.key,big=e.shiftKey?10:1;let v=cur[s.id];
+    if(k==="ArrowUp"||k==="ArrowRight")v+=s.step*big;else if(k==="ArrowDown"||k==="ArrowLeft")v-=s.step*big;
+    else if(k==="PageUp")v+=s.step*10;else if(k==="PageDown")v-=s.step*10;else if(k==="Home")v=s.official;else return;
+    e.preventDefault();if(set(v))emitSoon()});
+  paint();return el}
+function render(){
   document.getElementById("app").textContent=args.css.replace(/<\/?style>/g,"");
+  const focused=document.activeElement&&document.activeElement.getAttribute("aria-label");
   const root=document.getElementById("root");root.innerHTML=args.table;
-  const bySpec=Object.fromEntries(specs.map(s=>[s.id,s]));
+  const by=Object.fromEntries(specs.map(s=>[s.id,s]));
   const head=root.querySelector("thead tr");if(!head)return height();
   const row=document.createElement("tr");row.className="sl";
-  [...head.children].forEach((th,i)=>{const c=document.createElement("th");
-    const g=th.dataset.gate;
-    if(i===0){c.className="lab";c.innerHTML=`<span class="lt">Thresholds</span><span class="ls">Black line = official. Coral = looser.</span>`;
-      const b=document.createElement("button");b.className="rs";b.type="button";b.textContent="Reset to official";
-      b.onclick=()=>{for(const s of specs)cur[s.id]=s.official;render(args);emit()};c.appendChild(b);}
-    else if(g&&bySpec[g]&&!th.classList.contains("off"))c.appendChild(slider(bySpec[g]));
-    else if(g&&th.classList.contains("off"))c.innerHTML='<span class="off-s">off</span>';
-    else if(g)c.innerHTML='<span class="off-s">yes/no</span>';
-    row.appendChild(c);});
+  const ths=[...head.children],lead=ths.filter(t=>!t.dataset.gate).length;
+  const moved=specs.some(s=>cur[s.id]!==s.official);
+  const lab=document.createElement("th");lab.className="lab";lab.colSpan=lead;
+  lab.innerHTML=`<span class="lt">Thresholds</span><span class="ls">Slide any gate to explore. The recommendation above never changes.</span><span class="key"><span><i class="k1"></i>recommended</span><span><i class="k2"></i>looser side</span></span>`;
+  const b=document.createElement("button");b.className="btn";b.type="button";b.textContent="Reset to recommended";b.disabled=!moved;
+  b.onclick=()=>{for(const s of specs)cur[s.id]=s.official;render();emit()};lab.appendChild(b);row.appendChild(lab);
+  for(const th of ths.slice(lead)){const c=document.createElement("th");const g=th.dataset.gate;
+    if(th.classList.contains("off"))c.innerHTML='<span class="yn">off</span>';
+    else if(by[g])c.appendChild(slider(by[g]));else c.innerHTML='<span class="yn">yes/no</span>';row.appendChild(c)}
   head.parentNode.insertBefore(row,head);
-  height();}
+  if(focused){const f=root.querySelector(`[aria-label="${focused}"]`);if(f)f.focus({preventScroll:true})}
+  // cells and what-if chips that changed since the last render settle in, nothing else moves
+  const cells=[...root.querySelectorAll("tbody td")];const now=cells.map(td=>td.textContent+"|"+td.className);
+  if(A&&!reduce){const changed=lastCells?cells.filter((td,i)=>lastCells[i]!==undefined&&lastCells[i]!==now[i]).map(td=>td.firstElementChild||td):
+      [...root.querySelectorAll("td.g .st")];
+    if(changed.length)A.animate(changed,{scale:[.5,1],opacity:[0,1],duration:240,ease:"outBack",delay:A.stagger(lastCells?14:4)});}
+  lastCells=now;height()}
 window.addEventListener("message",e=>{const d=e.data;if(!d||d.type!=="streamlit:render")return;
-  specs=d.args.gates;for(const s of specs){if(!(s.id in cur))cur[s.id]=(d.args.value||{})[s.id]??s.official;}
-  render(d.args);});
+  args=d.args;specs=args.gates;for(const s of specs){if(!(s.id in cur))cur[s.id]=(args.value||{})[s.id]??s.official}
+  render()});
 new ResizeObserver(height).observe(document.getElementById("root"));
 send("streamlit:componentReady",{apiVersion:1});
 </script></body></html>

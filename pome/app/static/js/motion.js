@@ -35,6 +35,13 @@
     else {
       if (verdict) animate(verdict, { clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"],
                                       duration: DUR.slow, ease: "outExpo" });
+      // the two words the question asks about get their underline drawn, then the answer
+      // slots that answer them rise in
+      animate(document.querySelectorAll("h1.q .k"), { "--u": [0, 1], duration: 640, ease: "outExpo",
+                                                     delay: stagger(160, { start: 200 }) });
+      const slots = document.querySelectorAll(".ac .slot");
+      if (slots.length) animate(slots, { opacity: [0, 1], y: [10, 0], duration: DUR.slow,
+                                         ease: "outExpo", delay: stagger(90, { start: 520 }) });
       if (rows.length) animate([rows[0]], { backgroundColor: ["rgba(43,207,206,.28)", "rgba(43,207,206,0)"],
                                           duration: 900, ease: "outQuart", delay: DUR.slow });
       // icons pop in a diagonal wave: row then column order

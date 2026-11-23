@@ -20,6 +20,8 @@ _PATHS = {
                   '<path d="M12 17h.01"/>',
     "not_tested": '<path d="M5 12h14"/>',
     "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    "warn": '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 '
+            '3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
 }
 _SHORT = {"not_recommended": "Not recommended", "eligible": "Eligible", "eligible_modeled": "Eligible (modeled)",
           "rejected": "Rejected", "unverified": "Unverified"}
@@ -87,6 +89,7 @@ def answer(text: str, *, recommended: bool, what_if: bool = False) -> str:
     cls = "ans" + (" ans-rec" if recommended and not what_if else "") + (" ans-wi" if what_if else "")
     # keep a comparison such as "0.75 < 0.80" on one line
     text = escape(text).replace(" &lt; ", "\u00a0&lt;\u00a0").replace(" &gt; ", "\u00a0&gt;\u00a0")
+    text = text.replace(" (cost MODELED)", ' <span class="bdg bdg-modeled">MODELED</span>')
     return f'<p class="{cls}" role="status" aria-live="polite">{text}</p>'
 
 
@@ -99,18 +102,34 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
                cost: dict[str, tuple[str, bool]] | None = None,
                labels: dict[str, str] | None = None,
                error: dict[str, tuple[str, bool]] | None = None,
-               notes: dict[str, str] | None = None) -> str:
-    labels = labels or {}
-    notes = notes or {}
+               notes: dict[str, str] | None = None,
+               short: dict[str, str] | None = None) -> str:
+    """Gate matrix. Fixed column widths so all gates fit at 1280 px; the slider frame adds
+    one header row above this one, a slider per gate column."""
+    labels, notes, short = labels or {}, notes or {}, short or {}
     head = "".join(
         f'<th scope="col" class="g{" off" if g in off else ""}" data-gate="{escape(g)}">'
-        f'{escape(labels.get(g, g))}'
+        f'{escape(labels.get(g, g))}<span class="gs">{escape(short.get(g, ""))}</span>'
         f'{"<small>off</small>" if g in off else ""}</th>' for g in gates)
-    wi_head = '<th scope="col">What-if</th>' if what_if is not None else ""
+    cols = ['<col class="c-id">', '<col class="c-st">']
+    wi_head = ""
+    if what_if is not None:
+        wi_head += '<th scope="col">What-if</th>'
+        cols.append('<col class="c-wi">')
     if cost is not None:
-        wi_head += '<th scope="col">Monthly cost</th>'
+        wi_head += '<th scope="col" class="r">Monthly cost</th>'
+        cols.append('<col class="c-cost">')
     if error is not None:
-        wi_head += '<th scope="col">Error rate</th>'
+        wi_head += '<th scope="col" class="r">Error rate</th>'
+        cols.append('<col class="c-err">')
+    cols += ['<col class="c-g">'] * len(gates)
+
+    def _num(txt: str, over: bool, why: str) -> str:
+        if not over:
+            return f'<td class="num r">{escape(txt)}</td>'
+        return (f'<td class="num r over" title="{why}">{icon("warn")}{escape(txt)}'
+                f'<span class="sr"> ({why.lower()})</span></td>')
+
     body = []
     for r in rows:
         cells = "".join(
@@ -121,19 +140,36 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
         wi = (f'<td class="stat">{_chip(what_if[r["config"]])}{note}</td>'
               if what_if is not None else "")
         if cost is not None:
-            txt, over = cost.get(r["config"], ("—", False))
-            tag = ' <span class="ob">over budget</span>' if over else ""
-            wi += f'<td class="num cost{" over" if over else ""}">{escape(txt)}{tag}</td>'
+            wi += _num(*cost.get(r["config"], ("—", False)), "Over the monthly budget")
         if error is not None:
-            txt, over = error.get(r["config"], ("—", False))
-            tag = ' <span class="ob">over limit</span>' if over else ""
-            wi += f'<td class="num cost{" over" if over else ""}">{escape(txt)}{tag}</td>'
-        body.append(f'<tr><th scope="row" class="cid">{escape(r["config"])}</th>'
+            wi += _num(*error.get(r["config"], ("—", False)), "Over the error limit")
+        body.append(f'<tr><th scope="row" class="cid" title="{escape(r["config"])}">'
+                    f'{escape(r["config"])}</th>'
                     f'<td class="stat">{_chip(r["status"])}</td>{wi}{cells}</tr>')
-    return (f'<div class="tw"><table class="gm"><caption class="sr">Gate results per '
-            f'configuration, failing first</caption><thead><tr><th scope="col">Configuration'
-            f'</th><th scope="col">Official status</th>{wi_head}{head}</tr></thead>'
-            f'<tbody>{"".join(body)}</tbody></table></div>')
+    return (f'<div class="tw"><table class="gm fx"><caption class="sr">Gate results per '
+            f'configuration</caption><colgroup>{"".join(cols)}</colgroup><thead><tr>'
+            f'<th scope="col">Configuration</th><th scope="col">Recommended status</th>'
+            f'{wi_head}{head}</tr></thead><tbody>{"".join(body)}</tbody></table></div>')
+
+
+def answer_card(*, model: str, config: str, host: str, region: str, cost: str, modeled: bool,
+                passing: int, total: int, decision_hash: str, source: str = "") -> str:
+    """The answer to the page question: one slot each for model and hosting plan, then cost."""
+    bdg = '<span class="bdg bdg-modeled">MODELED</span>' if modeled else ""
+    src = f"<span>{escape(source)}</span>" if source else ""
+    return (
+        '<div class="ac" role="status" aria-live="polite"><dl class="slots">'
+        f'<div class="slot k"><dt>Model</dt><dd>{escape(model)}<small>{escape(config)}</small>'
+        '</dd></div>'
+        f'<div class="slot k"><dt>Hosting plan</dt><dd>{escape(host)}<small>{escape(region)}'
+        '</small></dd></div>'
+        f'<div class="slot"><dt>Monthly cost</dt><dd>{escape(cost)}{bdg}</dd></div></dl>'
+        f'<div class="ac-foot">{src}<span><b class="kn num" data-count="{passing}">{passing}'
+        f'</b> of <b class="num">{total}</b> configurations pass every gate</span>'
+        f'<span><b class="kn num" data-count="{total - passing}">{total - passing}</b> rejected'
+        '</span></div><details class="repro"><summary>Same inputs, same result</summary>'
+        f'<p>decision <code>{escape(decision_hash)}…</code> · profile banking_mvp · re-running '
+        'with these inputs gives the same hash.</p></details></div>')
 
 
 def _details(summary: str, lines: list[tuple[str, str]]) -> str:
@@ -274,8 +310,39 @@ _CSS = """
 html{-webkit-font-smoothing:antialiased}
 .tally{margin:.75rem 0 0;font-size:.9375rem;color:var(--muted)}
 .tally .kn{font-weight:500;color:var(--text)}
-.hl{color:var(--accent);background:linear-gradient(transparent 62%,rgba(43,207,206,.35) 0);padding:0 .1em}
-h1{font-size:2rem!important;line-height:1.2!important;max-width:40ch}
+h1.q{font-size:clamp(1.9rem,1.2rem + 2.2vw,2.75rem)!important;line-height:1.12!important;letter-spacing:-.02em;
+ font-weight:600!important;text-wrap:balance;max-width:24ch;margin:0 0 1.5rem!important;padding:0!important}
+h1.q .k{position:relative;color:var(--accent);white-space:nowrap}
+h1.q .k::after{content:"";position:absolute;left:0;right:0;bottom:-.08em;height:.12em;border-radius:2px;
+ background:var(--teal);transform-origin:left;transform:scaleX(var(--u,1))}
+::selection{background:rgba(43,207,206,.35);color:var(--text)}
+.ac{border:1px solid var(--teal);border-radius:8px;background:var(--panel);padding:1.25rem 1.5rem;max-width:56rem;
+ box-shadow:0 1px 2px rgba(28,29,31,.06),0 6px 18px -8px rgba(11,115,114,.18)}
+.ac .slots{display:grid;grid-template-columns:repeat(3,auto);gap:1rem 2.5rem;align-items:start;
+ justify-content:start;margin:0}
+.ac .slot dt{font-size:.8125rem;color:var(--muted);margin:0 0 .15rem}
+.ac .slot dd{margin:0;font-size:1.375rem;font-weight:600;line-height:1.2}
+.ac .slot dd small{display:block;font-size:.8125rem;font-weight:400;color:var(--muted);margin-top:.15rem}
+.ac .slot.k dd{color:var(--accent)}
+.ac .slot .bdg{vertical-align:.2em;margin-left:.4rem}
+.ac-foot{display:flex;flex-wrap:wrap;gap:.25rem 1.25rem;margin-top:1rem;padding-top:.85rem;
+ border-top:1px solid #E6E6E8;font-size:.875rem;color:var(--muted)}
+.ac-foot b{color:var(--text);font-weight:600}
+.ac details.repro{margin-top:.75rem;font-size:.8125rem;color:var(--muted)}
+.ac details.repro summary{cursor:pointer;width:max-content}
+.ac details.repro p{margin:.3rem 0 0}
+.ac details.repro code{font-size:.75rem}
+@media (max-width:760px){.ac .slots{grid-template-columns:1fr}}
+.gm.fx{table-layout:fixed;width:max-content;min-width:100%}
+.gm.fx col.c-id{width:12.75rem}.gm.fx col.c-st{width:8.25rem}.gm.fx col.c-wi{width:8.75rem}
+.gm.fx col.c-cost{width:7rem}.gm.fx col.c-err{width:5rem}.gm.fx col.c-g{width:3.25rem}
+.gm.fx th,.gm.fx td{padding:.45rem .5rem}
+.gm.fx .cid{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gm.fx td.g,.gm.fx th.g{padding-inline:.15rem}
+.gm th.g .gs{display:block;font-weight:400;font-size:.6875rem;color:var(--muted);line-height:1.25;white-space:normal}
+.gm .r{text-align:right;white-space:nowrap}
+.gm td.over{color:var(--coraltext)}
+.gm td.over .ic{color:var(--coral);margin-right:.3rem}
 ::selection{background:var(--sel);color:var(--seltext)}
 *{scrollbar-color:var(--line) transparent}
 :focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
@@ -419,6 +486,8 @@ td.gi{font-size:.9375rem;color:var(--text)}
 /* Streamlit chrome in the Gossamer look */
 [role="tab"]{transition:color var(--dur-fast) var(--ease-out)}
 [data-testid="stSidebar"]{background:#F2F2F3}
+[data-testid="stCaptionContainer"]{opacity:1!important;color:var(--muted)!important}
+[data-testid="stCaptionContainer"] p{color:var(--muted)!important}
 @media (prefers-reduced-motion:reduce){
   .bdg,tbody tr{transition:none}
   table details[open] .dx{animation:fade 120ms ease-out}
