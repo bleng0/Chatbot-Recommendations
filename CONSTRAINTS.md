@@ -17,6 +17,7 @@ as optional gates for a stricter profile; the app reports region and retention a
 A config is `eligible` only if every gate passes. A gate whose evidence is missing is
 `unverified`, never `pass`. Evidence marked `modeled` can pass a gate but the config is
 flagged `eligible (modeled)` and the UI says so.
+What-if profiles may omit gates for exploration only; the official recommendation always uses banking_mvp as written.
 
 | # | Gate | Threshold | Evidence | Why this number |
 |---|------|-----------|----------|-----------------|
