@@ -26,8 +26,29 @@ def test_badge_shape_follows_provenance():
     assert badge("") == ""
 
 
-def test_both_themes_define_the_same_tokens():
-    assert TOKENS["dark"].keys() == TOKENS["light"].keys()
+def _lum(h: str) -> float:
+    c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+
+def _ratio(a: str, b: str) -> float:
+    hi, lo = sorted((_lum(a), _lum(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def test_gossamer_text_tokens_pass_aa_and_icon_tokens_pass_3_to_1():
+    t = TOKENS["light"]
+    assert set(TOKENS) == {"light"}
+    for key in ("text", "muted", "accent", "coraltext"):
+        assert _ratio(t[key], t["bg"]) >= 4.5 and _ratio(t[key], t["panel"]) >= 4.5, key
+    assert _ratio(t["coral"], t["bg"]) >= 3
+
+
+def test_stats_row_carries_count_targets_for_the_count_up():
+    from pome.app.render import stats
+    html = stats([("configurations", 20), ("rejected", 19)])
+    assert 'data-count="20"' in html and 'data-count="19"' in html and "rejected" in html
 
 
 def test_motion_loader_points_at_self_hosted_files_that_exist():

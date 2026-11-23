@@ -1,5 +1,5 @@
-# POME theme. Contrast checked 2026-11-23: every text token >= 4.5:1 on its surface;
-# teal #23B5A2 / coral are used for strokes and icons only (>= 3:1), never small text.
+# POME theme: Gossamer, light only (owner 2026-11-23). Text >= 4.5:1 on its surface;
+# teal #2BCFCE and coral #EC4D25 are fills and icons only, never small text.
 [server]
 enableStaticServing = true
 
@@ -7,6 +7,12 @@ enableStaticServing = true
 gatherUsageStats = false
 
 [theme]
+base = "light"
+backgroundColor = "#FAFAFA"
+secondaryBackgroundColor = "#F2F2F3"
+textColor = "#1C1D1F"
+primaryColor = "#0B7372"
+borderColor = "#CDCDCF"
 font = "Fira Sans, system-ui, sans-serif"
 codeFont = "Fira Code, ui-monospace, monospace"
 baseRadius = "small"
@@ -19,16 +25,3 @@ fontFaces = [
   { family = "Fira Code", url = "app/static/fonts/fira-code-latin-500-normal.woff2", weight = 500 },
 ]
 
-[theme.dark]
-backgroundColor = "#014F4E"
-secondaryBackgroundColor = "#013C3B"
-textColor = "#E6F4F2"
-primaryColor = "#23B5A2"
-borderColor = "#1F6E6B"
-
-[theme.light]
-backgroundColor = "#EAF6F5"
-secondaryBackgroundColor = "#DCEFEC"
-textColor = "#014F4E"
-primaryColor = "#0F766E"
-borderColor = "#B9DCD7"

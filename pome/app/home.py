@@ -20,7 +20,6 @@ from pome.app.views import (
     cost_curves,
     evidence_rows,
     gate_matrix,
-    split_configs,
     status_label,
     variant_rows,
 )
@@ -28,15 +27,13 @@ from pome.profiles.loader import load_profile, what_if_profile
 from pome.registry.loader import load_registry
 
 st.set_page_config(page_title="POME: model and hosting selection", layout="wide")
-theme = "light" if (st.context.theme.type or "dark") == "light" else "dark"
-T = render.TOKENS[theme]
-st.html(render.css(theme))
+T = render.TOKENS["light"]
+st.html(render.css("light"))
 
 profile = load_profile()
 registry = load_registry()
 by_id = {c.config_id: c for c in registry}
 GATES = sorted(profile.gates, key=lambda g: int(g[1:]))
-measured_ids, published_ids = split_configs(registry)
 
 with st.sidebar:
     st.header("Scenario")
@@ -65,6 +62,11 @@ st.title("Which model and hosting should a bank's support bot use?")
 st.html(f'<p class="note">{render.icon("info")}Replaying recorded evaluation results. No live '
         f'API calls are made. Every number carries its provenance badge.</p>')
 st.html(render.answer(answer_line(d, snap, profile), recommended=bool(d.recommended)))
+counts = [("configurations", len(d.verdicts)),
+          ("eligible", sum(v.status.startswith("eligible") for v in d.verdicts)),
+          ("rejected", sum(v.status == "rejected" for v in d.verdicts)),
+          ("gates checked", len(GATES))]
+st.html(render.stats(counts))
 st.html(f'<p class="hash">decision {d.decision_hash[:12]}… · snapshot '
         f'{d.snapshot_sha256[:12]}… · profile banking_mvp · same inputs, same hash</p>')
 
@@ -77,11 +79,7 @@ if wi:
             + f'<p class="hash">what-if decision {wi.decision_hash[:12]}… · thresholds of the '
               f'gates kept are unchanged</p></div>')
 
-source = st.segmented_control(
-    "Configurations", [f"Measured by POME ({len(measured_ids)})",
-                       f"From published sources ({len(published_ids)})"],
-    default=f"Measured by POME ({len(measured_ids)})", label_visibility="collapsed")
-ids = set(measured_ids if (source or "").startswith("Measured") else published_ids)
+ids = {c.config_id for c in registry}
 
 tab_gates, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
     ["Gates", "Cost", "Evidence", "Deployment variants", "Configurations"])
@@ -104,13 +102,13 @@ with tab_cost:
     costs = {k.split(".", 1)[0]: e for k, e in snap.values.items()
              if k.endswith(".cost.monthly_usd") and k.split(".", 1)[0] in ids}
     if not costs:
-        st.write("No configuration in this group has a cost yet (needs tokens and a price).")
+        st.write("No configuration has a cost yet.")
     else:
         budget = float(profile.gates["G11"].value)
         items = sorted(costs.items(), key=lambda kv: float(kv[1].value))
         names_ = [cid for cid, _ in items]
         vals = [float(e.value) for _, e in items]
-        colors = [T["coral"] if v > budget else T["stroke"] for v in vals]
+        colors = [T["coral"] if v > budget else T["teal"] for v in vals]
         fig = go.Figure(go.Bar(
             x=vals, y=names_, orientation="h", marker={"color": colors, "cornerradius": 4},
             text=[f"${v:,.0f}" + (" over budget" if v > budget else "") for v in vals],
@@ -126,7 +124,8 @@ with tab_cost:
             xaxis={"title": f"USD per month at {int(volume):,} tickets (MODELED)",
                    "gridcolor": T["line"], "zeroline": False, "tickprefix": "$",
                    "range": [0, max(budget, *vals) * 1.18]},
-            yaxis={"autorange": "reversed", "tickfont": {"family": "Fira Code, monospace"}},
+            yaxis={"autorange": "reversed",
+                   "tickfont": {"family": "Fira Code, monospace", "color": T["muted"]}},
             hoverlabel={"font": {"family": "Fira Sans, sans-serif"}})
         st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
         sh = snap.values.get(f"{SELFHOST}.cost.monthly_usd")
@@ -152,7 +151,7 @@ with tab_ev:
 with tab_var:
     shown = [c for c in registry if c.config_id in ids and c.variants]
     if not shown:
-        st.write("No open-weight model in this group lists published deployment settings.")
+        st.write("No open-weight model lists published deployment settings.")
     for c in shown:
         rows = variant_rows(c)
         cost = snap.values.get(f"{c.config_id}.cost.monthly_usd")

@@ -2,14 +2,14 @@
 from html import escape
 from urllib.parse import quote
 
-# Text tokens are >= 4.5:1 on their surface; stroke/coral tokens are >= 3:1 (icons, outlines).
+# Gossamer palette (light only, owner 2026-11-23): #FAFAFA #CDCDCF #939599 #2BCFCE #EC4D25.
+# Text tokens are >= 4.5:1 on bg and panel; teal #2BCFCE is a fill (bars, tints) only and
+# coral #EC4D25 an icon/outline colour (>= 3:1); their darker text twins carry words.
 TOKENS = {
-    "dark": {"bg": "#014F4E", "panel": "#013C3B", "line": "#1F6E6B", "text": "#E6F4F2",
-             "muted": "#A8D5CF", "accent": "#6FDCCB", "stroke": "#23B5A2", "coral": "#F06A6A",
-             "tint": "rgba(35,181,162,.16)", "sel": "#23B5A2", "seltext": "#012F2E"},
-    "light": {"bg": "#EAF6F5", "panel": "#FFFFFF", "line": "#B9DCD7", "text": "#014F4E",
-              "muted": "#3E6E6B", "accent": "#0F766E", "stroke": "#0F766E", "coral": "#C2413F",
-              "tint": "rgba(15,118,110,.10)", "sel": "#0F766E", "seltext": "#FFFFFF"},
+    "light": {"bg": "#FAFAFA", "panel": "#FFFFFF", "line": "#CDCDCF", "grey": "#939599",
+              "text": "#1C1D1F", "muted": "#5E6065", "accent": "#0B7372", "stroke": "#0B7372",
+              "teal": "#2BCFCE", "coral": "#EC4D25", "coraltext": "#C23A17",
+              "tint": "rgba(43,207,206,.14)", "sel": "#2BCFCE", "seltext": "#1C1D1F"},
 }
 
 # Lucide icons (ISC licence), one stroke weight; drawn, never emoji.
@@ -70,6 +70,14 @@ def css(theme: str) -> str:
     v = ";".join(f"--{k}:{val}" for k, val in t.items())
     masks = "".join(_mask(n) for n in _PATHS)
     return f"<style>:root{{{v}}}{_CSS}{masks}</style>"
+
+
+def stats(items: list[tuple[str, int]]) -> str:
+    """Headline counts; motion.js counts each one up from 0 to data-count."""
+    cells = "".join(
+        f'<div class="kp"><span class="kn num" data-count="{int(n)}">{int(n)}</span>'
+        f'<span class="kl">{escape(label)}</span></div>' for label, n in items)
+    return f'<div class="kpis" role="list">{cells}</div>'
 
 
 def answer(text: str, *, recommended: bool, what_if: bool = False) -> str:
@@ -140,11 +148,23 @@ def variant_table(rows: list[dict]) -> str:
 
 
 _CSS = """
+:root{--dur-fast:150ms;--dur:220ms;--dur-slow:480ms;--ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);--stagger:28ms}
 html{-webkit-font-smoothing:antialiased}
+.kpis{display:flex;flex-wrap:wrap;gap:.75rem;margin:1rem 0 .25rem}
+.kp{display:flex;flex-direction:column;gap:.1rem;padding:.6rem .9rem;min-width:8.5rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  transition:border-color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out)}
+.kp:hover{border-color:var(--grey);transform:translateY(-1px)}
+.kn{font-size:1.75rem;font-weight:500;line-height:1.1;color:var(--text)}
+.kl{font-size:.8125rem;color:var(--muted)}
+.kp:nth-child(2) .kn{color:var(--accent)}
+.kp:nth-child(3) .kn{color:var(--coraltext)}
+.bdg,.kp,.ans,.tw{will-change:auto}
 h1{font-size:2rem!important;line-height:1.2!important;max-width:40ch}
 ::selection{background:var(--sel);color:var(--seltext)}
 *{scrollbar-color:var(--line) transparent}
-:focus-visible{outline:2px solid var(--stroke)!important;outline-offset:2px}
+:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
 code,.num,.cid,.hash{font-family:"Fira Code",ui-monospace,monospace;
   font-variant-numeric:tabular-nums}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
@@ -154,7 +174,7 @@ code,.num,.cid,.hash{font-family:"Fira Code",ui-monospace,monospace;
 .hash{font-size:.75rem;color:var(--muted);margin:.25rem 0 1.5rem}
 .ans{font-size:1.375rem;line-height:1.35;font-weight:500;margin:0;padding:.875rem 1.125rem;
   border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:72ch;}
-.ans-rec{border-color:var(--coral)}
+.ans-rec{border-color:var(--coral);box-shadow:inset 3px 0 0 var(--teal)}
 .ans-wi{font-size:1.125rem;border-style:dashed}
 .wi h3{font-size:1rem;font-weight:600;margin:1.75rem 0 .5rem}
 .wi h3 .muted{font-weight:400}
@@ -165,7 +185,7 @@ th,td{padding:.45rem .6rem;text-align:left;border-bottom:1px solid var(--line);
 tbody tr:last-child>*{border-bottom:0}
 thead th{font-weight:500;color:var(--muted);font-size:.8125rem;position:sticky;top:0;
   background:var(--panel)}
-tbody tr{transition:background-color 150ms cubic-bezier(.16,1,.3,1)}
+tbody tr{transition:background-color var(--dur-fast) var(--ease-out)}
 tbody tr:hover{background:var(--tint)}
 th.cid{font-weight:400}
 .gm th:first-child,.gm td:first-child{position:sticky;left:0;background:var(--panel);z-index:1}
@@ -182,11 +202,14 @@ td.set{white-space:normal;min-width:22rem;color:var(--muted)}
 .st-pass{color:var(--accent)}
 .st-fail{font-weight:500}
 .st-fail .ic{color:var(--coral)}
+.st-fail{color:var(--coraltext)}
 .st-unverified,.st-not_tested{color:var(--muted)}
 .bdg{display:inline-block;white-space:nowrap;font:500 .6875rem/1 "Fira Sans",sans-serif;
   letter-spacing:.04em;padding:.22rem .45rem;color:var(--text);vertical-align:middle}
 .bdg-measured{border:1px solid var(--stroke);border-radius:3px}
 .bdg-published{border-radius:999px;background:var(--tint);border:1px solid transparent}
+.bdg{transition:transform var(--dur-fast) var(--ease-out)}
+tr:hover .bdg{transform:translateY(-1px)}
 .bdg-vendor-doc{border-radius:999px;border:1px solid var(--line)}
 .bdg-modeled{border:1px dashed var(--muted);border-radius:3px}
 .unit{color:var(--muted);font-size:.75rem}
@@ -198,16 +221,22 @@ table details summary{cursor:pointer;list-style:none;display:inline-flex;align-i
 table details summary::-webkit-details-marker{display:none}
 table details summary::before{content:"";width:.4rem;height:.4rem;border-right:1.5px solid
   currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);
-  transition:transform 180ms cubic-bezier(.16,1,.3,1)}
+  transition:transform var(--dur) var(--ease-out)}
 table details[open] summary::before{transform:rotate(45deg)}
-table details[open] .dx{animation:open 180ms cubic-bezier(.16,1,.3,1)}
+table details[open] .dx{animation:open var(--dur) var(--ease-out)}
 @keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .dx dl{margin:.4rem 0 .2rem;display:grid;grid-template-columns:auto 1fr;gap:.2rem .75rem;
   white-space:normal;max-width:64ch;font-size:.8125rem}
 .dx dt{color:var(--muted)}.dx dd{margin:0;overflow-wrap:anywhere}
 .vh{font-size:1rem;font-weight:600;margin:1.5rem 0 .5rem}
 .one{margin:.35rem 0;color:var(--muted);font-size:.875rem}
+/* chart bars grow from their baseline (motion.js) */
+.js-plotly-plot .bars path{transform-box:fill-box;transform-origin:0 50%}
+/* Streamlit chrome in the Gossamer look */
+[role="tab"]{transition:color var(--dur-fast) var(--ease-out)}
+[data-testid="stSidebar"]{background:#F2F2F3}
 @media (prefers-reduced-motion:reduce){
+  .kp,.bdg,tbody tr{transition:none}
   table details[open] .dx{animation:fade 120ms ease-out}
   table details summary::before{transition:none}
   @keyframes fade{from{opacity:0}to{opacity:1}}
