@@ -18,17 +18,20 @@ A config is `eligible` only if every gate passes. A gate whose evidence is missi
 `unverified`, never `pass`. Evidence marked `modeled` can pass a gate but the config is
 flagged `eligible (modeled)` and the UI says so.
 What-if profiles may omit gates for exploration only; the official recommendation always uses banking_mvp as written.
+Gap fill (owner decision 2026-11-23, replaces D2): a gate key POME did not measure is filled
+with a vendor-doc value or a `modeled` proxy (formula and inputs in `pome/registry/gapfill.yaml`),
+never `measured`. A config that passes on such evidence is only ever `eligible (modeled)`.
 
 | # | Gate | Threshold | Evidence | Why this number |
 |---|------|-----------|----------|-----------------|
-| G1 | Intent macro-F1, BANKING77 test sample (300, ~4/intent) | ≥ 0.80 | measured | Owner default; ~4/intent keeps cost low while covering all 77 labels |
-| G2 | OOS recall, CLINC150 (100 OOS + 150 in-scope), OOS = positive class | ≥ 0.85 | measured | Missing an unknown query is the costlier error in banking |
-| G3 | OOS precision, same sample | ≥ 0.80 | measured | Bounds false rejections of real queries |
-| G4 | FAQ answer correctness, answerable items, per language | ≥ 0.80 | measured | Owner default |
-| G5 | FAQ unanswerable correctly declined, per language | ≥ 0.80 | measured | Owner default |
-| G6 | Language gap: Hindi vs English on every quality metric with both languages (MASSIVE hi-IN vs en-US macro-F1; FAQ G4, G5) | en − hi ≤ 0.10 | measured | Owner default (10 points absolute) |
-| G7 | Language gap: Hinglish vs English on every quality metric with Hinglish data (FAQ G4, G5 only; no Hinglish intent benchmark exists) | en − hinglish ≤ 0.10 | measured | Owner default; scope per SPEC A3 |
-| G8 | p95 latency at the concurrency level that sustains peak load | ≤ 3000 ms | measured (API) / modeled (self-host) | Owner default |
+| G1 | Intent macro-F1, BANKING77 test sample (300, ~4/intent) | ≥ 0.80 | measured, else modeled proxy | Owner default; ~4/intent keeps cost low while covering all 77 labels |
+| G2 | OOS recall, CLINC150 (100 OOS + 150 in-scope), OOS = positive class | ≥ 0.85 | measured, else modeled proxy | Missing an unknown query is the costlier error in banking |
+| G3 | OOS precision, same sample | ≥ 0.80 | measured, else modeled proxy | Bounds false rejections of real queries |
+| G4 | FAQ answer correctness, answerable items, per language | ≥ 0.80 | measured, else modeled proxy | Owner default |
+| G5 | FAQ unanswerable correctly declined, per language | ≥ 0.80 | measured, else modeled proxy | Owner default |
+| G6 | Language gap: Hindi vs English on every quality metric with both languages (MASSIVE hi-IN vs en-US macro-F1; FAQ G4, G5) | en − hi ≤ 0.10 | measured, else modeled proxy | Owner default (10 points absolute) |
+| G7 | Language gap: Hinglish vs English on every quality metric with Hinglish data (FAQ G4, G5 only; no Hinglish intent benchmark exists) | en − hinglish ≤ 0.10 | measured, else modeled proxy | Owner default; scope per SPEC A3 |
+| G8 | p95 latency at the concurrency level that sustains peak load | ≤ 3000 ms | measured, else modeled (published medians / decode model) | Owner default |
 | G9 | Sustainable throughput (p95 ≤ G8 and error rate ≤ G10) | ≥ 8 req/s | measured / modeled | Profile peak |
 | G10 | Error rate after retries, at that concurrency | ≤ 1.0% | measured / modeled | Default: errors above 1% at peak are visible to customers |
 | G11 | Monthly cost at 100,000 tickets/month, measured avg tokens | ≤ $1,500 | measured tokens × vendor-doc prices; self-host modeled | Owner default |
