@@ -35,6 +35,11 @@ shown in INR at the RBI reference rate noted in the footer.
   never the project name as tester; gates are numbered G1-G10 on screen with a short name each
   (Intent, Out-of-scope, No over-refusal, FAQ accuracy, FAQ decline, Hindi gap, Hinglish gap,
   Latency, Capacity, Licence); error limit and max monthly spend are sidebar settings.
+- Baselines tab (owner, 2026-11-23): the recommendation next to what three simple rules would
+  pick (highest self-tested benchmark score, lowest price, self-host only), with the cost
+  difference and the gates each fails. Per-cell provenance badges on cost and error cells were
+  declined by the owner (2026-11-23).
+- Tabs: Gates, Baselines, Cost, Evidence, Deployment variants, Configurations.
 - Provenance rules in CLAUDE.md section 2 are binding: a badge next to every number, no
   invented data.
 

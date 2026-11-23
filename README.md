@@ -44,8 +44,19 @@ a what-if view; the recommendation never changes, and a config that passes only 
 was loosened is marked "Not recommended". Rules: CONSTRAINTS.md section A; decisions: SPEC.md
 sections 15-16.
 
-In a container: `docker compose -f compose.pome.yaml up --build`, then open the same address.
+In a container: `docker compose -f compose.pome.yaml up --build`, then open the same address
+(start Docker Desktop first on Windows; verified on the owner's PC 2026-11-23).
 Tests: `uv run pytest -q`. Lint: `uv run ruff check .`.
+Secrets scan: `gitleaks git . --redact --no-banner` (history scan; `.gitleaksignore` lists 15
+verified false positives, all config IDs containing "api"). Use `git`, not `dir`: `dir` also
+reads the gitignored `.env`.
+
+Status 2026-11-23: 427 tests pass; the same inputs give decision hash `e9ad4c71d6a2` every
+run. With the default settings (1,00,000 tickets a month, max spend ₹1,39,195, max error rate
+1.0%) the app recommends gpt-5.4-nano on the OpenAI API (global endpoint) at ₹3,433 a month,
+from published vendor data (cost MODELED); 3 of 20 configurations pass every gate. Evidence
+sources and the full results table: `docs/research/evidence-plan.md` ("Status 2026-11-23").
+Gate thresholds and rules: `CONSTRAINTS.md`. Product and wording rules: `PRODUCT.md`.
 
 ## Overview
 
@@ -208,14 +219,8 @@ polls it with `wget` every 30 seconds.
 The repository is initialized on `main` with an initial commit. Ignore rules cover
 `node_modules/`, `.next/`, local env files, build artifacts, and local agent skills.
 
-Publish it to a new remote:
-
-```bash
-git remote add origin https://github.com/<your-user>/<your-repo>.git
-git push -u origin main
-```
-
-If a remote is already configured, replace `add` with `set-url`. Day-to-day workflow:
+The remote is https://github.com/bleng0/Chatbot-Recommendations (branch `main`). Commits are
+authored as bleng0 and carry no AI attribution lines. Run the secrets scan above before pushing. Day-to-day workflow:
 
 ```bash
 git status                       # see what changed

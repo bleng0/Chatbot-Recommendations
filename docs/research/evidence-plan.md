@@ -1,11 +1,72 @@
 # POME evidence plan (G1-G14): how to get honest numbers for free
 
+Last updated 2026-11-23. Start with "Status 2026-11-23" below; it reflects the code as of commit 9081331 and later.
+
 Retrieved 2026-11-22 unless noted. No API was called and nothing was bought or signed up for. Tags: **M** = measured, **VD** = vendor-doc, **MOD** = modeled. Source numbers [Sx] refer to the list at the end.
 
 **Main findings**
 1. **Gemini Developer API (configs 1-3) fails G12 and G13 based on vendor docs alone.** On paid tier, Google may store or cache data in any country where it has facilities [S3]. Its usage policy keeps prompts and outputs for 55 days for abuse monitoring [S4], which is more than the 30 days G13 allows. On free tier, Google also uses the data to improve its products [S1][S3]. A configuration that can pass G12/G13 is **Vertex AI in asia-south1**. India ML processing is listed for `gemini-2.5-flash` (128k), `gemini-3.5-flash` and `gemini-3.5-flash-lite`. It is not listed for 2.5 Flash-Lite or 3.1 Flash-Lite [S6]. Proposal: add these as configs 1b/2b.
 2. **The config-1 replacement is `gemini-3.5-flash-lite`.** Since 2026-09-18, the 2.5 models are available only to projects that have already used them, and Google recommends 3.5 Flash-Lite for new projects [S2][S2b]. It has a free tier, and its **Batch API is free on the free tier** [S1]. That is the cheapest way to score the full pilot sample.
 3. **Self-hosting Gemma 4 24/7 in India fails G11 at every provider priced here** (cheapest is about $1,533/month). Whether G8 passes is uncertain (see B).
+
+
+## Status 2026-11-23 (latest; read this first)
+
+This section replaces the 2026-11-22 findings wherever they disagree. Sections A-F below are the original research, kept for their sources; notes marked **Update 2026-11-23** say what changed.
+
+**What changed since 2026-11-22 (owner decisions, recorded in CONSTRAINTS.md section A and SPEC.md sections 15-16)**
+1. **20 configurations**, not 5: Gemini, Vertex, OpenAI, Anthropic, Mistral, Sarvam and DeepSeek APIs, one local Ollama run, and eight self-hosted GPU options in India (vLLM, bf16).
+2. **G12 (India processing) and G13 (retention) are dropped** from `banking_mvp` (2026-11-22). Region and retention are shown as information only, so the Gemini API's 55-day retention no longer rejects it.
+3. **New thresholds**: G8 p95 latency ≤ 20,000 ms (was 3,000 ms); G9 ≥ 5 req/s with peak load 5 req/s (was 8). G10 (error rate, default ≤ 1.0%) and G11 (budget, default ≤ $1,500 = ₹1,39,195 a month) are user settings in the app sidebar, not gate columns.
+4. **Gap fill replaces "unverified"**: every gate key that was not self-tested is filled with a vendor-doc value or a `modeled` proxy whose formula and inputs are in `pome/registry/gapfill.yaml`. Nothing is labelled self-tested unless a run record exists. A config that passes on such evidence is only ever "eligible (modeled)". Rules used:
+   - Quality (G1-G7): the score of the closest self-tested model (same size and tier), else gemma4-12b-ollama-local-q4, the only config with every quality metric.
+   - API p95 latency (G8): (median time to first token + 200 output tokens / median output speed) x 1000 ms, from Artificial Analysis medians.
+   - Throughput (G9): published rate limits (RPM/RPS), the Gemini spend cap, or Little's law.
+   - Error rate (G10): 100 − the provider's published SLA where one exists; otherwise the Wilson 95% upper bound of our own gem25f run (0 failures in 108 calls = 3.43%).
+   - Self-host (G8, G9, G11): decode model t = weights GB / (1.935 TB/s x 0.7), first-token time 0.2 s, concurrency 32; cost = GPU price x 730 h + ops cost.
+5. **Display**: costs in INR at the RBI reference rate US$1 = ₹92.7968 (2026-11-23); badges read SELF-TESTED, PUBLISHED, VENDOR-DOC and MODELED; gates are numbered G1-G10 on screen (internal G14 shows as G10 Licence).
+6. **Self-tested quality runs exist for 3 configs only**: gem25f-api-global, gemma4-26b-api-global and gemma4-12b-ollama-local-q4. No load test and no paid GPU hour was run; total API spend stays within the free tier.
+
+**Current decision** (default settings: 1,00,000 tickets a month, max spend ₹1,39,195, max error rate 1.0%; decision hash `e9ad4c71d6a2`, snapshot `94c355d1486d`, same hash on every run): **gpt54nano-api-global** (gpt-5.4-nano on the OpenAI API, global endpoint) at **₹3,433 a month**, recommended from published vendor data (cost MODELED). 3 configs are eligible (modeled), 17 are rejected.
+
+| Config | Model | Host | Region | Quality evidence (G1) | Monthly cost | Status | Fails |
+|---|---|---|---|---|---|---|---|
+| gpt54nano-api-global | gpt-5.4-nano | OpenAI API | global endpoint | MODELED | ₹3,433 | eligible (modeled) | - |
+| gpt54mini-api-global | gpt-5.4-mini | OpenAI API | global endpoint | MODELED | ₹12,528 | eligible (modeled) | - |
+| gem35f-vertex-global | gemini-3.5-flash | Vertex AI | global; asia-south1 has no Standard PayGo | MODELED | ₹25,055 | eligible (modeled) | - |
+| sarvam105b-api-in | sarvam-105b | Sarvam API | India | MODELED | ₹1,100 | rejected | Error limit |
+| haiku55-api-global | claude-haiku-5-5 | Anthropic API | global | MODELED | ₹1,485 | rejected | Error limit |
+| deepseekv41flash-sarvam-in | deepseekv4.1-flash-1017 | Sarvam API | India | MODELED | ₹1,940 | rejected | Error limit |
+| gemma4-26b-api-global | gemma-4-26b-a4b-it | Gemini API | global | SELF-TESTED | ₹1,949 | rejected | G9 Capacity, Error limit |
+| mistralsmall4-api-global | mistral-small-2603 | Mistral API | global | MODELED | ₹1,949 | rejected | G9 Capacity |
+| deepseekflash-api-global | deepseek-flash | DeepSeek API | China | MODELED | ₹3,897 | rejected | Error limit |
+| gem35fl-api-global | gemini-3.5-flash-lite | Gemini API | global | MODELED | ₹6,310 | rejected | Error limit |
+| gem25f-api-global | gemini-2.5-flash | Gemini API | global | SELF-TESTED | ₹7,883 | rejected | Error limit |
+| sonnet55-api-global | claude-sonnet-5-5 | Anthropic API | global | MODELED | ₹29,695 | rejected | Error limit |
+| gemma4-12b-ollama-local-q4 | gemma-4-12b | local Ollama on the owner's laptop | local machine | SELF-TESTED | ₹3,48,328 | rejected | G1 Intent, Budget |
+| gemma4-12b-vllm-in-bf16 | gemma-4-12b | self-hosted GPU | India | MODELED | ₹3,48,328 | rejected | G1 Intent, Budget |
+| gemma4-26b-vllm-in-bf16 | google/gemma-4-26B-A4B-it | self-hosted GPU | India | MODELED | ₹3,48,328 | rejected | G9 Capacity, Budget |
+| gemma4-31b-vllm-in-bf16 | google/gemma-4-31B-it | self-hosted GPU | India | MODELED | ₹3,48,328 | rejected | G9 Capacity, Budget |
+| llama31-8b-vllm-in-bf16 | meta-llama/Llama-3.1-8B-Instruct | self-hosted GPU | India | MODELED | ₹3,48,328 | rejected | G1 Intent, Budget |
+| museglimmer30b-vllm-in-bf16 | meta-models/Muse-Glimmer-30B | self-hosted GPU | India | MODELED | ₹3,48,328 | rejected | G9 Capacity, Budget |
+| qwen38-27b-vllm-in-bf16 | Qwen/Qwen3.8-27B | self-hosted GPU | India | MODELED | ₹3,48,328 | rejected | G9 Capacity, Budget |
+| sarvam30b-vllm-in-bf16 | sarvamai/sarvam-30b | self-hosted GPU | India | MODELED | ₹3,48,328 | rejected | G9 Capacity, Budget |
+
+Why so many fail the error limit: no provider publishes an SLA for those APIs, so the 3.43% proxy applies. Raising the max error rate in the sidebar to 4% makes them eligible unless another gate fails.
+
+**Baselines** (what a simple rule would pick instead of the gates; Baselines tab in the app):
+- **Our rule**: gpt54nano-api-global at ₹3,433/month; passes every gate.
+- **Highest benchmark score**: gem25f-api-global at ₹7,883/month (₹4,449 more a month than our pick); fails Error limit.
+- **Lowest price**: sarvam105b-api-in at ₹1,100/month (₹2,333 less a month than our pick); fails Error limit.
+- **Self-host only**: gemma4-12b-vllm-in-bf16 at ₹3,48,328/month (₹3,44,894 more a month than our pick); fails G1 Intent, Budget.
+- An API-only rule picks the same config as ours, because our pick is already an API.
+
+**Which earlier findings still hold**
+- Main finding 1 (Gemini API fails G12/G13): no longer decides anything, because G12 and G13 are dropped.
+- Main finding 2 (use gemini-3.5-flash-lite): it is in the registry as gem35fl-api-global; rejected only on the error-limit proxy.
+- Main finding 3 (self-hosting 24/7 fails G11): still true. Every self-hosted config costs ₹3,48,328 a month on the default GPU (Azure Central India, 1x A100 80GB), above the ₹1,39,195 default budget.
+- Section B's G8 verdict (~4.4 s fails 3,000 ms): G8 is now 20,000 ms, so latency alone no longer rejects self-hosting; G9 (capacity) and G11 (budget) do.
+- Section C: the SLA facts feed the G10 proxy described above.
 
 ---
 
@@ -43,6 +104,8 @@ Retrieved 2026-11-22 unless noted. No API was called and nothing was bought or s
 | Yotta Shakti | 1x H100 SXM / 2x L40S | ₹596 / ₹593 | ₹435,080 / ₹432,890 | [S23] No date shown. Convert using a dated RBI rate (not retrieved). |
 | GCP asia-south1 | a2-ultragpu-1g / a3 | not resolvable | - | The page shows only default-region prices, and a3 is 8-GPU only [S24] |
 
+**Update 2026-11-23:** the app now lists seven India GPU options (Azure, AWS, E2E, Yotta; vendor-doc prices) and adds the user's ops cost; the default is Azure Central India 1x A100 80GB at ₹3,48,328 a month.
+
 **G11 (MOD):** monthly cost = $/h x 730. Every 24/7 option costs more than $1,500. Running only during business hours (for example 12 h/day) roughly halves the cost, but then off-hours tickets cannot be served. This is an assumption the user needs to confirm.
 
 **Throughput/latency model (MOD)**
@@ -51,7 +114,7 @@ Decode is memory-bandwidth-bound, so each decode step must read the weights it t
 - `t_step ≈ (W_touched + KV_bytes) / (BW x η)`, with η = 0.6-0.8 (assumed, uncited).
 - Expert fraction touched per layer at batch B: `f = 1 − (1 − 8/128)^B`. At B=24, f ≈ 0.79, so W_touched approaches the full 50.4 GB.
 - On an H100 SXM (3.35 TB/s) [S25]: t_step ≈ 50.4/(3.35x0.7) ≈ **21 ms**. The band from η alone is 19-25 ms. On an H100 NVL (3.9 TB/s) it is about 18 ms. On an A100 (2.039 TB/s) [S26] it is about 35 ms.
-- End-to-end latency `E2E ≈ TTFT + 200 x t_step` ≈ 0.2 + 4.2 = **~4.4 s on H100 bf16**, which would fail G8 (3,000 ms).
+- End-to-end latency `E2E ≈ TTFT + 200 x t_step` ≈ 0.2 + 4.2 = **~4.4 s on H100 bf16**, which would fail G8 (3,000 ms). **Update 2026-11-23:** G8 is now ≤ 20,000 ms, so this passes; the app uses the A100 bandwidth 1.935 TB/s x 0.7.
 - Throughput by Little's law: concurrency N = λ x E2E = 8 x 4.4 ≈ 35. Output rate = N / t_step ≈ 1,600 tok/s, which is about 8 req/s. **G9 is borderline.**
 - Prefill compute (2 x 3.8e9 x 4,800 tok/s ≈ 36 TFLOP/s) is small compared with H100 bf16 peak (1,979 TFLOPS, with sparsity [S25]).
 
@@ -65,6 +128,8 @@ Decode is memory-bandwidth-bound, so each decode step must read the weights it t
 - **What Google publishes (VD):** Vertex AI online inference SLA is 99.5% monthly uptime. "Downtime" means a server-side 5xx rate above 5% sustained for at least 5 minutes [S28]. This does **not** support G10 (≤1% errors). The only latency SLO requires Provisioned Throughput on the global endpoint: p50 of 80 TPS for 2.5 Flash and 110 TPS for 2.5 Flash-Lite [S28]. A 200-token response at 80 TPS takes about 2.5 s plus TTFT (MOD, ±30%). Paid tiers 1-3 are defined by spend [S5]. Per-model RPM numbers appear only in AI Studio.
 
 ## D. Deployment evidence (G11-G14)
+
+**Update 2026-11-23:** G12 and G13 are dropped from `banking_mvp`; the rows below are kept as information. G11 now uses each config's published prices at 600 input / 200 output tokens per ticket.
 
 | Item | Value | Tag | Source |
 |---|---|---|---|
@@ -107,6 +172,8 @@ None of these models can claim "99% accuracy". Every modeled value needs its err
 ---
 
 ## Ranked actions (cheapest and most reliable first)
+
+**Status 2026-11-23:** 1 done (G14 recorded for all 20 configs; G12/G13 dropped). 2 owner (deck). 3 and 4 not run; quality for those models is a modeled proxy. 5 not run. 6 partly done (gem25f self-tested, 108 calls). 7 done (`pome/registry/gapfill.yaml`). 8 not run (no spend approved). 9 done as gem35f-vertex-global (global endpoint; asia-south1 has no Standard PayGo).
 
 | # | Action | Effort | Yields | Risks |
 |---|---|---|---|---|
