@@ -27,6 +27,15 @@ def slider_specs(profile: Profile, gates: list[str], label) -> list[dict]:
     return out
 
 
-def gate_sliders(specs: list[dict], key: str) -> dict[str, float]:
-    value = _component(gates=specs, key=key, default=None)
+def gate_sliders(specs: list[dict], table_html: str, css: str, key: str) -> dict[str, float]:
+    """The gate table with one vertical slider in each gate column's header."""
+    import streamlit as st
+    prev = st.session_state.get(key) or {}
+    value = _component(gates=specs, table=table_html, css=css, value=prev, key=key, default=None)
     return {k: float(v) for k, v in (value or {}).items()}
+
+
+def current(key: str) -> dict[str, float]:
+    """Slider values from the last interaction, read before the table is built."""
+    import streamlit as st
+    return {k: float(v) for k, v in (st.session_state.get(key) or {}).items()}

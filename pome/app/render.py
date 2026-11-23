@@ -103,7 +103,8 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
     labels = labels or {}
     notes = notes or {}
     head = "".join(
-        f'<th scope="col" class="g{" off" if g in off else ""}">{escape(labels.get(g, g))}'
+        f'<th scope="col" class="g{" off" if g in off else ""}" data-gate="{escape(g)}">'
+        f'{escape(labels.get(g, g))}'
         f'{"<small>off</small>" if g in off else ""}</th>' for g in gates)
     wi_head = '<th scope="col">What-if</th>' if what_if is not None else ""
     if cost is not None:

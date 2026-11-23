@@ -15,7 +15,7 @@ from pome.app.scenario import (
     decide,
     decide_sliders,
 )
-from pome.app.sliders import gate_sliders, slider_specs
+from pome.app.sliders import current, gate_sliders, slider_specs
 from pome.app.views import (
     SHOWN_GATES,
     USD_INR,
@@ -101,8 +101,7 @@ tab_gates, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
 with tab_gates:
     st.html('<p class="one">Gate thresholds: slide to explore. Looser than official marks '
             'passing configs <b>Not recommended</b>; the official result never changes.</p>')
-    moved = gate_sliders(slider_specs(profile, GATES, display_gate), key="gate_sliders")
-    moved = {g: v for g, v in moved.items()
+    moved = {g: v for g, v in current("gate_sliders").items()
              if g not in off and v != float(profile.gates[g].value)}
     wi, not_rec = (decide_sliders(snap, scenario, off, moved) if off or moved else (None, {}))
     if wi:
@@ -145,9 +144,11 @@ with tab_gates:
         rows.sort(key=lambda r: _val(r["config"], "serving.error_pct") or inf)
     if order == "Descending":
         rows.reverse()
-    st.html(render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
-                              labels={g: display_gate(g) for g in GATES}, error=error_cells,
-                              notes=nr_notes))
+    gate_sliders(slider_specs(profile, GATES, display_gate),
+                 render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
+                                   labels={g: display_gate(g) for g in GATES},
+                                   error=error_cells, notes=nr_notes),
+                 render.css("light"), key="gate_sliders")
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
         st.html(f'<p class="one">No evidence recorded yet: {", ".join(no_ev)}</p>')
