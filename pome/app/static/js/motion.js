@@ -35,10 +35,10 @@
     else {
       if (verdict) animate(verdict, { clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"],
                                       duration: DUR.slow, ease: "outExpo" });
-      animate(rows[0] ? [rows[0]] : [], { backgroundColor: ["rgba(43,207,206,.28)", "rgba(43,207,206,0)"],
+      if (rows.length) animate([rows[0]], { backgroundColor: ["rgba(43,207,206,.28)", "rgba(43,207,206,0)"],
                                           duration: 900, ease: "outQuart", delay: DUR.slow });
       // icons pop in a diagonal wave: row then column order
-      animate(icons, { scale: [0.4, 1], opacity: [0, 1], duration: DUR.base, ease: "outBack",
+      if (icons.length) animate(icons, { scale: [0.4, 1], opacity: [0, 1], duration: DUR.base, ease: "outBack",
                        delay: stagger(6, { start: 360 }) });
     }
     document.querySelectorAll(".kn[data-count]").forEach((el) => {
