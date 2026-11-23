@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<style>
+:root{--text:#1C1D1F;--muted:#5E6065;--line:#CDCDCF;--teal:#2BCFCE;--accent:#0B7372;--coral:#EC4D25;--coraltext:#C23A17}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.4 "Fira Sans",system-ui,sans-serif;color:var(--text);background:transparent}
+.row{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap}
+.s{display:flex;flex-direction:column;align-items:center;width:4.6rem;padding:.4rem .2rem;
+   border:1px solid var(--line);border-radius:6px;background:#fff;transition:border-color 150ms}
+.s.loose{border-color:var(--coral)}
+.g{font-weight:600}
+.v{font:12px "Fira Code",ui-monospace,monospace;min-height:1.2em}
+.s.loose .v{color:var(--coraltext)}
+.o{font-size:11px;color:var(--muted)}
+.t{position:relative;height:120px;margin:.3rem 0}
+input[type=range]{writing-mode:vertical-lr;direction:rtl;height:120px;width:1.6rem;margin:0;
+   accent-color:var(--accent);cursor:pointer}
+.s.loose input{accent-color:var(--coral)}
+input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mk{position:absolute;left:-6px;right:-6px;height:2px;background:var(--text);pointer-events:none}
+.tag{font-size:11px;color:var(--coraltext);min-height:1.3em}
+button{margin-left:.5rem;font:inherit;font-size:13px;padding:.3rem .7rem;border:1px solid var(--line);
+   border-radius:6px;background:#fff;cursor:pointer;align-self:center}
+button:focus-visible{outline:2px solid var(--accent)}
+@media (prefers-reduced-motion:reduce){.s{transition:none}}
+</style></head>
+<body><div class="row" id="row"></div>
+<script>
+const send=(type,data)=>window.parent.postMessage(Object.assign({isStreamlitMessage:true,type},data),"*");
+let specs=null;const cur={};
+const fmt=(sp,v)=>sp.unit==="ms"?`${(v/1000).toLocaleString("en-IN",{maximumFractionDigits:1})} s`
+  :sp.unit==="req_per_s"?`${v} r/s`:Number(v).toFixed(2);
+const loose=(sp,v)=>sp.op===">="?v<sp.official:v>sp.official;
+function emit(){send("streamlit:setComponentValue",{value:Object.assign({},cur),dataType:"json"})}
+function paint(sp,el){const v=cur[sp.id],l=loose(sp,v);el.classList.toggle("loose",l);
+  el.querySelector(".v").textContent=fmt(sp,v);
+  el.querySelector(".tag").textContent=l?"loosened":"";
+  el.querySelector("input").setAttribute("aria-valuetext",fmt(sp,v)+(l?", looser than official":""));}
+function build(){const row=document.getElementById("row");row.innerHTML="";
+  for(const sp of specs){if(!(sp.id in cur))cur[sp.id]=sp.official;
+    const el=document.createElement("div");el.className="s";
+    const pct=(sp.official-sp.min)/(sp.max-sp.min)*100;
+    el.innerHTML=`<span class="g">${sp.label}</span><span class="v"></span>
+      <div class="t"><input type="range" min="${sp.min}" max="${sp.max}" step="${sp.step}"
+       value="${cur[sp.id]}" aria-label="${sp.label} threshold"><span class="mk" style="bottom:calc(${pct}% - 1px)"></span></div>
+      <span class="o">official ${fmt(sp,sp.official)}</span><span class="tag"></span>`;
+    const inp=el.querySelector("input");
+    inp.addEventListener("input",()=>{cur[sp.id]=Number(inp.value);paint(sp,el)});
+    inp.addEventListener("change",emit);
+    paint(sp,el);row.appendChild(el);}
+  const b=document.createElement("button");b.type="button";b.textContent="Reset to official";
+  b.onclick=()=>{for(const sp of specs)cur[sp.id]=sp.official;build();emit()};row.appendChild(b);
+  send("streamlit:setFrameHeight",{height:document.body.scrollHeight+4});}
+window.addEventListener("message",e=>{const d=e.data;if(!d||d.type!=="streamlit:render")return;
+  if(!specs){specs=d.args.gates;build();}});
+send("streamlit:componentReady",{apiVersion:1});
+</script></body></html>

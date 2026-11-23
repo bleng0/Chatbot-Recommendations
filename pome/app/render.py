@@ -21,7 +21,7 @@ _PATHS = {
     "not_tested": '<path d="M5 12h14"/>',
     "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
 }
-_SHORT = {"eligible": "Eligible", "eligible_modeled": "Eligible (modeled)",
+_SHORT = {"not_recommended": "Not recommended", "eligible": "Eligible", "eligible_modeled": "Eligible (modeled)",
           "rejected": "Rejected", "unverified": "Unverified"}
 _UNIT = {"usd_per_month": "USD/month", "inr_per_month": "/month", "inr_per_hour": "/hour",
          "inr_per_1m_tokens": "/1M tokens", "req_per_s": "req/s", "tok_per_s": "tok/s",
@@ -98,8 +98,10 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
                what_if: dict[str, str] | None = None,
                cost: dict[str, tuple[str, bool]] | None = None,
                labels: dict[str, str] | None = None,
-               error: dict[str, tuple[str, bool]] | None = None) -> str:
+               error: dict[str, tuple[str, bool]] | None = None,
+               notes: dict[str, str] | None = None) -> str:
     labels = labels or {}
+    notes = notes or {}
     head = "".join(
         f'<th scope="col" class="g{" off" if g in off else ""}">{escape(labels.get(g, g))}'
         f'{"<small>off</small>" if g in off else ""}</th>' for g in gates)
@@ -113,7 +115,9 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
         cells = "".join(
             f'<td class="g{" off" if g in off else ""}">{cell(r["gates"][g])}</td>'
             if g in r["gates"] else '<td class="g">—</td>' for g in gates)
-        wi = (f'<td class="stat">{_chip(what_if[r["config"]])}</td>'
+        note = (f'<small class="nr">{escape(notes[r["config"]])}</small>'
+                if r["config"] in notes else "")
+        wi = (f'<td class="stat">{_chip(what_if[r["config"]])}{note}</td>'
               if what_if is not None else "")
         if cost is not None:
             txt, over = cost.get(r["config"], ("—", False))
@@ -347,6 +351,8 @@ table details[open] .dx{animation:open var(--dur) var(--ease-out)}
   color:var(--accent)}
 .chip-eligible_modeled{border-style:dashed}
 .chip-rejected{color:var(--text)}
+.chip-not_recommended{color:var(--coraltext);border-color:var(--coral);background:#fff}
+.nr{color:var(--coraltext)}small.nr{display:block;font-size:.75rem;margin-top:.2rem}
 thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 .gm tbody tr:nth-child(even)>*{background:color-mix(in srgb,var(--bg) 60%,var(--panel))}
 .gm tbody tr:hover>*{background:var(--tint)}

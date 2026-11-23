@@ -12,7 +12,7 @@ from pome.evidence.build import build_evidence, build_published_evidence
 from pome.evidence.gapfill import build_gap_evidence
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot, build_snapshot
-from pome.profiles.loader import Profile, load_profile, what_if_profile
+from pome.profiles.loader import Gate, Profile, load_profile, what_if_profile
 from pome.registry.loader import ConfigEntry, load_registry
 from pome.selection.engine import Decision, select
 
@@ -107,6 +107,32 @@ def decide_what_if(snap: Snapshot, s: Scenario, off: tuple[str, ...]) -> Decisio
     Exploration only: never the official recommendation. (Evidence depends only on volume,
     never on which gates are on, so the official snapshot is the right input.)"""
     return select(snap, what_if_profile(_profile(s), off))
+
+
+def _looser(gate: Gate, value: float) -> bool:
+    return value < gate.value if gate.op == ">=" else value > gate.value
+
+
+def decide_sliders(snap: Snapshot, s: Scenario, off: tuple[str, ...],
+                   thresholds: dict[str, float]) -> tuple[Decision, dict[str, list[str]]]:
+    """What-if with per-gate threshold sliders. Returns the what-if decision and, per config,
+    the loosened gates it passes only because of the slider ("Not recommended").
+    Never the official recommendation."""
+    base = _profile(s)
+    moved = {g: v for g, v in thresholds.items() if v != base.gates[g].value}
+    wi = select(snap, what_if_profile(base, off, moved))
+    loose = {g for g, v in moved.items() if _looser(base.gates[g], v)}
+    if not loose:
+        return wi, {}
+    tight = {g: v for g, v in moved.items() if g not in loose}
+    strict = select(snap, what_if_profile(base, off, tight) if (off or tight) else base)
+    failed = {v.config_id: [r.gate for r in v.gates if r.gate in loose and r.status == "fail"]
+              for v in strict.verdicts}
+    strict_ok = {v.config_id for v in strict.verdicts if v.status.startswith("eligible")}
+    not_rec = {v.config_id: failed[v.config_id] for v in wi.verdicts
+               if v.status.startswith("eligible") and v.config_id not in strict_ok
+               and failed.get(v.config_id)}
+    return wi, not_rec
 
 
 def breakeven_tickets(*, api_cost_per_ticket: float, selfhost_monthly: float) -> int | None:

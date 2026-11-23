@@ -38,18 +38,27 @@ def load_profile(path: Path = DEFAULT_PATH) -> Profile:
     return Profile.model_validate(data)
 
 
-def what_if_profile(base: Profile, off: Iterable[str]) -> Profile:
-    """Exploration only: base minus the switched-off gates. Kept gates are copied unchanged,
-    so no threshold moves. The official recommendation never uses this profile."""
+def what_if_profile(base: Profile, off: Iterable[str],
+                    thresholds: dict[str, float] | None = None) -> Profile:
+    """Exploration only: base minus the switched-off gates, with optional per-gate threshold
+    overrides from the UI sliders (session only, CLAUDE.md section 3). The official
+    recommendation never uses this profile."""
     off_sorted = sorted(set(off))
-    if not off_sorted:
-        raise ValueError("a what-if needs at least one gate switched off")
-    unknown = [g for g in off_sorted if g not in base.gates]
+    moved = dict(sorted((thresholds or {}).items()))
+    if not off_sorted and not moved:
+        raise ValueError("a what-if needs at least one gate switched off or one threshold moved")
+    unknown = [g for g in [*off_sorted, *moved] if g not in base.gates]
     if unknown:
-        raise ValueError(f"cannot switch off gates that {base.name} does not have: {unknown}")
+        raise ValueError(f"{base.name} has no gates {unknown}")
+    yes_no = [g for g in moved if base.gates[g].op == "required"]
+    if yes_no:
+        raise ValueError(f"yes/no gates have no threshold to move: {yes_no}")
+    gates = {g: (v.model_copy(update={"value": float(moved[g])}) if g in moved else v)
+             for g, v in base.gates.items() if g not in off_sorted}
+    label = [f"{g} off" for g in off_sorted] + [f"{g}={v:g}" for g, v in moved.items()]
     return base.model_copy(update={
-        "name": f"{base.name} what-if ({', '.join(off_sorted)} off)",
-        "gates": {g: v for g, v in base.gates.items() if g not in off_sorted},
+        "name": f"{base.name} what-if ({', '.join(label)})",
+        "gates": gates,
         "what_if_of": base.name,
     })
 

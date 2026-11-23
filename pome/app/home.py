@@ -13,8 +13,9 @@ from pome.app.scenario import (
     Scenario,
     breakeven_tickets,
     decide,
-    decide_what_if,
+    decide_sliders,
 )
+from pome.app.sliders import gate_sliders, slider_specs
 from pome.app.views import (
     SHOWN_GATES,
     USD_INR,
@@ -65,7 +66,8 @@ with st.sidebar:
     ops = float(ops_inr) / float(USD_INR.value)
     st.header("Tweak mode")
     st.caption("Switch a gate off to see a what-if view; the official result is unchanged.")
-    off = tuple(g for g, row in zip(GATES, gate_info_rows(profile), strict=True)
+    info = dict(zip(GATES, gate_info_rows(profile), strict=True))
+    off = tuple(g for g, row in info.items()
                 if not st.toggle(f"{row['gate']} · {row['checks']}", value=True,
                                  key=f"gate_{g}", help=f"Passes if {row['pass_if']}"))
 
@@ -76,7 +78,6 @@ max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
 scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
                     max_spend_usd=max_spend_usd, max_error_pct=float(max_error))
 snap, d = decide(scenario)
-wi = decide_what_if(snap, scenario, off) if off else None
 
 st.html('<h1>Which <span class="hl">model</span> and <span class="hl">hosting plan</span> '
         'should you use?</h1>')
@@ -90,14 +91,7 @@ st.html(render.stats(counts))
 st.html(f'<p class="hash">decision {d.decision_hash[:12]}… · snapshot '
         f'{d.snapshot_sha256[:12]}… · profile banking_mvp · same inputs, same hash</p>')
 
-if wi:
-    names = ", ".join(display_gate(g) for g in off)
-    st.html(f'<div class="wi"><h3>What-if ({names} off): <span class="muted">not the official '
-            f'decision</span></h3>'
-            + render.answer(relabel(answer_line(wi, snap, what_if_profile(profile, off))),
-                            recommended=bool(wi.recommended), what_if=True)
-            + f'<p class="hash">what-if decision {wi.decision_hash[:12]}… · thresholds of the '
-              f'gates kept are unchanged</p></div>')
+wi_box = st.container()  # filled once the sliders in the Gates tab are read
 
 ids = {c.config_id for c in registry}
 
@@ -105,11 +99,35 @@ tab_gates, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
     ["Gates", "Cost", "Evidence", "Deployment variants", "Configurations"])
 
 with tab_gates:
+    st.html('<p class="one">Gate thresholds: slide to explore. Looser than official marks '
+            'passing configs <b>Not recommended</b>; the official result never changes.</p>')
+    moved = gate_sliders(slider_specs(profile, GATES, display_gate), key="gate_sliders")
+    moved = {g: v for g, v in moved.items()
+             if g not in off and v != float(profile.gates[g].value)}
+    wi, not_rec = (decide_sliders(snap, scenario, off, moved) if off or moved else (None, {}))
+    if wi:
+        parts = [f"{display_gate(g)} off" for g in off] + [
+            f"{display_gate(g)} moved" for g in moved]
+        why = ""
+        if wi.recommended in not_rec:
+            gs = ", ".join(f"{display_gate(g)} (official {info[g]['pass_if']})"
+                           for g in not_rec[wi.recommended])
+            why = (f'<p class="nr">Not recommended: {wi.recommended} passes only because '
+                   f'{gs} was loosened.</p>')
+        wi_box.html(
+            f'<div class="wi"><h3>What-if ({", ".join(parts)}): '
+            f'<span class="muted">not the official decision</span></h3>'
+            + render.answer(relabel(answer_line(wi, snap, what_if_profile(profile, off, moved))),
+                            recommended=bool(wi.recommended), what_if=True) + why
+            + f'<p class="hash">what-if decision {wi.decision_hash[:12]}…</p></div>')
     sort_by = st.segmented_control(
         "Sort by", ["Status", "Monthly cost", "Error rate"], default="Status")
     order = st.segmented_control("Order", ["Ascending", "Descending"], default="Ascending")
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
-    wi_status = {v.config_id: v.status for v in wi.verdicts} if wi else None
+    wi_status = ({v.config_id: ("not_recommended" if v.config_id in not_rec else v.status)
+                  for v in wi.verdicts} if wi else None)
+    nr_notes = {cid: "; ".join(f"{display_gate(g)} official {info[g]['pass_if']}" for g in gs)
+                for cid, gs in not_rec.items()}
     budget_usd = max_spend_usd
 
     def _val(cid: str, metric: str) -> float | None:
@@ -128,7 +146,8 @@ with tab_gates:
     if order == "Descending":
         rows.reverse()
     st.html(render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
-                              labels={g: display_gate(g) for g in GATES}, error=error_cells))
+                              labels={g: display_gate(g) for g in GATES}, error=error_cells,
+                              notes=nr_notes))
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
         st.html(f'<p class="one">No evidence recorded yet: {", ".join(no_ev)}</p>')
