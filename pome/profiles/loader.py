@@ -1,11 +1,12 @@
 """Requirements profile: loaded from YAML and hashed (PLAN F1)."""
 import hashlib
 import json
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 DEFAULT_PATH = Path(__file__).with_name("banking_mvp.yaml")
 
@@ -26,12 +27,36 @@ class Profile(BaseModel):
     peak_rps: float
     region: str
     gates: dict[str, Gate]
+    # Set only on exploration profiles (CONSTRAINTS.md section A); the official profile has None.
+    what_if_of: str | None = Field(default=None, min_length=1)
 
 
 def load_profile(path: Path = DEFAULT_PATH) -> Profile:
-    return Profile.model_validate(yaml.safe_load(Path(path).read_text(encoding="utf-8")))
+    data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    if "what_if_of" in data:
+        raise ValueError("a profile file cannot set what_if_of: use what_if_profile()")
+    return Profile.model_validate(data)
+
+
+def what_if_profile(base: Profile, off: Iterable[str]) -> Profile:
+    """Exploration only: base minus the switched-off gates. Kept gates are copied unchanged,
+    so no threshold moves. The official recommendation never uses this profile."""
+    off_sorted = sorted(set(off))
+    if not off_sorted:
+        raise ValueError("a what-if needs at least one gate switched off")
+    unknown = [g for g in off_sorted if g not in base.gates]
+    if unknown:
+        raise ValueError(f"cannot switch off gates that {base.name} does not have: {unknown}")
+    return base.model_copy(update={
+        "name": f"{base.name} what-if ({', '.join(off_sorted)} off)",
+        "gates": {g: v for g, v in base.gates.items() if g not in off_sorted},
+        "what_if_of": base.name,
+    })
 
 
 def profile_hash(profile: Profile) -> str:
-    canon = json.dumps(profile.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
+    # The marker is left out when unset, so the official profile hash is unchanged.
+    data = profile.model_dump(mode="json",
+                              exclude={"what_if_of"} if profile.what_if_of is None else None)
+    canon = json.dumps(data, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canon.encode()).hexdigest()

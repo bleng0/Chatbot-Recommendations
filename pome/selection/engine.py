@@ -175,7 +175,7 @@ def _validate_profile(profile: Profile) -> None:
     for gid, op in GATE_OPS.items():
         g = profile.gates.get(gid)
         if g is None:
-            if gid in OPTIONAL_GATES:
+            if gid in OPTIONAL_GATES or profile.what_if_of is not None:  # what-if: gate switched off
                 continue
             raise InvalidProfile(f"profile has no gate {gid}")
         if g.op != op:
@@ -293,7 +293,10 @@ def select(snapshot: Snapshot, profile: Profile) -> Decision:
     feasible = sorted(
         (v for v in verdicts if v.status in ("eligible", "eligible_modeled")),
         # equal cost: a config with serving evidence beats one whose serving is not tested
-        key=lambda v: (v.monthly_cost, bool(v.not_tested), -v.quality_margin,
+        # cost / margin are None only in a what-if with G11 / every quality gate off: rank last
+        key=lambda v: (math.inf if v.monthly_cost is None else v.monthly_cost,
+                       bool(v.not_tested),
+                       math.inf if v.quality_margin is None else -v.quality_margin,
                        math.inf if v.p95_ms is None else v.p95_ms, v.config_id),
     )
     best = feasible[0] if feasible else None

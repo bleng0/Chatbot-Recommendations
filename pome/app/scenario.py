@@ -11,7 +11,7 @@ from pome.cost.model import selfhost_monthly_cost
 from pome.evidence.build import build_evidence, build_published_evidence
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot, build_snapshot
-from pome.profiles.loader import Profile, load_profile
+from pome.profiles.loader import Profile, load_profile, what_if_profile
 from pome.registry.loader import ConfigEntry, load_registry
 from pome.selection.engine import Decision, select
 
@@ -67,10 +67,13 @@ def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
         retrieved_at=EVIDENCE_AT, formula=b.formula)
 
 
+def _profile(s: Scenario) -> Profile:
+    return load_profile().model_copy(update={"volume_tickets_per_month": s.volume})
+
+
 def decide(s: Scenario, records: Path = RECORDS,
            registry: list[ConfigEntry] | None = None) -> tuple[Snapshot, Decision]:
-    base = load_profile()
-    profile = base.model_copy(update={"volume_tickets_per_month": s.volume})
+    profile = _profile(s)
     reg = registry if registry is not None else load_registry()
     ev = build_evidence(reg, records, profile, EVIDENCE_AT)
     ev |= build_published_evidence(reg, profile, EVIDENCE_AT)
@@ -78,6 +81,13 @@ def decide(s: Scenario, records: Path = RECORDS,
         ev[f"{SELFHOST}.cost.monthly_usd"] = _selfhost_cost(s, profile)
     snap = build_snapshot(ev, EVIDENCE_AT)
     return snap, select(snap, profile)
+
+
+def decide_what_if(snap: Snapshot, s: Scenario, off: tuple[str, ...]) -> Decision:
+    """The snapshot decide() built, judged against banking_mvp minus the gates in off.
+    Exploration only: never the official recommendation. (Evidence depends only on volume,
+    never on which gates are on, so the official snapshot is the right input.)"""
+    return select(snap, what_if_profile(_profile(s), off))
 
 
 def breakeven_tickets(*, api_cost_per_ticket: float, selfhost_monthly: float) -> int | None:
