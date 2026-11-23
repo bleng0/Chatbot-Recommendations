@@ -17,6 +17,8 @@ class EvidenceValue(BaseModel):
     run_ids: list[str] = []
     key_index: int | None = None
     formula: str | None = None
+    study: bool = False  # published third-party figure (decision D1): never `measured`
+    measured_under: dict[str, str | int | float] | None = None  # settings the study reported
 
     @field_validator("unit", "source")
     @classmethod
@@ -33,4 +35,9 @@ class EvidenceValue(BaseModel):
             raise ValueError("vendor-doc evidence needs a URL source")
         if self.provenance == "modeled" and not (self.formula and self.formula.strip()):
             raise ValueError("modeled evidence needs a stated formula")
+        if self.study:
+            if self.provenance != "vendor-doc":
+                raise ValueError("study evidence must be vendor-doc")
+            if not self.measured_under:
+                raise ValueError("study evidence needs the settings it was reported under")
         return self

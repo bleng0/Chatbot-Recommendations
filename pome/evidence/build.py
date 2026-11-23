@@ -20,6 +20,9 @@ from pome.profiles.loader import Profile
 from pome.registry.loader import ConfigEntry
 
 MIN_ITEMS = 15
+# Priced-only configs were not run by POME, so tokens per ticket are the project workload
+# assumption (600 in / 200 out), not a measurement.
+ASSUMED_IN_TOKENS, ASSUMED_OUT_TOKENS = 600, 200
 LANGS = ("en", "hi", "hinglish")
 _DEPLOY = {"region_processing": "deploy.region", "retention_days": "deploy.retention_days",
            "commercial_use": "deploy.commercial_use"}
@@ -120,3 +123,30 @@ def build_evidence(registry: list[ConfigEntry], root: Path, profile: Profile, no
                        "formula": f"value = measured value of {src_id} (same weights, "
                                   "different serving stack; SPEC A7)"})
     return ev
+
+
+def build_published_evidence(registry: list[ConfigEntry], profile: Profile, now: datetime
+                             ) -> dict[str, EvidenceValue]:
+    """Modeled monthly cost for priced-only configs: published list price x ASSUMED tokens.
+
+    Kept apart from build_evidence so that nothing here can be mistaken for run-derived
+    evidence. No quality evidence is produced: those configs stay unverified (decision D2).
+    """
+    out: dict[str, EvidenceValue] = {}
+    for cfg in registry:
+        p_in, p_out = cfg.pricing.input_per_1m, cfg.pricing.output_per_1m
+        if cfg.evaluation_mode != "priced_only" or not (p_in and p_out):
+            continue
+        b = api_monthly_cost(
+            tickets=profile.volume_tickets_per_month, in_tokens_per_ticket=ASSUMED_IN_TOKENS,
+            out_tokens_per_ticket=ASSUMED_OUT_TOKENS, in_price_per_1m=float(p_in.value),
+            out_price_per_1m=float(p_out.value))
+        out[f"{cfg.config_id}.cost.monthly_usd"] = EvidenceValue(
+            value=b.total, unit="usd_per_month", provenance="modeled",
+            source=(f"list price {p_in.source} ({p_in.provenance}); tokens per ticket assumed, "
+                    f"not measured: {ASSUMED_IN_TOKENS} in / {ASSUMED_OUT_TOKENS} out"),
+            retrieved_at=now,
+            formula=f"{b.formula} | tokens per ticket assumed (not measured): "
+                    f"{ASSUMED_IN_TOKENS} in, {ASSUMED_OUT_TOKENS} out")
+    return out
+

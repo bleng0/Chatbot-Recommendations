@@ -24,6 +24,25 @@ class Deployment(BaseModel):
     commercial_use: EvidenceValue | None
 
 
+class Variant(BaseModel):
+    """One published deployment setting for an open-weight model. Every metric is a study value
+    that records the exact settings it was reported under; match decides whether the settings
+    are close enough to the POME workload to be a modeled gate input (decision D3)."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    variant_id: str
+    stack: str
+    quant: str
+    gpu: str
+    gpu_count: int | None = None
+    batch_concurrency: str = "not stated"
+    context: str = "not stated"
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    match: Literal["MATCH", "REFERENCE"] = "REFERENCE"
+    metrics: dict[str, EvidenceValue] = {}
+    note: str = ""
+
+
 class ConfigEntry(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     config_id: str
@@ -39,6 +58,7 @@ class ConfigEntry(BaseModel):
     pricing: Pricing
     deployment: Deployment
     notes: str = ""
+    variants: list[Variant] = []
 
 
 class _RegistryFile(BaseModel):

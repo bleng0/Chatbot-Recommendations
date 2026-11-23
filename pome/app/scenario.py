@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from pome.cost.model import selfhost_monthly_cost
-from pome.evidence.build import build_evidence
+from pome.evidence.build import build_evidence, build_published_evidence
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot, build_snapshot
 from pome.profiles.loader import Profile, load_profile
@@ -73,6 +73,7 @@ def decide(s: Scenario, records: Path = RECORDS,
     profile = base.model_copy(update={"volume_tickets_per_month": s.volume})
     reg = registry if registry is not None else load_registry()
     ev = build_evidence(reg, records, profile, EVIDENCE_AT)
+    ev |= build_published_evidence(reg, profile, EVIDENCE_AT)
     if any(c.config_id == SELFHOST for c in reg):
         ev[f"{SELFHOST}.cost.monthly_usd"] = _selfhost_cost(s, profile)
     snap = build_snapshot(ev, EVIDENCE_AT)

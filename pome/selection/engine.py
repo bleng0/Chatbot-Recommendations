@@ -239,7 +239,7 @@ def _verdict(cid: str, values: dict[str, EvidenceValue], profile: Profile) -> Ve
             unverified.append(msg)
             continue
         ok, detail, slack = _evaluate_check(ch, evs, profile)
-        if ch.gate != "G11" and any(e.provenance == "modeled" for e in evs):
+        if ch.gate != "G11" and any(e.provenance == "modeled" or e.study for e in evs):
             modeled = True
         if ch.gate in QUALITY_GATES and slack is not None:
             slacks.append(slack)

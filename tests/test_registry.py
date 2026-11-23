@@ -11,14 +11,11 @@ def configs():
     return {c.config_id: c for c in load_registry()}
 
 
-def test_registry_has_the_five_agreed_configs(configs):
-    assert sorted(configs) == [
-        "gem25f-api-global",
-        "gem35fl-api-global",
-        "gemma4-12b-ollama-local-q4",
-        "gemma4-12b-vllm-in-bf16",
-        "gemma4-26b-api-global",
-    ]
+def test_registry_has_the_five_agreed_configs_plus_fifteen_published_only(configs):
+    original = {"gem25f-api-global", "gem35fl-api-global", "gemma4-12b-ollama-local-q4",
+                "gemma4-12b-vllm-in-bf16", "gemma4-26b-api-global"}
+    assert original <= set(configs)
+    assert len(configs) == 20  # owner decision D4, 2026-11-23: 15 published-source configs added
 
 
 def test_selfhost_quality_comes_from_the_local_ollama_run(configs):

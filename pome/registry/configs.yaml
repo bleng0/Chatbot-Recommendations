@@ -88,3 +88,839 @@ configs:
       retention_days: null
       commercial_use: *apache
     notes: "Quality source for the self-hosted config: same weights, 4-bit, thinking off. Laptop latency is not used for G8/G9. Not a deployment option itself."
+
+  # --- Added 2026-11-23: published sources only (prices, vendor docs, studies). Not measured by POME. ---
+  - config_id: gpt54nano-api-global
+    model_id: gpt-5.4-nano
+    version: alias; no pinned version string on the pricing page
+    host: OpenAI API (Standard tier)
+    region: global endpoint (data-residency endpoints cost +10%)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 0.2
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://developers.openai.com/api/docs/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      output_per_1m:
+        value: 1.25
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://developers.openai.com/api/docs/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    deployment: &id001
+      region_processing: null
+      retention_days: null
+      commercial_use: null
+    notes: 'Published price only; not evaluated by POME. Deprecated: shutdown 2027-04-01, replacement gpt-6-luna has no price yet.'
+  - config_id: gpt54mini-api-global
+    model_id: gpt-5.4-mini
+    version: alias; no pinned version string on the pricing page
+    host: OpenAI API (Standard tier)
+    region: global endpoint (data-residency endpoints cost +10%)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 0.75
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://developers.openai.com/api/docs/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      output_per_1m:
+        value: 4.5
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://developers.openai.com/api/docs/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    deployment: *id001
+    notes: Published price only; not evaluated by POME.
+  - config_id: haiku55-api-global
+    model_id: claude-haiku-5-5
+    version: alias; no pinned version string on the pricing page
+    host: Anthropic API (Standard)
+    region: global (no India processing offered for this model)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 0.1
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://platform.claude.com/docs/en/about-claude/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      output_per_1m:
+        value: 0.5
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://platform.claude.com/docs/en/about-claude/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    deployment: *id001
+    notes: Price is for prompts up to 100K tokens (above that $0.50 / $2.50). Published price only; not evaluated by POME.
+  - config_id: sonnet55-api-global
+    model_id: claude-sonnet-5-5
+    version: alias; no pinned version string on the pricing page
+    host: Anthropic API (Standard)
+    region: global (no India processing offered for this model)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 2.0
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://platform.claude.com/docs/en/about-claude/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      output_per_1m:
+        value: 10.0
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://platform.claude.com/docs/en/about-claude/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    deployment: *id001
+    notes: Published price only; not evaluated by POME.
+  - config_id: gem35f-vertex-global
+    model_id: gemini-3.5-flash
+    version: alias; no pinned version string on the pricing page
+    host: Vertex AI (Standard PayGo, global endpoint)
+    region: global; asia-south1 has no Standard PayGo (Provisioned Throughput only, price not collected)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 1.5
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://cloud.google.com/vertex-ai/generative-ai/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      output_per_1m:
+        value: 9.0
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://cloud.google.com/vertex-ai/generative-ai/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    deployment: *id001
+    notes: Published price only; not evaluated by POME. The model is deprecated on the Gemini API and routes to gemini-3.6-flash there.
+  - config_id: mistralsmall4-api-global
+    model_id: mistral-small-2603
+    version: alias; no pinned version string on the pricing page
+    host: Mistral API
+    region: global (no regional commitment found)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 0.15
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://docs.mistral.ai/models/mistral-small-4-0-26-03
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      output_per_1m:
+        value: 0.6
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://docs.mistral.ai/models/mistral-small-4-0-26-03
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    deployment: *id001
+    notes: Published price only; not evaluated by POME. 119B total / 6.5B active MoE.
+  - config_id: sarvam105b-api-in
+    model_id: sarvam-105b
+    version: alias; no pinned version string on the pricing page
+    host: Sarvam API
+    region: India (Azure Central India; inference on Yotta and NxtGen GPUs)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 0.107762
+        unit: usd_per_1m_tokens
+        provenance: modeled
+        source: https://docs.sarvam.ai/api/getting-started/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+        formula: INR 10 per 1M tokens (excl. GST) / 92.7968 INR per USD (RBI reference rate 2026-11-23)
+      output_per_1m:
+        value: 0.269406
+        unit: usd_per_1m_tokens
+        provenance: modeled
+        source: https://docs.sarvam.ai/api/getting-started/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+        formula: INR 25 per 1M tokens (excl. GST) / 92.7968 INR per USD (RBI reference rate 2026-11-23)
+    deployment: &id002
+      region_processing:
+        value: India
+        unit: region
+        provenance: vendor-doc
+        source: https://www.sarvam.ai/trust-center
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      retention_days: null
+      commercial_use: null
+    notes: Introductory INR price through the end of 2026; reasoning tokens bill as output. Published rate limits (60/200/300 req/min by plan) are below the 480 req/min needed for 8 req/s, so G9 would fail. Not evaluated by POME.
+  - config_id: deepseekflash-api-global
+    model_id: deepseek-flash
+    version: alias; no pinned version string on the pricing page
+    host: DeepSeek API
+    region: 'China (privacy policy: data stored in the PRC)'
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 0.3
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://api-docs.deepseek.com/quick_start/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+      output_per_1m:
+        value: 1.2
+        unit: usd_per_1m_tokens
+        provenance: vendor-doc
+        source: https://api-docs.deepseek.com/quick_start/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    deployment: *id001
+    notes: Peak-hour price; off-peak is half. deepseek-v4-flash is retired. Published price only; not evaluated by POME.
+  - config_id: deepseekv41flash-sarvam-in
+    model_id: deepseekv4.1-flash-1017
+    version: alias; no pinned version string on the pricing page
+    host: Sarvam API (hosted DeepSeek)
+    region: India (Sarvam hosting)
+    serving: managed
+    quant: n/a (vendor-managed)
+    evaluation_mode: priced_only
+    pricing:
+      input_per_1m:
+        value: 0.150867
+        unit: usd_per_1m_tokens
+        provenance: modeled
+        source: https://docs.sarvam.ai/api/getting-started/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+        formula: INR 14 per 1M tokens (excl. GST) / 92.7968 INR per USD (RBI reference rate 2026-11-23)
+      output_per_1m:
+        value: 0.592693
+        unit: usd_per_1m_tokens
+        provenance: modeled
+        source: https://docs.sarvam.ai/api/getting-started/pricing
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+        formula: INR 55 per 1M tokens (excl. GST) / 92.7968 INR per USD (RBI reference rate 2026-11-23)
+    deployment: *id002
+    notes: Introductory INR price through the end of 2026. Not evaluated by POME.
+  - config_id: gemma4-31b-vllm-in-bf16
+    model_id: google/gemma-4-31B-it
+    version: open weights
+    host: self-hosted GPU (India region)
+    region: India
+    serving: vLLM
+    quant: bf16
+    evaluation_mode: modeled
+    provider: none
+    pricing:
+      input_per_1m: null
+      output_per_1m: null
+    deployment:
+      region_processing: null
+      retention_days: null
+      commercial_use: &id003
+        value: true
+        unit: bool
+        provenance: vendor-doc
+        source: https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    notes: Dense 30.7B, Apache 2.0. Published settings and memory only; quality not measured by POME.
+    variants:
+    - variant_id: vllm-bf16-2gpu
+      stack: vLLM >=0.19.1
+      quant: BF16 (Google)
+      gpu: A100/H100
+      gpu_count: 2
+      batch_concurrency: TP=2; concurrency not stated
+      context: max-model-len 16384 / 32768 (guide examples)
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics: {}
+      note: ''
+    - variant_id: ollama-q4_K_M
+      stack: Ollama
+      quant: q4_K_M
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 20
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: q4_K_M
+            model_tag: 31b-it
+      note: ''
+    - variant_id: ollama-qat
+      stack: Ollama
+      quant: qat
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 19
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: qat
+            model_tag: 31b-it
+      note: ''
+    - variant_id: ollama-q8_0
+      stack: Ollama
+      quant: q8_0
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 34
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: q8_0
+            model_tag: 31b-it
+      note: ''
+    - variant_id: ollama-bf16
+      stack: Ollama
+      quant: bf16
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 63
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: bf16
+            model_tag: 31b-it
+      note: ''
+  - config_id: gemma4-26b-vllm-in-bf16
+    model_id: google/gemma-4-26B-A4B-it
+    version: open weights
+    host: self-hosted GPU (India region)
+    region: India
+    serving: vLLM
+    quant: bf16
+    evaluation_mode: modeled
+    provider: none
+    pricing:
+      input_per_1m: null
+      output_per_1m: null
+    deployment:
+      region_processing: null
+      retention_days: null
+      commercial_use: *id003
+    notes: 25.2B total / 3.8B active MoE, Apache 2.0. Published settings and memory only; quality not measured by POME.
+    variants:
+    - variant_id: vllm-bf16-1gpu
+      stack: vLLM >=0.25.0
+      quant: BF16 (Google)
+      gpu: A100/H100
+      gpu_count: 1
+      batch_concurrency: concurrency not stated
+      context: max-model-len 32768
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics: {}
+      note: ''
+    - variant_id: ollama-q4_K_M
+      stack: Ollama
+      quant: q4_K_M
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 18
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: q4_K_M
+            model_tag: 26b-a4b-it
+      note: ''
+    - variant_id: ollama-qat
+      stack: Ollama
+      quant: qat
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 16
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: qat
+            model_tag: 26b-a4b-it
+      note: ''
+    - variant_id: ollama-q8_0
+      stack: Ollama
+      quant: q8_0
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 28
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: q8_0
+            model_tag: 26b-a4b-it
+      note: ''
+    - variant_id: ollama-bf16
+      stack: Ollama
+      quant: bf16
+      gpu: not stated
+      gpu_count: null
+      batch_concurrency: not stated
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        weights_memory_gb:
+          value: 52
+          unit: GB
+          provenance: vendor-doc
+          source: https://ollama.com/library/gemma4/tags
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: Ollama
+            quant: bf16
+            model_tag: 26b-a4b-it
+      note: ''
+  - config_id: qwen38-27b-vllm-in-bf16
+    model_id: Qwen/Qwen3.8-27B
+    version: open weights
+    host: self-hosted GPU (India region)
+    region: India
+    serving: vLLM
+    quant: bf16
+    evaluation_mode: modeled
+    provider: none
+    pricing:
+      input_per_1m: null
+      output_per_1m: null
+    deployment:
+      region_processing: null
+      retention_days: null
+      commercial_use:
+        value: true
+        unit: bool
+        provenance: vendor-doc
+        source: https://huggingface.co/Qwen/Qwen3.8-27B
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    notes: Dense, Apache 2.0, 262K context. Only a non-NVIDIA single-stream number was found.
+    variants:
+    - variant_id: vllm-ascend-w8a8
+      stack: vLLM Ascend 0.23.0, MTP on
+      quant: W8A8 (Ascend build)
+      gpu: Ascend 950PR
+      gpu_count: 1
+      batch_concurrency: 1 concurrent request
+      context: OSL 2048
+      input_tokens: null
+      output_tokens: 2048
+      match: REFERENCE
+      metrics:
+        decode_tok_s_single_stream:
+          value: 64
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://recipes.vllm.ai/Qwen/Qwen3.8-27B
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: vLLM Ascend 0.23.0, MTP on
+            quant: W8A8
+            gpu: 1x Ascend 950PR, TP1
+            concurrency: 1
+            output_tokens: 2048
+      note: Non-NVIDIA hardware, single stream. No NVIDIA throughput found.
+  - config_id: llama31-8b-vllm-in-bf16
+    model_id: meta-llama/Llama-3.1-8B-Instruct
+    version: open weights
+    host: self-hosted GPU (India region)
+    region: India
+    serving: vLLM
+    quant: bf16
+    evaluation_mode: modeled
+    provider: none
+    pricing:
+      input_per_1m: null
+      output_per_1m: null
+    deployment:
+      region_processing: null
+      retention_days: null
+      commercial_use: null
+    notes: Only model with MATCH-length serving rows (MLPerf, 8x B300). English MASSIVE composite 0.822 in arXiv 2607.27421 is context only; it is not a POME gate input.
+    variants:
+    - variant_id: mlperf-server
+      stack: TensorRT (version n/s)
+      quant: 'not stated (MLPerf closed: accuracy >= 99% of FP16 reference)'
+      gpu: B300-SXM-270GB
+      gpu_count: 8
+      batch_concurrency: MLPerf Server scenario
+      context: max_seq_len 2048
+      input_tokens: 778
+      output_tokens: 73
+      match: MATCH
+      metrics:
+        throughput_tok_s_system:
+          value: 173950
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://developer.nvidia.com/deep-learning-performance-training-inference/ai-inference
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: TensorRT (version n/s)
+            gpu: 8x B300-SXM-270GB
+            scenario: Server
+            dataset: CNN-DailyMail
+            mean_input_tokens: 778
+            mean_output_tokens: 73
+            benchmark: MLPerf Inference v6.1 Closed
+      note: Lengths match the POME workload; system throughput over 8 GPUs, not per GPU. TTFT <= 2000 ms, TPOT <= 100 ms are limits, not measured percentiles.
+    - variant_id: mlperf-interactive
+      stack: TensorRT (version n/s)
+      quant: 'not stated (MLPerf closed: accuracy >= 99% of FP16 reference)'
+      gpu: B300-SXM-270GB
+      gpu_count: 8
+      batch_concurrency: MLPerf Interactive scenario
+      context: max_seq_len 2048
+      input_tokens: 778
+      output_tokens: 73
+      match: MATCH
+      metrics:
+        throughput_tok_s_system:
+          value: 129168
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://developer.nvidia.com/deep-learning-performance-training-inference/ai-inference
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: TensorRT (version n/s)
+            gpu: 8x B300-SXM-270GB
+            scenario: Interactive
+            dataset: CNN-DailyMail
+            mean_input_tokens: 778
+            mean_output_tokens: 73
+            benchmark: MLPerf Inference v6.1 Closed
+      note: TTFT <= 500 ms, TPOT <= 30 ms are limits, not measured percentiles.
+    - variant_id: mlperf-offline
+      stack: TensorRT (version n/s)
+      quant: 'not stated (MLPerf closed: accuracy >= 99% of FP16 reference)'
+      gpu: B300-SXM-270GB
+      gpu_count: 8
+      batch_concurrency: MLPerf Offline scenario
+      context: max_seq_len 2048
+      input_tokens: 778
+      output_tokens: 73
+      match: REFERENCE
+      metrics:
+        throughput_tok_s_system:
+          value: 171114
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://developer.nvidia.com/deep-learning-performance-training-inference/ai-inference
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: TensorRT (version n/s)
+            gpu: 8x B300-SXM-270GB
+            scenario: Offline
+            dataset: CNN-DailyMail
+            mean_input_tokens: 778
+            mean_output_tokens: 73
+            benchmark: MLPerf Inference v6.1 Closed
+      note: Offline has no latency bound, so it is not used for p95 sizing.
+    - variant_id: fp8-w8a8
+      stack: vLLM
+      quant: FP8 W8A8 static per-tensor (RedHatAI)
+      gpu: not benchmarked
+      gpu_count: null
+      batch_concurrency: eval TP=1
+      context: max_model_len 4096
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        quality_recovery_pct:
+          value: 99.52
+          unit: percent
+          provenance: vendor-doc
+          source: https://huggingface.co/RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: vLLM
+            quant: FP8 W8A8 static per-tensor
+            benchmark: OpenLLM v1 average
+            eval_tp: 1
+            max_model_len: 4096
+        weights_memory_reduction_pct:
+          value: 50
+          unit: percent
+          provenance: vendor-doc
+          source: https://huggingface.co/RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: vLLM
+            quant: FP8 W8A8 static per-tensor
+            benchmark: OpenLLM v1 average
+            eval_tp: 1
+            max_model_len: 4096
+            note: card says approximately 50%
+      note: Recovery is on English general benchmarks, not on banking intent tasks.
+    - variant_id: gptq-int4
+      stack: vLLM
+      quant: GPTQ INT4 weight-only, group 128 (RedHatAI)
+      gpu: not benchmarked
+      gpu_count: null
+      batch_concurrency: eval TP=1
+      context: '8192'
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        quality_recovery_pct:
+          value: 98.9
+          unit: percent
+          provenance: vendor-doc
+          source: https://huggingface.co/RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: vLLM
+            quant: GPTQ INT4 weight-only, group 128
+            benchmark: OpenLLM v1 average
+            eval_tp: 1
+            max_model_len: 8192
+        mmlu_hindi_recovery_pct:
+          value: 94.1
+          unit: percent
+          provenance: vendor-doc
+          source: https://huggingface.co/RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: vLLM
+            quant: GPTQ INT4 weight-only, group 128
+            benchmark: MMLU Hindi (50.10 -> 47.14)
+            eval_tp: 1
+            max_model_len: 8192
+        weights_memory_reduction_pct:
+          value: 75
+          unit: percent
+          provenance: vendor-doc
+          source: https://huggingface.co/RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: vLLM
+            quant: GPTQ INT4 weight-only, group 128
+            benchmark: OpenLLM v1 average
+            eval_tp: 1
+            max_model_len: 8192
+            note: card says approximately 75%
+      note: 'Hindi recovery is lower than English: a relevant risk for G5/G6 if this quantisation were used.'
+  - config_id: sarvam30b-vllm-in-bf16
+    model_id: sarvamai/sarvam-30b
+    version: open weights
+    host: self-hosted GPU (India region)
+    region: India
+    serving: vLLM
+    quant: bf16
+    evaluation_mode: modeled
+    provider: none
+    pricing:
+      input_per_1m: null
+      output_per_1m: null
+    deployment:
+      region_processing: null
+      retention_days: null
+      commercial_use:
+        value: true
+        unit: bool
+        provenance: vendor-doc
+        source: https://huggingface.co/sarvamai/sarvam-30b
+        retrieved_at: '2026-11-23T12:00:00+05:30'
+    notes: 32B total / 2.4B active MoE, Apache 2.0. The hosted Sarvam-30B API is deprecated; this entry is the open weights.
+    variants:
+    - variant_id: nvidia-sglang-h100
+      stack: SGLang (version n/s)
+      quant: not stated
+      gpu: H100 SXM
+      gpu_count: 2
+      batch_concurrency: concurrency 32-64 simulated
+      context: not stated
+      input_tokens: 3584
+      output_tokens: 128
+      match: REFERENCE
+      metrics:
+        output_tok_s_per_gpu:
+          value: 998
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://developer.nvidia.com/blog/how-nvidia-extreme-hardware-software-co-design-delivered-a-large-inference-boost-for-sarvam-ais-sovereign-models/
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under: &id004
+            stack: SGLang (version n/s)
+            gpu: 2x H100 SXM, EP=2, DP-attention=2
+            concurrency: 32-64 simulated
+            input_tokens: 3584
+            output_tokens: 128
+            sla: P95 TTFT < 1000 ms, P95 ITL < 15 ms
+        output_tok_s_per_user:
+          value: 75
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://developer.nvidia.com/blog/how-nvidia-extreme-hardware-software-co-design-delivered-a-large-inference-boost-for-sarvam-ais-sovereign-models/
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under: *id004
+      note: NVIDIA technical blog (vendor engineering content, not a peer-reviewed study). Input length 3584 is outside the 150-3000 match range; reference only.
+  - config_id: museglimmer30b-vllm-in-bf16
+    model_id: meta-models/Muse-Glimmer-30B
+    version: open weights
+    host: self-hosted GPU (India region)
+    region: India
+    serving: vLLM
+    quant: bf16
+    evaluation_mode: modeled
+    provider: none
+    pricing:
+      input_per_1m: null
+      output_per_1m: null
+    deployment:
+      region_processing: null
+      retention_days: null
+      commercial_use: null
+    notes: Dense ~29.6B incl. vision encoder. Licence not confirmed for commercial use, so G14 stays unverified.
+    variants:
+    - variant_id: llamacpp-5090-b1
+      stack: llama.cpp (version n/s)
+      quant: K-Quant-17GB (Meta)
+      gpu: RTX 5090
+      gpu_count: 1
+      batch_concurrency: batch 1
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        output_tok_s:
+          value: 74.9
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://huggingface.co/meta-models/Muse-Glimmer-30B
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: llama.cpp (version n/s)
+            quant: K-Quant-17GB (Meta)
+            gpu: RTX 5090 x1
+            batch: 1
+            sampling: greedy
+      note: Batch 1 only; input and output lengths not reported. Says nothing about 8 req/s capacity.
+    - variant_id: llamacpp-5090-b1-dflash
+      stack: llama.cpp (version n/s) + quantised DFlash drafter
+      quant: K-Quant-17GB (Meta)
+      gpu: RTX 5090
+      gpu_count: 1
+      batch_concurrency: batch 1
+      context: not stated
+      input_tokens: null
+      output_tokens: null
+      match: REFERENCE
+      metrics:
+        output_tok_s:
+          value: 233.4
+          unit: tok_per_s
+          provenance: vendor-doc
+          source: https://huggingface.co/meta-models/Muse-Glimmer-30B
+          retrieved_at: '2026-11-23T12:00:00+05:30'
+          study: true
+          measured_under:
+            stack: llama.cpp (version n/s) + quantised DFlash drafter
+            quant: K-Quant-17GB (Meta)
+            gpu: RTX 5090 x1
+            batch: 1
+            sampling: greedy
+      note: Batch 1 only; input and output lengths not reported. Says nothing about 8 req/s capacity.

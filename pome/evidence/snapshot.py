@@ -19,13 +19,22 @@ def _ts(dt: AwareDatetime) -> str:
     return dt.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
+def _dump(v: EvidenceValue) -> dict:
+    """Canonical dict. `study` and `measured_under` are omitted at their defaults so that the
+    hash of evidence recorded before decision D1 does not change."""
+    d = v.model_dump(mode="python")
+    if not d["study"]:
+        del d["study"], d["measured_under"]
+    return {**d, "retrieved_at": _ts(v.retrieved_at)}
+
+
 def _canonical(schema_version: str, created_at: AwareDatetime,
                values: dict[str, EvidenceValue]) -> str:
     payload = {
         "schema_version": schema_version,
         "created_at": _ts(created_at),
         "values": {
-            key: {**v.model_dump(mode="python"), "retrieved_at": _ts(v.retrieved_at)}
+            key: _dump(v)
             for key, v in values.items()
         },
     }
