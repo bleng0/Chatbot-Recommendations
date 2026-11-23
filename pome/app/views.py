@@ -230,13 +230,13 @@ def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sideb
     if cfg.host.startswith("self-hosted"):
         return [
             ("Rent GPUs in India", f"Rent {gpu} in an India region for {cfg.model_id}."),
-            ("Serve the model", f"Run {cfg.serving} with {cfg.model_id} at {cfg.quant}, "
-                                "behind a private endpoint."),
-            ("Add a gateway", "Put an API gateway and request queue in front; keep logs "
-                              "off or redacted."),
+            ("Serve the model", (f"Run {cfg.serving} with {cfg.model_id} at {cfg.quant}, "
+                                 "behind a private endpoint.")),
+            ("Add a gateway", ("Put an API gateway and request queue in front; keep logs "
+                               "off or redacted.")),
             ("Route tickets", route),
-            ("Watch and scale", "Track latency, errors and GPU load; add GPUs before peak "
-                                "hours."),
+            ("Watch and scale", ("Track latency, errors and GPU load; add GPUs before peak "
+                                 "hours.")),
         ]
     if cfg.provider == "ollama":
         return [
@@ -249,8 +249,8 @@ def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sideb
     return [
         ("Open a provider account", f"Create a paid {provider} account and an API key."),
         ("Pick model and region", f"Call {cfg.model_id}; region: {cfg.region}."),
-        ("Set data controls", "Turn on zero data retention if offered; never send card or "
-                              "account numbers."),
+        ("Set data controls", ("Turn on zero data retention if offered; never send card or "
+                               "account numbers.")),
         ("Route tickets", route),
         ("Watch cost and errors", "Set a monthly spend alert and retry failed calls once."),
     ]

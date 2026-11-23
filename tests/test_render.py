@@ -75,3 +75,17 @@ def test_gate_table_can_show_a_monthly_cost_column_with_over_budget_marked():
                       cost={"a": ("₹1,500", True)})
     assert '<td class="num cost over">₹1,500 <span class="ob">over budget</span></td>' in html
     assert "Monthly cost" in html
+
+
+def test_gate_table_shows_hidden_setting_failures_in_red_columns():
+    html = gate_table([ROW], ["G1", "G2"], set(), None,
+                      cost={"a": ("₹1", False)}, error={"a": ("3.43%", True)})
+    assert "Error rate" in html
+    assert '<td class="num cost over">3.43% <span class="ob">over limit</span></td>' in html
+
+
+def test_config_table_is_compact_and_escaped():
+    from pome.app.render import config_table
+    html = config_table([{"config": "a<b", "model": "m", "host": "h", "region": "r",
+                          "serving": "s", "quant": "q"}])
+    assert 'class="ct"' in html and "a&lt;b" in html and "notes" not in html.lower()

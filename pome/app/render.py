@@ -97,7 +97,8 @@ def _chip(status: str) -> str:
 def gate_table(rows: list[dict], gates: list[str], off: set[str],
                what_if: dict[str, str] | None = None,
                cost: dict[str, tuple[str, bool]] | None = None,
-               labels: dict[str, str] | None = None) -> str:
+               labels: dict[str, str] | None = None,
+               error: dict[str, tuple[str, bool]] | None = None) -> str:
     labels = labels or {}
     head = "".join(
         f'<th scope="col" class="g{" off" if g in off else ""}">{escape(labels.get(g, g))}'
@@ -105,6 +106,8 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
     wi_head = '<th scope="col">What-if</th>' if what_if is not None else ""
     if cost is not None:
         wi_head += '<th scope="col">Monthly cost</th>'
+    if error is not None:
+        wi_head += '<th scope="col">Error rate</th>'
     body = []
     for r in rows:
         cells = "".join(
@@ -115,6 +118,10 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
         if cost is not None:
             txt, over = cost.get(r["config"], ("—", False))
             tag = ' <span class="ob">over budget</span>' if over else ""
+            wi += f'<td class="num cost{" over" if over else ""}">{escape(txt)}{tag}</td>'
+        if error is not None:
+            txt, over = error.get(r["config"], ("—", False))
+            tag = ' <span class="ob">over limit</span>' if over else ""
             wi += f'<td class="num cost{" over" if over else ""}">{escape(txt)}{tag}</td>'
         body.append(f'<tr><th scope="row" class="cid">{escape(r["config"])}</th>'
                     f'<td class="stat">{_chip(r["status"])}</td>{wi}{cells}</tr>')
@@ -160,12 +167,12 @@ def config_fan(items: list[dict], focus: str) -> str:
         hidden = "" if it["config"] == focus else " hidden"
         panels.append(f'<section class="fan-steps" data-cid="{cid}"{hidden}>'
                       f'<h3>How to build <code>{cid}</code></h3><ol>{steps}</ol></section>')
-    return (f'<div class="fan"><div class="fan-bar"><button type="button" class="fan-prev" '
-            f'aria-label="Previous configuration">&larr;</button><p class="fan-live" '
-            f'aria-live="polite"></p><button type="button" class="fan-next" '
-            f'aria-label="Next configuration">&rarr;</button></div>'
+    return (f'<div class="fan"><div class="fan-main"><p class="fan-live" aria-live="polite">'
+            f'</p>{"".join(panels)}</div><div class="fan-side"><button type="button" '
+            f'class="fan-prev" aria-label="Previous configuration">&uarr;</button>'
             f'<div class="fan-rail" tabindex="0" aria-label="Configurations">{"".join(cards)}'
-            f'</div>{"".join(panels)}</div>{_FAN_JS}')
+            f'</div><button type="button" class="fan-next" aria-label="Next configuration">'
+            f'&darr;</button></div></div>{_FAN_JS}')
 
 
 _FAN_JS = """<script>(function () {
@@ -189,16 +196,17 @@ _FAN_JS = """<script>(function () {
       translateX: [-10, 0], duration: 320, ease: "outExpo", delay: window.anime.stagger(45) });
   }
   function fan() {
-    const mid = rail.getBoundingClientRect().left + rail.clientWidth / 2;
+    const box = rail.getBoundingClientRect();
+    const mid = box.top + rail.clientHeight / 2;
     let best = cards[0], bestD = Infinity;
     cards.forEach((c) => {
       const r = c.getBoundingClientRect();
-      const d = (r.left + r.width / 2 - mid) / r.width;   // distance in card widths
+      const d = (r.top + r.height / 2 - mid) / r.height;   // distance in card heights
       const a = Math.min(Math.abs(d), 3);
-      c.style.transform = `rotate(${Math.max(-12, Math.min(12, d * 5))}deg) ` +
-        `translateY(${a * 10}px) scale(${1 - a * 0.07})`;
-      c.style.filter = a < 0.5 ? "none" : `blur(${Math.min(a * 2.2, 6)}px)`;
-      c.style.opacity = String(1 - Math.min(a * 0.22, 0.6));
+      c.style.transform = `rotate(${Math.max(-6, Math.min(6, d * 2.5))}deg) ` +
+        `translateX(${a * 8}px) scale(${1 - a * 0.05})`;
+      c.style.filter = a < 0.5 ? "none" : `blur(${Math.min(a * 0.6, 1.2)}px)`;
+      c.style.opacity = String(1 - Math.min(a * 0.15, 0.45));
       if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = c; }
     });
     show(best);
@@ -207,19 +215,30 @@ _FAN_JS = """<script>(function () {
   rail.addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fan); },
                         { passive: true });
   const go = (c) => c && c.scrollIntoView({ behavior: still ? "auto" : "smooth",
-                                            inline: "center", block: "nearest" });
+                                            block: "center", inline: "nearest" });
   const step = (n) => go(cards[Math.max(0, Math.min(cards.length - 1, cards.indexOf(current) + n))]);
   root.querySelector(".fan-prev").addEventListener("click", () => step(-1));
   root.querySelector(".fan-next").addEventListener("click", () => step(1));
   cards.forEach((c) => c.addEventListener("click", () => go(c)));
   rail.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
-    if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+    if (e.key === "ArrowDown") { e.preventDefault(); step(1); }
+    if (e.key === "ArrowUp") { e.preventDefault(); step(-1); }
   });
   const first = rail.querySelector("[aria-current]") || cards[0];
-  const start = () => { rail.scrollLeft = first.offsetLeft - (rail.clientWidth - first.offsetWidth) / 2; fan(); };
+  const start = () => { rail.scrollTop = first.offsetTop - (rail.clientHeight - first.offsetHeight) / 2; fan(); };
   new ResizeObserver(() => { if (rail.clientWidth) start(); }).observe(rail);
 })();</script>"""
+
+
+def config_table(rows: list[dict[str, str]]) -> str:
+    cols = [("config", "Configuration"), ("model", "Model"), ("host", "Host"),
+            ("region", "Region"), ("serving", "Serving"), ("quant", "Quant")]
+    head = "".join(f'<th scope="col">{t}</th>' for _, t in cols)
+    body = "".join("<tr>" + "".join(
+        f'<td class="{"cid" if k == "config" else ""}">{escape(r[k])}</td>' for k, _ in cols)
+        + "</tr>" for r in rows)
+    return (f'<div class="tw"><table class="ct"><thead><tr>{head}</tr></thead>'
+            f"<tbody>{body}</tbody></table></div>")
 
 
 def evidence_table(rows: list[dict[str, str]]) -> str:
@@ -362,21 +381,23 @@ td.gi{font-size:.9375rem;color:var(--text)}
 .gm td.cost{text-align:right}
 .gm td.over{color:var(--coraltext)}
 .ob{font:500 .6875rem/1 "Fira Sans",sans-serif;margin-left:.3rem}
-.fan{margin-top:.5rem}
-.fan-bar{display:flex;align-items:center;gap:.75rem;margin-bottom:.25rem}
-.fan-bar button{width:2.25rem;height:2.25rem;border-radius:999px;border:1px solid var(--line);
+.fan{margin-top:.5rem;display:grid;grid-template-columns:minmax(0,1fr) 19rem;gap:2rem;
+  align-items:start}
+.fan-side{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.fan-side>button{width:2.25rem;height:2.25rem;border-radius:999px;border:1px solid var(--line);
   background:var(--panel);color:var(--text);cursor:pointer;font-size:1rem;
   transition:border-color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
-.fan-bar button:hover{border-color:var(--teal);background:var(--tint)}
-.fan-live{margin:0;font:500 .875rem "Fira Code",monospace;color:var(--accent);flex:1;text-align:center}
-.fan-rail{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;
-  padding:2rem 40% 2.5rem;scrollbar-width:none;outline-offset:4px;perspective:900px}
+.fan-side>button:hover{border-color:var(--teal);background:var(--tint)}
+.fan-live{margin:0 0 .5rem;font:500 .8125rem "Fira Code",monospace;color:var(--accent)}
+.fan-rail{display:flex;flex-direction:column;gap:.75rem;overflow-y:auto;height:30rem;width:100%;
+  scroll-snap-type:y mandatory;padding:12rem .75rem;scrollbar-width:none;outline-offset:4px}
 .fan-rail::-webkit-scrollbar{display:none}
-.fan-card{flex:0 0 17rem;scroll-snap-align:center;display:flex;flex-direction:column;gap:.35rem;
-  text-align:left;padding:1rem 1.1rem;border-radius:10px;border:1px solid var(--line);
+.fan-card{flex:0 0 auto;scroll-snap-align:center;display:flex;flex-direction:column;gap:.3rem;
+  text-align:left;padding:.85rem 1rem;border-radius:10px;border:1px solid var(--line);
   background:var(--panel);color:var(--text);cursor:pointer;font:inherit;
-  box-shadow:0 6px 18px rgba(28,29,31,.06);transform-origin:50% 120%;
+  box-shadow:0 6px 18px rgba(28,29,31,.06);transform-origin:0% 50%;
   transition:box-shadow var(--dur) var(--ease-out),border-color var(--dur) var(--ease-out)}
+@media (max-width:900px){.fan{grid-template-columns:1fr}.fan-side{order:-1}}
 .fan-card[aria-current]{border-color:var(--teal);box-shadow:0 14px 32px rgba(11,115,114,.18)}
 .fc-id{font:500 .9375rem "Fira Code",monospace}
 .fc-model{font-size:.8125rem;color:var(--muted)}
@@ -393,6 +414,8 @@ td.gi{font-size:.9375rem;color:var(--text)}
 .fs-t{font-weight:500}
 .fs-d{color:var(--muted);font-size:.875rem}
 @media (prefers-reduced-motion:reduce){.fan-card{transition:none}}
+.ct td,.ct th{white-space:normal;font-size:.8125rem;padding:.35rem .5rem}
+.ct td.cid{font-family:"Fira Code",monospace;white-space:nowrap}
 /* chart bars grow from their baseline (motion.js) */
 .js-plotly-plot .bars path{transform-box:fill-box;transform-origin:0 50%}
 /* Streamlit chrome in the Gossamer look */

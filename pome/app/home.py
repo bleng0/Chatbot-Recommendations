@@ -109,13 +109,29 @@ with tab_info:
     st.html(render.gate_info_table(gate_info_rows(profile)))
 
 with tab_gates:
+    sort_by = st.segmented_control(
+        "Sort by", ["Status", "Monthly cost", "Error rate", "Name"], default="Status")
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
     wi_status = {v.config_id: v.status for v in wi.verdicts} if wi else None
     budget_usd = max_spend_usd
-    cost_cells = {k.split(".", 1)[0]: (inr(float(e.value)), float(e.value) > budget_usd)
-                  for k, e in snap.values.items() if k.endswith(".cost.monthly_usd")}
+
+    def _val(cid: str, metric: str) -> float | None:
+        e = snap.values.get(f"{cid}.{metric}")
+        return float(e.value) if e is not None and isinstance(e.value, int | float) else None
+
+    cost_cells = {cid: (inr(v), v > budget_usd) for r in rows
+                  if (v := _val(cid := r["config"], "cost.monthly_usd")) is not None}
+    error_cells = {cid: (f"{v:.2f}%", v > float(max_error)) for r in rows
+                   if (v := _val(cid := r["config"], "serving.error_pct")) is not None}
+    inf = float("inf")
+    if sort_by == "Monthly cost":
+        rows.sort(key=lambda r: _val(r["config"], "cost.monthly_usd") or inf)
+    elif sort_by == "Error rate":
+        rows.sort(key=lambda r: _val(r["config"], "serving.error_pct") or inf)
+    elif sort_by == "Name":
+        rows.sort(key=lambda r: r["config"])
     st.html(render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
-                              labels={g: display_gate(g) for g in GATES}))
+                              labels={g: display_gate(g) for g in GATES}, error=error_cells))
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
         st.html(f'<p class="one">No evidence recorded yet: {", ".join(no_ev)}</p>')
@@ -198,6 +214,10 @@ with tab_var:
                 + render.variant_table(rows))
 
 with tab_cfg:
+    st.html(render.config_table([{
+        "config": c.config_id, "model": c.model_id, "host": c.host.split(" (")[0],
+        "region": c.region.split(" (")[0].split(";")[0], "serving": c.serving,
+        "quant": c.quant.split(" (")[0]} for c in registry if c.config_id in ids]))
     status = {v.config_id: v.status for v in d.verdicts}
     order = [r["config"] for r in gate_matrix(d)]
     gpu_label = GPU_OPTIONS[gpu].label + (f" x{int(gpus)}" if int(gpus) > 1 else "")
@@ -209,14 +229,10 @@ with tab_cfg:
             "config": cid, "model": c.model_id, "host": c.host.split(" (")[0],
             "status": status[cid], "cost": f"{inr(float(cost.value))}/mo" if cost else "—",
             "steps": architecture_steps(c, gpu=gpu_label)})
-    st.caption("Scroll or use the arrows; the card in the middle shows its build steps.")
+    st.caption("Scroll the list on the right or use the arrows; the middle card's build steps "
+               "show on the left.")
     st.html(render.config_fan(fan_items, focus=d.recommended or order[0]),
             unsafe_allow_javascript=True)
-    with st.expander("All configuration details (table)"):
-        st.dataframe(pd.DataFrame([{
-            "config": c.config_id, "model": c.model_id, "host": c.host, "region": c.region,
-            "serving": c.serving, "quant": c.quant, "mode": c.evaluation_mode, "notes": c.notes,
-        } for c in registry if c.config_id in ids]), hide_index=True, width="stretch")
 
 st.html(f'<p class="foot">All costs are shown in INR. Conversion: US$1 = '
         f'₹{RATE:.4f} (RBI reference rate, {USD_INR.retrieved_at.date().isoformat()}). '
