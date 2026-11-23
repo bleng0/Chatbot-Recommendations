@@ -78,7 +78,7 @@ def test_cost_exactly_at_budget_passes_and_one_cent_over_fails():
 
 
 def test_cheapest_feasible_is_recommended_not_cheapest_overall():
-    cheap_but_slow = passing("cheap", cost=100.0, p95=3500.0)
+    cheap_but_slow = passing("cheap", cost=100.0, p95=25000.0)
     d = select(snap(cheap_but_slow, passing("mid", cost=900.0), passing("dear", cost=1400.0)), PROFILE)
     assert (d.outcome, d.recommended) == ("recommended", "mid")
     assert [s.config_id for s in d.shortlist] == ["mid", "dear"]
@@ -135,7 +135,7 @@ def test_missing_evidence_is_unverified_never_pass():
 
 
 def test_a_fail_outranks_unverified():
-    d = select(snap(passing("a", p95=5000.0), drop=["a.deploy.region"]), PROFILE)
+    d = select(snap(passing("a", p95=25000.0), drop=["a.deploy.region"]), PROFILE)
     v = verdict(d, "a")
     assert v.status == "rejected"
     assert v.missing == ["a.deploy.region"]
@@ -378,5 +378,5 @@ def test_invalid_serving_evidence_is_still_unverified():
 
 
 def test_failing_serving_evidence_still_rejects():
-    d = select(snap(passing("a", p95=5000.0)), LENIENT)
+    d = select(snap(passing("a", p95=25000.0)), LENIENT)
     assert verdict(d, "a").status == "rejected"

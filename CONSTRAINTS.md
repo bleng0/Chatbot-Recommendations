@@ -31,10 +31,10 @@ never `measured`. A config that passes on such evidence is only ever `eligible (
 | G5 | FAQ unanswerable correctly declined, per language | ≥ 0.80 | measured, else modeled proxy | Owner default |
 | G6 | Language gap: Hindi vs English on every quality metric with both languages (MASSIVE hi-IN vs en-US macro-F1; FAQ G4, G5) | en − hi ≤ 0.10 | measured, else modeled proxy | Owner default (10 points absolute) |
 | G7 | Language gap: Hinglish vs English on every quality metric with Hinglish data (FAQ G4, G5 only; no Hinglish intent benchmark exists) | en − hinglish ≤ 0.10 | measured, else modeled proxy | Owner default; scope per SPEC A3 |
-| G8 | p95 latency at the concurrency level that sustains peak load | ≤ 3000 ms | measured, else modeled (published medians / decode model) | Owner default |
-| G9 | Sustainable throughput (p95 ≤ G8 and error rate ≤ G10) | ≥ 8 req/s | measured / modeled | Profile peak |
+| G8 | p95 latency at the concurrency level that sustains peak load | ≤ 20000 ms | measured, else modeled (published medians / decode model) | Owner decision 2026-11-23 (was 3000 ms) |
+| G9 | Sustainable throughput (p95 ≤ G8 and error rate ≤ G10) | ≥ 5 req/s | measured / modeled | Owner decision 2026-11-23 (was 8, the profile peak) |
 | G10 | Error rate after retries, at that concurrency | ≤ 1.0% | measured / modeled | Default: errors above 1% at peak are visible to customers |
-| G11 | Monthly cost at the app's ticket volume | ≤ the user's max monthly spend (app sidebar, INR; default ₹1,39,195 = $1,500) | measured tokens × vendor-doc prices; self-host modeled | Owner decision 2026-11-23: budget is a user input, shown as a cost column, not a gate column |
+| G11 | Monthly cost at the app's ticket volume | ≤ $1,500 by default (₹1,39,195); the user sets their own max monthly spend in the app sidebar | measured tokens × vendor-doc prices; self-host modeled | Owner decision 2026-11-23: budget is a user input, shown as a cost column, not a gate column |
 | G14 | Licence/terms permit commercial use | required | vendor-doc | Owner default |
 
 Gate rules:
@@ -46,7 +46,7 @@ Gate rules:
   ranks first. Serving evidence that is present but fails or is invalid still counts.
 - Minimum sample: a quality metric needs at least 15 scored items (successful calls) to be
   used; below that it stays unverified (owner decision 2026-11-22, was 30).
-- G8–G10: pass if at least one tested concurrency level reaches ≥ 8 req/s with p95 ≤ 3000 ms
+- G8–G10: pass if at least one tested concurrency level reaches ≥ 5 req/s with p95 ≤ 20000 ms
   and errors ≤ 1%.
 - G11 ticket definition: SPEC A4.
 - Not legal certification: G14 records documented evidence only.
