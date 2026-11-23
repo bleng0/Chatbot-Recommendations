@@ -30,10 +30,11 @@ def test_gate_matrix_sorts_failing_then_unverified_then_eligible():
     assert [r["config"] for r in rows] == ["bad", "gap", "ok"]
 
 
-def test_answer_line_names_missing_evidence_and_the_shared_failure():
+def test_answer_line_flags_a_recommendation_built_on_modeled_evidence():
     snap_, d = decide(Scenario())
-    assert answer_line(d, snap_, load_profile()) == (
-        "No configuration qualifies yet: 16 lack evidence, 2 fail G1 (0.75 < 0.80)")
+    assert d.recommended_is_modeled
+    assert answer_line(d, snap_, load_profile()).startswith(
+        f"Recommended on modeled evidence (not measured): {d.recommended} at $")
 
 
 def test_answer_line_for_a_recommendation_states_config_and_modeled_cost():

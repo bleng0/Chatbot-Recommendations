@@ -118,9 +118,12 @@ def test_new_api_configs_get_a_modeled_cost_from_the_stated_token_assumption():
     assert round(float(cost.value), 2) == 135.0  # 60M x 0.75 + 20M x 4.50 per 1M tokens
 
 
-def test_no_new_config_is_recommended_or_eligible_without_task_evidence():
+def test_new_configs_are_never_plain_eligible_and_only_recommended_as_modeled():
+    # Owner 2026-11-23 replaced decision D2: unmeasured configs now get proxy evidence, so they
+    # may be recommended, but only ever as modeled, never as plainly eligible.
     _, d = decide(Scenario())
-    assert d.recommended not in NEW_API + NEW_SELF
     status = {v.config_id: v.status for v in d.verdicts}
-    assert set(NEW_API) <= set(status)  # priced configs appear with a modeled cost
-    assert all(status[c] == "unverified" for c in NEW_API + NEW_SELF if c in status)
+    assert set(NEW_API + NEW_SELF) <= set(status)
+    assert all(status[c] != "eligible" for c in NEW_API + NEW_SELF)
+    if d.recommended in NEW_API + NEW_SELF:
+        assert d.recommended_is_modeled

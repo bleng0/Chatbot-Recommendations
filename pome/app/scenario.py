@@ -9,6 +9,7 @@ from pathlib import Path
 
 from pome.cost.model import selfhost_monthly_cost
 from pome.evidence.build import build_evidence, build_published_evidence
+from pome.evidence.gapfill import build_gap_evidence
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot, build_snapshot
 from pome.profiles.loader import Profile, load_profile, what_if_profile
@@ -77,8 +78,10 @@ def decide(s: Scenario, records: Path = RECORDS,
     reg = registry if registry is not None else load_registry()
     ev = build_evidence(reg, records, profile, EVIDENCE_AT)
     ev |= build_published_evidence(reg, profile, EVIDENCE_AT)
-    if any(c.config_id == SELFHOST for c in reg):
-        ev[f"{SELFHOST}.cost.monthly_usd"] = _selfhost_cost(s, profile)
+    for c in reg:
+        if c.host.startswith("self-hosted"):
+            ev[f"{c.config_id}.cost.monthly_usd"] = _selfhost_cost(s, profile)
+    ev |= build_gap_evidence(reg, ev, profile, records)
     snap = build_snapshot(ev, EVIDENCE_AT)
     return snap, select(snap, profile)
 

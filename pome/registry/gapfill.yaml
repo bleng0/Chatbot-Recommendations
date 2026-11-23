@@ -1,0 +1,132 @@
+# Inputs for values POME did not measure (owner request 2026-11-23: no gate may stay empty).
+# Every value built from this file is `vendor-doc` (a URL that states it) or `modeled`
+# (a stated formula with the inputs below). None is `measured`. See pome/evidence/gapfill.py.
+retrieved_at: "2026-11-23T17:30:00+05:30"
+out_tokens: 200            # project workload assumption (same as cost model)
+in_tokens: 600
+
+# Quality proxies: POME's own measured runs on the closest measured model.
+quality_default_anchor: gemma4-12b-ollama-local-q4   # only config with every quality metric
+quality_anchor:            # banking77 only: closest measured model by size/tier
+  gem35fl-api-global: gemma4-26b-api-global
+  gpt54nano-api-global: gemma4-26b-api-global
+  gpt54mini-api-global: gem25f-api-global
+  haiku55-api-global: gem25f-api-global
+  sonnet55-api-global: gem25f-api-global
+  gem35f-vertex-global: gem25f-api-global
+  mistralsmall4-api-global: gem25f-api-global
+  sarvam105b-api-in: gem25f-api-global
+  deepseekflash-api-global: gem25f-api-global
+  deepseekv41flash-sarvam-in: gem25f-api-global
+  gemma4-31b-vllm-in-bf16: gemma4-26b-api-global
+  gemma4-26b-vllm-in-bf16: gemma4-26b-api-global
+  qwen38-27b-vllm-in-bf16: gemma4-26b-api-global
+  sarvam30b-vllm-in-bf16: gemma4-26b-api-global
+  museglimmer30b-vllm-in-bf16: gemma4-26b-api-global
+  llama31-8b-vllm-in-bf16: gemma4-12b-ollama-local-q4
+
+# Hosted API speed, lowest-effort variant (Artificial Analysis medians, not p95, not at peak).
+api_speed:
+  gem35fl-api-global:        {ttft_s: 4.62, tok_s: 309, variant: "Google API", url: "https://artificialanalysis.ai/models/gemini-3-5-flash-lite"}
+  gem25f-api-global:         {ttft_s: 0.60, tok_s: 171, variant: non-reasoning, url: "https://artificialanalysis.ai/models/gemini-2-5-flash"}
+  gemma4-26b-api-global:     {ttft_s: 1.72, tok_s: 81,  variant: non-reasoning, url: "https://artificialanalysis.ai/models/gemma-4-26b-a4b"}
+  gem35f-vertex-global:      {ttft_s: 2.60, tok_s: 158, variant: minimal, url: "https://artificialanalysis.ai/models/gemini-3-5-flash"}
+  gpt54nano-api-global:      {ttft_s: 1.32, tok_s: 106, variant: non-reasoning, url: "https://artificialanalysis.ai/models/gpt-5-4-nano"}
+  gpt54mini-api-global:      {ttft_s: 1.18, tok_s: 125, variant: non-reasoning, url: "https://artificialanalysis.ai/models/gpt-5-4-mini"}
+  haiku55-api-global:        {ttft_s: 6.02, tok_s: 218, variant: low, url: "https://artificialanalysis.ai/models/claude-haiku-5-5"}
+  sonnet55-api-global:       {ttft_s: 2.99, tok_s: 134, variant: low, url: "https://artificialanalysis.ai/models/claude-sonnet-5-5"}
+  mistralsmall4-api-global:  {ttft_s: 1.59, tok_s: 121, variant: non-reasoning, url: "https://artificialanalysis.ai/models/mistral-small-4"}
+  sarvam105b-api-in:         {ttft_s: 6.76, tok_s: 282, variant: high, url: "https://artificialanalysis.ai/models/sarvam-105b"}
+  deepseekflash-api-global:  {ttft_s: 0.78, tok_s: 227, variant: "V4.1 Flash non-reasoning", url: "https://artificialanalysis.ai/models/deepseek-v4-1-flash"}
+  deepseekv41flash-sarvam-in: {ttft_s: 0.78, tok_s: 227, variant: "V4.1 Flash non-reasoning (median across providers)", url: "https://artificialanalysis.ai/models/deepseek-v4-1-flash"}
+
+# Throughput ceilings. kind: rpm (published requests/min), rps (published requests/s),
+# spend (Gemini Tier 1 spend cap per 10 min / cost per request), concurrency (Little's law).
+api_limits:
+  gem35fl-api-global:        {kind: spend, usd_per_10min: 10, url: "https://ai.google.dev/gemini-api/docs/rate-limits"}
+  gem25f-api-global:         {kind: spend, usd_per_10min: 10, url: "https://ai.google.dev/gemini-api/docs/rate-limits"}
+  gem35f-vertex-global:      {kind: spend, usd_per_10min: 10, url: "https://ai.google.dev/gemini-api/docs/rate-limits", note: "Vertex publishes no fixed per-project cap (dynamic shared quota); proxy = Gemini API Tier 1 spend cap"}
+  gemma4-26b-api-global:     {kind: rpm, value: 20, url: "https://openrouter.ai/docs/api/reference/limits", note: "free tier only; proxy = OpenRouter free-model limit for the same Google backend"}
+  gpt54nano-api-global:      {kind: rpm, value: 500, url: "https://developers.openai.com/api/docs/models/gpt-5.4-mini", note: "Tier 1; nano table not readable, proxy = gpt-5.4-mini Tier 1"}
+  gpt54mini-api-global:      {kind: rpm, value: 500, url: "https://developers.openai.com/api/docs/models/gpt-5.4-mini", note: "Tier 1"}
+  haiku55-api-global:        {kind: rpm, value: 1000, url: "https://platform.claude.com/docs/api/rate-limits", note: "start tier"}
+  sonnet55-api-global:       {kind: rpm, value: 1000, url: "https://platform.claude.com/docs/api/rate-limits", note: "start tier"}
+  mistralsmall4-api-global:  {kind: rps, value: 1, url: "https://help.mistral.ai/en/articles/225174-what-are-the-limits-of-the-free-tier", note: "paid-tier limits are console-only; proxy = published free-tier 1 req/s"}
+  sarvam105b-api-in:         {kind: rpm, value: 300, url: "https://docs.sarvam.ai/api/getting-started/pricing", note: "highest published plan"}
+  deepseekv41flash-sarvam-in: {kind: rpm, value: 300, url: "https://docs.sarvam.ai/api/getting-started/pricing", note: "highest published plan"}
+  deepseekflash-api-global:  {kind: concurrency, value: 2500, url: "https://api-docs.deepseek.com/quick_start/rate_limit"}
+
+# Error rate after retries: 100 - published uptime SLA, else a proxy.
+api_error:
+  gem35f-vertex-global:      {sla_pct: 99.5, url: "https://cloud.google.com/vertex-ai/generative-ai/sla"}
+  gpt54nano-api-global:      {sla_pct: 99.9, url: "https://openai.com/api-scale-tier", note: "Scale Tier SLA; Standard tier has none"}
+  gpt54mini-api-global:      {sla_pct: 99.9, url: "https://openai.com/api-scale-tier", note: "Scale Tier SLA; Standard tier has none"}
+  mistralsmall4-api-global:  {sla_pct: 99.5, url: "https://docs.mistral.ai/inference/priority-tier", note: "Priority Tier SLA"}
+error_proxy:               # providers with no published SLA: 95% upper bound of POME's own error share
+  anchor: gem25f-api-global
+  z: 1.96
+
+# Self-hosted decode model (docs/research/evidence-plan.md section B), 1x A100 80GB bf16.
+selfhost:
+  gpu_bw_tbps: 2.039
+  gpu_bw_url: "https://www.nvidia.com/en-us/data-center/a100/"
+  eta: 0.7
+  ttft_s: 0.2
+  concurrency: 32
+  vm_sla_pct: 99.9
+  vm_sla_url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services"
+  params_b:
+    gemma4-12b-vllm-in-bf16: 12.0
+    gemma4-12b-ollama-local-q4: 12.0
+    gemma4-31b-vllm-in-bf16: 30.7
+    gemma4-26b-vllm-in-bf16: 25.2
+    qwen38-27b-vllm-in-bf16: 27.0
+    llama31-8b-vllm-in-bf16: 8.03
+    sarvam30b-vllm-in-bf16: 32.0
+    museglimmer30b-vllm-in-bf16: 29.6
+
+# Deployment facts (EvidenceValue fields). Only used where the registry has none.
+deploy:
+  gem35fl-api-global: &gemini_api
+    region:   {value: "global (any country with Google facilities)", unit: region, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/terms"}
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/terms"}
+  gem25f-api-global: *gemini_api
+  gemma4-26b-api-global:
+    region:   {value: "global (any country with Google facilities)", unit: region, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/terms"}
+    retention_days: {value: 55, unit: days, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/docs/usage-policies"}
+  gemma4-12b-ollama-local-q4:
+    region:   {value: "local machine", unit: region, provenance: modeled, source: "owner laptop", formula: "region = where the process runs (quality-only config)"}
+    retention_days: {value: 0, unit: days, provenance: modeled, source: "Ollama runs locally", formula: "nothing leaves the machine; retention set by the operator"}
+  gpt54nano-api-global: &openai
+    region:   {value: "global (regional processing is an opt-in endpoint)", unit: region, provenance: vendor-doc, source: "https://developers.openai.com/api/docs/models/gpt-5.4-nano"}
+    retention_days: {value: 30, unit: days, provenance: vendor-doc, source: "https://developers.openai.com/api/docs/guides/your-data"}
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://openai.com/policies/services-agreement/"}
+  gpt54mini-api-global: *openai
+  haiku55-api-global: &anthropic
+    region:   {value: "global (US-only inference is opt-in)", unit: region, provenance: vendor-doc, source: "https://platform.claude.com/docs/en/api/service-tiers"}
+    retention_days: {value: 30, unit: days, provenance: vendor-doc, source: "https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organizations-data"}
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://www.anthropic.com/legal/commercial-terms"}
+  sonnet55-api-global: *anthropic
+  gem35f-vertex-global:
+    region:   {value: "global endpoint (no residency guarantee)", unit: region, provenance: vendor-doc, source: "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency"}
+    retention_days: {value: 1, unit: days, provenance: vendor-doc, source: "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/data-governance"}
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://cloud.google.com/terms/service-terms"}
+  mistralsmall4-api-global:
+    region:   {value: "EU", unit: region, provenance: vendor-doc, source: "https://help.mistral.ai/en/articles/156207-how-long-are-model-inputs-or-outputs-stored-on-mistral-ai-servers"}
+    retention_days: {value: 30, unit: days, provenance: vendor-doc, source: "https://help.mistral.ai/en/articles/156207-how-long-are-model-inputs-or-outputs-stored-on-mistral-ai-servers"}
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://legal.mistral.ai/terms"}
+  sarvam105b-api-in: &sarvam
+    retention_days: {value: 0, unit: days, provenance: vendor-doc, source: "https://docs.sarvam.ai/api/platform/data-retention"}
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://www.sarvam.ai/terms-of-service"}
+  deepseekv41flash-sarvam-in: *sarvam
+  deepseekflash-api-global:
+    region:   {value: "China", unit: region, provenance: vendor-doc, source: "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html"}
+    retention_days: {value: "no maximum stated", unit: days, provenance: vendor-doc, source: "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html"}
+    commercial_use: {value: true, unit: bool, provenance: modeled, source: "pay-as-you-go business API", formula: "paid API offered for building products; terms of service not read"}
+  llama31-8b-vllm-in-bf16:
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://www.llama.com/llama3_1/license/"}
+  museglimmer30b-vllm-in-bf16:
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://huggingface.co/meta-models/Muse-Glimmer-30B"}
+selfhost_deploy:           # every self-hosted config, same design assumption as the 12B
+  region:   {value: "India", unit: region, provenance: modeled, source: "design assumption: operator deploys in an India-region GPU instance", formula: "region is a deployment choice, not validated by this project"}
+  retention_days: {value: 0, unit: days, provenance: modeled, source: "design assumption: vLLM configured not to persist prompts or outputs", formula: "retention is operator-enforced, not validated by this project"}

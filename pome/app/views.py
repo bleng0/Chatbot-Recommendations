@@ -59,7 +59,9 @@ def answer_line(d: Decision, snap: Snapshot, profile: Profile) -> str:
         v = next(x for x in d.verdicts if x.config_id == d.recommended)
         cost = "no cost evidence" if v.monthly_cost is None else (
             f"${v.monthly_cost:,.0f}/month (cost MODELED)")
-        return f"Recommended: {d.recommended} at {cost}"
+        lead = ("Recommended on modeled evidence (not measured)" if d.recommended_is_modeled
+                else "Recommended")
+        return f"{lead}: {d.recommended} at {cost}"
     parts = []
     missing = sum(v.status == "unverified" for v in d.verdicts)
     if missing:
