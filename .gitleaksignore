@@ -1,0 +1,18 @@
+# Verified false positives (2026-11-23): gitleaks' generic-api-key rule flags config IDs
+# such as gem25f-api-global because they contain "api". None is a key; real keys live only
+# in .env (gitignored, never committed). One fingerprint per finding, nothing broader.
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:11
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:12
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:13
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:14
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:15
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:17
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:18
+39a67a2617dedb8e7efde742cab39241988709d5:pome/registry/gapfill.yaml:generic-api-key:19
+dd0ca8a22b4787ddb2470c4f333c80980deb9db3:tests/test_registry.py:generic-api-key:15
+dd0ca8a22b4787ddb2470c4f333c80980deb9db3:tests/test_published_evidence.py:generic-api-key:14
+4610fff86a9460bb1d63d8e3fe371e07c196d205:tests/test_build_evidence.py:generic-api-key:14
+7c01f0719d774b7ee6f8a985cdb91643d4566ece:tests/test_registry.py:generic-api-key:57
+8cfe08b95f62ee7bf82f22c4e1646f58412278ea:tests/test_build_evidence.py:generic-api-key:14
+e8025b76912bf88c1fa23754d42deac4b651eec3:tests/test_cli.py:generic-api-key:57
+7ee52af17de4219faf46ea4bb28437b712a0b205:tests/test_registry.py:generic-api-key:60
