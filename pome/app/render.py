@@ -73,11 +73,11 @@ def css(theme: str) -> str:
 
 
 def stats(items: list[tuple[str, int]]) -> str:
-    """Headline counts; motion.js counts each one up from 0 to data-count."""
-    cells = "".join(
-        f'<div class="kp"><span class="kn num" data-count="{int(n)}">{int(n)}</span>'
-        f'<span class="kl">{escape(label)}</span></div>' for label, n in items)
-    return f'<div class="kpis" role="list">{cells}</div>'
+    """One inline tally under the answer; motion.js counts each number up to data-count."""
+    parts = " · ".join(
+        f'<span class="kn num" data-count="{int(n)}">{int(n)}</span> {escape(label)}'
+        for label, n in items)
+    return f'<p class="tally">{parts}</p>'
 
 
 def answer(text: str, *, recommended: bool, what_if: bool = False) -> str:
@@ -155,16 +155,8 @@ _CSS = """
 :root{--dur-fast:150ms;--dur:220ms;--dur-slow:480ms;--ease-out:cubic-bezier(.16,1,.3,1);
   --ease-in-out:cubic-bezier(.65,0,.35,1);--stagger:28ms}
 html{-webkit-font-smoothing:antialiased}
-.kpis{display:flex;flex-wrap:wrap;gap:.75rem;margin:1rem 0 .25rem}
-.kp{display:flex;flex-direction:column;gap:.1rem;padding:.6rem .9rem;min-width:8.5rem;
-  background:var(--panel);border:1px solid var(--line);border-radius:6px;
-  transition:border-color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out)}
-.kp:hover{border-color:var(--grey);transform:translateY(-1px)}
-.kn{font-size:1.75rem;font-weight:500;line-height:1.1;color:var(--text)}
-.kl{font-size:.8125rem;color:var(--muted)}
-.kp:nth-child(2) .kn{color:var(--accent)}
-.kp:nth-child(3) .kn{color:var(--coraltext)}
-.bdg,.kp,.ans,.tw{will-change:auto}
+.tally{margin:.75rem 0 0;font-size:.9375rem;color:var(--muted)}
+.tally .kn{font-weight:500;color:var(--text)}
 h1{font-size:2rem!important;line-height:1.2!important;max-width:40ch}
 ::selection{background:var(--sel);color:var(--seltext)}
 *{scrollbar-color:var(--line) transparent}
@@ -178,7 +170,7 @@ code,.num,.cid,.hash{font-family:"Fira Code",ui-monospace,monospace;
 .hash{font-size:.75rem;color:var(--muted);margin:.25rem 0 1.5rem}
 .ans{font-size:1.375rem;line-height:1.35;font-weight:500;margin:0;padding:.875rem 1.125rem;
   border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:72ch;}
-.ans-rec{border-color:var(--coral);box-shadow:inset 3px 0 0 var(--teal)}
+.ans-rec{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 7%,var(--panel))}
 .ans-wi{font-size:1.125rem;border-style:dashed}
 .wi h3{font-size:1rem;font-weight:600;margin:1.75rem 0 .5rem}
 .wi h3 .muted{font-weight:400}
@@ -234,19 +226,14 @@ table details[open] .dx{animation:open var(--dur) var(--ease-out)}
 .dx dt{color:var(--muted)}.dx dd{margin:0;overflow-wrap:anywhere}
 .vh{font-size:1rem;font-weight:600;margin:1.5rem 0 .5rem}
 .one{margin:.35rem 0;color:var(--muted);font-size:.875rem}
-/* Gossamer palette spread across the UI: teal = good/selected, orange = bad/attention,
+/* Gossamer palette: teal = qualifies/selected, orange = fails/over budget,
    greys = structure. Coloured fills always carry a word, never colour alone. */
 .chip{display:inline-block;font-size:.75rem;font-weight:500;padding:.15rem .5rem;
   border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--bg)}
 .chip-eligible,.chip-eligible_modeled{background:var(--tint);border-color:var(--teal);
   color:var(--accent)}
 .chip-eligible_modeled{border-style:dashed}
-.chip-rejected{background:rgba(236,77,37,.08);border-color:rgba(236,77,37,.45);
-  color:var(--coraltext)}
-.kp{border-top:3px solid var(--grey)}
-.kp:nth-child(2){border-top-color:var(--teal)}
-.kp:nth-child(3){border-top-color:var(--coral)}
-.kp:nth-child(4){border-top-color:var(--line)}
+.chip-rejected{color:var(--text)}
 thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 .gm tbody tr:nth-child(even)>*{background:color-mix(in srgb,var(--bg) 60%,var(--panel))}
 .gm tbody tr:hover>*{background:var(--tint)}
@@ -255,7 +242,7 @@ thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 .bdg-vendor-doc{border-color:var(--grey)!important}
 .bdg-modeled{border-color:var(--grey)!important}
 .bdg-published{background:rgba(43,207,206,.22)!important}
-.wi{border-left:3px solid var(--grey);padding-left:1rem;margin-top:1.25rem}
+.wi{margin-top:1.25rem}
 .ans-wi{border-color:var(--grey);background:var(--bg)}
 .vh code{background:var(--tint);padding:.05rem .35rem;border-radius:3px}
 .mt-match{background:var(--tint);padding:.1rem .4rem;border-radius:3px}
@@ -272,7 +259,7 @@ thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 [role="tab"]{transition:color var(--dur-fast) var(--ease-out)}
 [data-testid="stSidebar"]{background:#F2F2F3}
 @media (prefers-reduced-motion:reduce){
-  .kp,.bdg,tbody tr{transition:none}
+  .bdg,tbody tr{transition:none}
   table details[open] .dx{animation:fade 120ms ease-out}
   table details summary::before{transition:none}
   @keyframes fade{from{opacity:0}to{opacity:1}}

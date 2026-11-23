@@ -26,22 +26,23 @@
   }
 
   function entrance() {
-    const parts = [...document.querySelectorAll(
-      "h1, .note, .ans, .kp, .hash, [role='tablist']")];
+    // one authored moment on load: the verdict wipes in, its numbers count up, then the
+    // gate icons settle in a wave. Everything else is already visible and stays still.
+    const verdict = document.querySelector(".ans:not(.ans-wi)");
     const rows = document.querySelectorAll(".gm tbody tr");
     const icons = document.querySelectorAll(".gm td.g .ic");
-    if (reduce()) { fade(parts); fade(rows); }
+    if (reduce()) { if (verdict) fade(verdict); }
     else {
-      animate(parts, { opacity: [0, 1], translateY: [10, 0], duration: DUR.slow,
-                       ease: "outExpo", delay: stagger(STEP * 2) });
-      animate(rows, { opacity: [0, 1], translateX: [-6, 0], duration: DUR.base,
-                      ease: "outQuart", delay: stagger(STEP, { start: 260 }) });
+      if (verdict) animate(verdict, { clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"],
+                                      duration: DUR.slow, ease: "outExpo" });
+      animate(rows[0] ? [rows[0]] : [], { backgroundColor: ["rgba(43,207,206,.28)", "rgba(43,207,206,0)"],
+                                          duration: 900, ease: "outQuart", delay: DUR.slow });
       // icons pop in a diagonal wave: row then column order
       animate(icons, { scale: [0.4, 1], opacity: [0, 1], duration: DUR.base, ease: "outBack",
                        delay: stagger(6, { start: 360 }) });
     }
     document.querySelectorAll(".kn[data-count]").forEach((el) => {
-      seen.counts[el.parentElement.textContent.replace(/\d+/g, "")] = el.dataset.count;
+      seen.counts[el.nextSibling ? el.nextSibling.textContent : ""] = el.dataset.count;
       countUp(el, 0);
     });
   }
@@ -66,13 +67,13 @@
 
   function counts() {
     document.querySelectorAll(".kn[data-count]").forEach((el) => {
-      const key = el.parentElement.textContent.replace(/\d+/g, "");
+      const key = el.nextSibling ? el.nextSibling.textContent : "";
       const before = seen.counts[key];
       if (before === el.dataset.count) return;
       seen.counts[key] = el.dataset.count;
       countUp(el, Number(before) || 0);
-      if (!reduce()) animate(el.parentElement, { scale: [1.04, 1], duration: DUR.base,
-                                                 ease: "outQuart" });
+      if (!reduce()) animate(el, { color: ["#0B7372", "#1C1D1F"], duration: DUR.slow,
+                                   ease: "outQuart" });
     });
   }
 

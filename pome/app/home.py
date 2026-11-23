@@ -63,7 +63,8 @@ st.html(f'<p class="note">{render.icon("info")}Replaying recorded evaluation res
         f'API calls are made. Every number carries its provenance badge.</p>')
 st.html(render.answer(answer_line(d, snap, profile), recommended=bool(d.recommended)))
 counts = [("configurations", len(d.verdicts)),
-          ("eligible", sum(v.status.startswith("eligible") for v in d.verdicts)),
+          ("eligible" if any(v.status == "eligible" for v in d.verdicts)
+           else "eligible (modeled)", sum(v.status.startswith("eligible") for v in d.verdicts)),
           ("rejected", sum(v.status == "rejected" for v in d.verdicts)),
           ("gates checked", len(GATES))]
 st.html(render.stats(counts))

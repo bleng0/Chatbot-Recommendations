@@ -10,7 +10,7 @@ BADGE = {"measured": "MEASURED", "vendor-doc": "VENDOR-DOC", "modeled": "MODELED
 _STATUS = {"eligible": "Eligible", "eligible_modeled": "Eligible (modeled inputs)",
            "rejected": "Rejected", "unverified": "Unverified (evidence missing)"}
 # Gate matrix order: failing configs first, then missing evidence, then the ones that pass.
-_ROW_ORDER = {"rejected": 0, "unverified": 1, "eligible_modeled": 2, "eligible": 3}
+_ROW_ORDER = {"eligible": 0, "eligible_modeled": 1, "rejected": 2, "unverified": 3}
 _METRIC_LABEL = {
     "throughput_tok_s_system": "tok/s (system)", "output_tok_s_per_gpu": "tok/s per GPU",
     "output_tok_s_per_user": "tok/s per user", "decode_tok_s_single_stream":

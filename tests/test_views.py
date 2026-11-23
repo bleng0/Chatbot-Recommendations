@@ -23,11 +23,12 @@ def test_gate_matrix_has_one_row_per_config_and_status_keys(tmp_path):
     assert {c for r in rows for c in r["gates"].values()} <= STATUSES
 
 
-def test_gate_matrix_sorts_failing_then_unverified_then_eligible():
+def test_gate_matrix_sorts_eligible_then_failing_then_unverified():
+    # design pass 2026-11-23: the reviewer's question is "which one qualifies", so it leads
     s = snap(passing("ok"), passing("bad", q=0.5), passing("gap"),
              drop=["gap.oos.clinc150.recall"])
     rows = gate_matrix(select(s, LENIENT))
-    assert [r["config"] for r in rows] == ["bad", "gap", "ok"]
+    assert [r["config"] for r in rows] == ["ok", "bad", "gap"]
 
 
 def test_answer_line_flags_a_recommendation_built_on_modeled_evidence():

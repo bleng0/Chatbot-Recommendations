@@ -49,6 +49,7 @@ def test_stats_row_carries_count_targets_for_the_count_up():
     from pome.app.render import stats
     html = stats([("configurations", 20), ("rejected", 19)])
     assert 'data-count="20"' in html and 'data-count="19"' in html and "rejected" in html
+    assert 'class="tally"' in html and "kp" not in html  # one inline sentence, no stat cards
 
 
 def test_motion_loader_points_at_self_hosted_files_that_exist():
