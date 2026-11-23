@@ -157,3 +157,134 @@ None of these models can claim "99% accuracy". Every modeled value needs its err
 - S32 https://lingjiaochen.com/papers/2024_FrugalGPT_TMLR.pdf
 - S33 https://export.arxiv.org/api/query?id_list=2005.11401,2309.06180,2204.08582,2003.04807
 - S34 https://aclanthology.org/2021.naacl-main.239/ , https://aclanthology.org/D19-1131/ , https://aclanthology.org/2020.nlp4convai-1.5/
+
+## Sources by gate (all 20 configs; retrieved 2026-11-22 and 2026-11-23)
+
+Every source behind a gate value the app shows, grouped by gate. `measured` = a POME run record; `vendor-doc` = a provider, price or study page; `modeled` = a formula whose inputs and their sources are listed in `pome/registry/gapfill.yaml`. Proxies reuse POME's own run of the named model. G11 (monthly cost) is checked against the user's max monthly spend in the app.
+
+### G1: Understands which banking request the customer means
+- carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gem25f-api-global (modeled)
+- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gemma4-26b-api-global (modeled)
+- runs/records/gem25f-api-global/banking77_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/banking77_run0.jsonl (measured)
+- runs/records/gemma4-26b-api-global/banking77_run0.jsonl (measured)
+
+### G2: Spots questions the bot must not answer
+- carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- runs/records/gemma4-12b-ollama-local-q4/clinc150_run0.jsonl (measured)
+
+### G3: Does not wrongly refuse real banking questions
+- carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- runs/records/gemma4-12b-ollama-local-q4/clinc150_run0.jsonl (measured)
+
+### G4: Answers FAQ questions correctly in every language
+- carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/faq_hi_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/faq_hinglish_run0.jsonl (measured)
+
+### G5: Declines FAQ questions it cannot answer
+- carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/faq_hi_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/faq_hinglish_run0.jsonl (measured)
+
+### G6: Hindi quality stays close to English
+- carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/faq_hi_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/massive_en_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/massive_hi_run0.jsonl (measured)
+
+### G7: Hinglish quality stays close to English
+- carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
+- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
+- runs/records/gemma4-12b-ollama-local-q4/faq_hinglish_run0.jsonl (measured)
+
+### G8: Replies fast enough at peak load
+- https://artificialanalysis.ai/models/claude-haiku-5-5 (modeled)
+- https://artificialanalysis.ai/models/claude-sonnet-5-5 (modeled)
+- https://artificialanalysis.ai/models/deepseek-v4-1-flash (modeled)
+- https://artificialanalysis.ai/models/gemini-2-5-flash (modeled)
+- https://artificialanalysis.ai/models/gemini-3-5-flash (modeled)
+- https://artificialanalysis.ai/models/gemini-3-5-flash-lite (modeled)
+- https://artificialanalysis.ai/models/gemma-4-26b-a4b (modeled)
+- https://artificialanalysis.ai/models/gpt-5-4-mini (modeled)
+- https://artificialanalysis.ai/models/gpt-5-4-nano (modeled)
+- https://artificialanalysis.ai/models/mistral-small-4 (modeled)
+- https://artificialanalysis.ai/models/sarvam-105b (modeled)
+- https://www.nvidia.com/en-us/data-center/a100/ (modeled)
+
+### G9: Keeps up with peak ticket traffic
+- https://ai.google.dev/gemini-api/docs/rate-limits (modeled)
+- https://api-docs.deepseek.com/quick_start/rate_limit (modeled)
+- https://developers.openai.com/api/docs/models/gpt-5.4-mini (modeled)
+- https://docs.sarvam.ai/api/getting-started/pricing (modeled)
+- https://help.mistral.ai/en/articles/225174-what-are-the-limits-of-the-free-tier (modeled)
+- https://openrouter.ai/docs/api/reference/limits (modeled)
+- https://platform.claude.com/docs/api/rate-limits (modeled)
+- https://www.nvidia.com/en-us/data-center/a100/ (modeled)
+
+### G10: Rarely fails a request after retries
+- POME runs of gem25f-api-global (modeled)
+- https://cloud.google.com/vertex-ai/generative-ai/sla (modeled)
+- https://docs.mistral.ai/inference/priority-tier (modeled)
+- https://openai.com/api-scale-tier (modeled)
+- https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services (modeled)
+
+### G11: Monthly cost stays within budget
+- https://aistudio.google.com/docs/pricing (modeled)
+- https://api-docs.deepseek.com/quick_start/pricing (modeled)
+- https://cloud.google.com/vertex-ai/generative-ai/pricing (modeled)
+- https://developers.openai.com/api/docs/pricing (modeled)
+- https://docs.mistral.ai/models/mistral-small-4-0-26-03 (modeled)
+- https://docs.sarvam.ai/api/getting-started/pricing (modeled)
+- https://platform.claude.com/docs/en/about-claude/pricing (modeled)
+- https://prices.azure.com/api/retail/prices (modeled)
+
+### G12: Customer data is processed in India
+- design assumption: operator deploys in an India-region GPU instance (modeled)
+- https://ai.google.dev/gemini-api/terms (vendor-doc)
+- https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html (vendor-doc)
+- https://developers.openai.com/api/docs/models/gpt-5.4-nano (vendor-doc)
+- https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency (vendor-doc)
+- https://docs.mistral.ai/admin/monitor-comply/privacy-data-controls (modeled)
+- https://platform.claude.com/docs/en/api/service-tiers (vendor-doc)
+- https://www.sarvam.ai/trust-center (vendor-doc)
+- owner laptop (modeled)
+
+### G13: Provider deletes customer data quickly
+- Ollama runs locally (modeled)
+- design assumption: vLLM configured not to persist prompts or outputs (modeled)
+- https://ai.google.dev/gemini-api/docs/usage-policies (vendor-doc)
+- https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html (vendor-doc)
+- https://developers.openai.com/api/docs/guides/your-data (vendor-doc)
+- https://docs.cloud.google.com/vertex-ai/generative-ai/docs/data-governance (vendor-doc)
+- https://docs.sarvam.ai/api/platform/data-retention (vendor-doc)
+- https://help.mistral.ai/en/articles/156207-how-long-are-model-inputs-or-outputs-stored-on-mistral-ai-servers (vendor-doc)
+- https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organizations-data (vendor-doc)
+
+### G14: Licence allows commercial use
+- https://ai.google.dev/gemini-api/terms (vendor-doc)
+- https://cloud.google.com/terms/service-terms (vendor-doc)
+- https://huggingface.co/Qwen/Qwen3.8-27B (vendor-doc)
+- https://huggingface.co/meta-models/Muse-Glimmer-30B (vendor-doc)
+- https://huggingface.co/sarvamai/sarvam-30b (vendor-doc)
+- https://legal.mistral.ai/terms (vendor-doc)
+- https://openai.com/policies/services-agreement/ (vendor-doc)
+- https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html (vendor-doc)
+- https://www.anthropic.com/legal/commercial-terms (vendor-doc)
+- https://www.llama.com/llama3_1/license/ (vendor-doc)
+- https://www.sarvam.ai/terms-of-service (vendor-doc)
+- pay-as-you-go business API (modeled)
+
+### Currency (display only)
+- https://www.rbi.org.in/scripts/ReferenceRateArchive.aspx: US$1 = ₹92.7968 (RBI reference rate, 2026-11-23)
