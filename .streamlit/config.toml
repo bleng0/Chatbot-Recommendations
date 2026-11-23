@@ -1,0 +1,34 @@
+# POME theme. Contrast checked 2026-11-23: every text token >= 4.5:1 on its surface;
+# teal #23B5A2 / coral are used for strokes and icons only (>= 3:1), never small text.
+[server]
+enableStaticServing = true
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+font = "Fira Sans, system-ui, sans-serif"
+codeFont = "Fira Code, ui-monospace, monospace"
+baseRadius = "small"
+showSidebarBorder = true
+fontFaces = [
+  { family = "Fira Sans", url = "app/static/fonts/fira-sans-latin-400-normal.woff2", weight = 400 },
+  { family = "Fira Sans", url = "app/static/fonts/fira-sans-latin-500-normal.woff2", weight = 500 },
+  { family = "Fira Sans", url = "app/static/fonts/fira-sans-latin-600-normal.woff2", weight = 600 },
+  { family = "Fira Code", url = "app/static/fonts/fira-code-latin-400-normal.woff2", weight = 400 },
+  { family = "Fira Code", url = "app/static/fonts/fira-code-latin-500-normal.woff2", weight = 500 },
+]
+
+[theme.dark]
+backgroundColor = "#014F4E"
+secondaryBackgroundColor = "#013C3B"
+textColor = "#E6F4F2"
+primaryColor = "#23B5A2"
+borderColor = "#1F6E6B"
+
+[theme.light]
+backgroundColor = "#EAF6F5"
+secondaryBackgroundColor = "#DCEFEC"
+textColor = "#014F4E"
+primaryColor = "#0F766E"
+borderColor = "#B9DCD7"
