@@ -170,3 +170,6 @@ with tab_cfg:
         "config": c.config_id, "model": c.model_id, "host": c.host, "region": c.region,
         "serving": c.serving, "quant": c.quant, "mode": c.evaluation_mode, "notes": c.notes,
     } for c in registry if c.config_id in ids]), hide_index=True, width="stretch")
+
+# Last element, so the rows and answers above exist when the motion script runs.
+st.html(render.MOTION, unsafe_allow_javascript=True)

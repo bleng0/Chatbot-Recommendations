@@ -54,6 +54,17 @@ def cell(status: str) -> str:
     return f'<span class="st st-{status}">{icon(status)}{_WORD[status]}</span>'
 
 
+# Loads anime.js and motion.js once (self-hosted), then animates what changed on each rerun.
+# Static text: no data is ever interpolated into this script.
+MOTION = """<script>(function () {
+  const go = () => requestAnimationFrame(() => setTimeout(() => window.pomeMotion(), 60));
+  const load = (src, cb) => { const s = document.createElement("script");
+    s.src = new URL(src, document.baseURI).href; s.onload = cb; document.head.appendChild(s); };
+  if (window.anime && window.pomeMotion) return go();
+  load("app/static/js/anime.umd.min.js", () => load("app/static/js/motion.js", go));
+})();</script>"""
+
+
 def css(theme: str) -> str:
     t = TOKENS[theme]
     v = ";".join(f"--{k}:{val}" for k, val in t.items())
@@ -142,14 +153,11 @@ code,.num,.cid,.hash{font-family:"Fira Code",ui-monospace,monospace;
 .note .ic{width:1rem;height:1rem;flex:none;margin-top:.15rem}
 .hash{font-size:.75rem;color:var(--muted);margin:.25rem 0 1.5rem}
 .ans{font-size:1.375rem;line-height:1.35;font-weight:500;margin:0;padding:.875rem 1.125rem;
-  border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:72ch;
-  animation:reveal 220ms cubic-bezier(.16,1,.3,1) both}
+  border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:72ch;}
 .ans-rec{border-color:var(--coral)}
 .ans-wi{font-size:1.125rem;border-style:dashed}
 .wi h3{font-size:1rem;font-weight:600;margin:1.75rem 0 .5rem}
 .wi h3 .muted{font-weight:400}
-@keyframes reveal{from{clip-path:inset(0 100% 0 0);opacity:.2}
-  to{clip-path:inset(0 0 0 0);opacity:1}}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
 table{border-collapse:collapse;width:100%;font-size:.875rem}
 th,td{padding:.45rem .6rem;text-align:left;border-bottom:1px solid var(--line);
@@ -166,7 +174,7 @@ td.set{white-space:normal;min-width:22rem;color:var(--muted)}
 .gm td.g,.gm th.g{text-align:center;padding-inline:.3rem}
 .gm .st{font-size:.8125rem}
 .gm th.g small{display:block;font-size:.6875rem;font-weight:400}
-.gm .off{opacity:.42;transition:opacity 200ms cubic-bezier(.16,1,.3,1)}
+.gm .off{opacity:.42}
 .gm thead th.off{text-decoration:line-through}
 .st{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
 .ic{display:inline-block;width:1.05rem;height:1.05rem;flex:none;background:currentColor;
@@ -200,7 +208,6 @@ table details[open] .dx{animation:open 180ms cubic-bezier(.16,1,.3,1)}
 .vh{font-size:1rem;font-weight:600;margin:1.5rem 0 .5rem}
 .one{margin:.35rem 0;color:var(--muted);font-size:.875rem}
 @media (prefers-reduced-motion:reduce){
-  .ans{animation:fade 120ms ease-out both}
   table details[open] .dx{animation:fade 120ms ease-out}
   table details summary::before{transition:none}
   @keyframes fade{from{opacity:0}to{opacity:1}}

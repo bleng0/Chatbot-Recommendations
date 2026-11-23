@@ -28,3 +28,14 @@ def test_badge_shape_follows_provenance():
 
 def test_both_themes_define_the_same_tokens():
     assert TOKENS["dark"].keys() == TOKENS["light"].keys()
+
+
+def test_motion_loader_points_at_self_hosted_files_that_exist():
+    from pathlib import Path
+
+    from pome.app.render import MOTION
+    static = Path("pome/app/static/js")
+    for name in ("anime.umd.min.js", "motion.js"):
+        assert f"app/static/js/{name}" in MOTION and (static / name).is_file()
+    js = (static / "motion.js").read_text(encoding="utf-8")
+    assert "prefers-reduced-motion" in js and "window.anime" in js
