@@ -36,12 +36,22 @@ st.html(render.css("light"))
 profile = load_profile()
 registry = load_registry()
 by_id = {c.config_id: c for c in registry}
-GATES = sorted(profile.gates, key=lambda g: int(g[1:]))
+# G11 (budget) is set by the user as "Max monthly spend", not shown as a gate
+GATES = sorted(set(profile.gates) - {"G11"}, key=lambda g: int(g[1:]))
+RATE = float(USD_INR.value)
 
 with st.sidebar:
     st.header("Scenario")
     volume = st.slider("Tickets per month", 10_000, 10_000_000,
                        profile.volume_tickets_per_month, step=10_000, format="%d")
+    st.caption("A ticket is one customer question the support bot handles, such as "
+               "\u201cwhy was my card declined?\u201d. Each ticket is one model call, so API "
+               "costs grow with tickets; a self-hosted GPU costs the same every month.")
+    max_spend_inr = st.number_input(
+        "Max monthly spend, INR", 0, 10_00_00_000,
+        int(round(float(profile.gates["G11"].value) * RATE)), step=5_000,
+        help="The most you are willing to pay per month. Configurations that cost more "
+             "are rejected.")
     gpu = st.selectbox("Self-host GPU (India price)", list(GPU_OPTIONS),
                        format_func=lambda k: GPU_OPTIONS[k].label)
     st.caption(GPU_OPTIONS[gpu].note)
@@ -58,7 +68,12 @@ with st.sidebar:
     st.caption("Teal = checked. Click a gate to switch it off for a what-if view.")
     off = tuple(sorted(set(GATES) - set(kept or []), key=lambda g: int(g[1:])))
 
-scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops))
+default_usd = float(profile.gates["G11"].value)
+# the default INR budget maps back to the exact banking_mvp value, so the official hash holds
+max_spend_usd = (default_usd if max_spend_inr == int(round(default_usd * RATE))
+                 else float(max_spend_inr) / RATE)
+scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
+                    max_spend_usd=max_spend_usd)
 snap, d = decide(scenario)
 wi = decide_what_if(snap, scenario, off) if off else None
 
@@ -86,7 +101,6 @@ if wi:
 
 ids = {c.config_id for c in registry}
 
-RATE = float(USD_INR.value)
 tab_gates, tab_info, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
     ["Gates", "Gate information", "Cost", "Evidence", "Deployment variants", "Configurations"])
 
@@ -96,7 +110,10 @@ with tab_info:
 with tab_gates:
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
     wi_status = {v.config_id: v.status for v in wi.verdicts} if wi else None
-    st.html(render.gate_table(rows, GATES, set(off), wi_status))
+    budget_usd = max_spend_usd
+    cost_cells = {k.split(".", 1)[0]: (inr(float(e.value)), float(e.value) > budget_usd)
+                  for k, e in snap.values.items() if k.endswith(".cost.monthly_usd")}
+    st.html(render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells))
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
         st.html(f'<p class="one">No evidence recorded yet: {", ".join(no_ev)}</p>')
@@ -113,7 +130,7 @@ with tab_cost:
     if not costs:
         st.write("No configuration has a cost yet.")
     else:
-        budget = float(profile.gates["G11"].value) * RATE
+        budget = float(max_spend_inr)
         items = sorted(costs.items(), key=lambda kv: float(kv[1].value))
         names_ = [cid for cid, _ in items]
         vals = [float(e.value) * RATE for _, e in items]
@@ -125,7 +142,7 @@ with tab_cost:
             textposition="outside", cliponaxis=False,
             hovertemplate="%{y}: ₹%{x:,.0f}/month (MODELED)<extra></extra>"))
         fig.add_vline(x=budget, line={"dash": "dash", "width": 1.5, "color": T["coral"]},
-                      annotation_text=f"G11 budget {inr(budget / RATE)}",
+                      annotation_text=f"Your max spend {inr(budget / RATE)}",
                       annotation_position="top", annotation_font_color=T["coraltext"])
         fig.update_layout(
             height=60 + 34 * len(vals), margin={"l": 10, "r": 90, "t": 36, "b": 30},

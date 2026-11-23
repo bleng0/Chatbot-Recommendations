@@ -187,7 +187,8 @@ _UNIT_TXT = {"ratio": "", "ratio_gap": " gap", "ms": " ms", "req_per_s": " req/s
 
 def gate_info_rows(profile: Profile) -> list[dict[str, str]]:
     rows = []
-    for g in sorted(profile.gates, key=lambda x: int(x[1:])):
+    # G11 is not shown as a gate: the user sets it as "Max monthly spend" in the sidebar
+    for g in sorted(set(profile.gates) - {"G11"}, key=lambda x: int(x[1:])):
         gate = profile.gates[g]
         if gate.op == "required":
             pass_if = "required"

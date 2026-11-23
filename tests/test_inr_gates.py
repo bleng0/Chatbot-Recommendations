@@ -22,7 +22,6 @@ def test_every_profile_gate_has_a_one_phrase_criterion():
 def test_gate_info_rows_show_the_threshold_with_budget_in_inr():
     rows = {r["gate"]: r for r in gate_info_rows(load_profile())}
     assert rows["G1"]["pass_if"] == "≥ 0.80"
-    assert rows["G11"]["pass_if"] == "≤ ₹1,39,195 / month"
     assert rows["G14"]["pass_if"] == "required"
 
 
@@ -30,3 +29,17 @@ def test_more_self_host_gpu_options_each_with_a_sourced_price():
     assert len(GPU_OPTIONS) >= 7
     for o in GPU_OPTIONS.values():
         assert o.price.source.startswith("http") or "prices.azure.com" in o.price.source
+
+
+def test_max_spend_sets_the_budget_gate_and_can_change_the_decision():
+    from pome.app.scenario import Scenario, decide
+    _, default = decide(Scenario())
+    _, tight = decide(Scenario(max_spend_usd=10.0))
+    assert default.recommended == "gpt54mini-api-global"   # ₹12,528 fits the default budget
+    assert tight.recommended != "gpt54mini-api-global"     # ~₹928 cap rules it out
+    assert default.decision_hash != tight.decision_hash
+
+
+def test_gate_information_no_longer_lists_the_budget_gate():
+    rows = [r["gate"] for r in gate_info_rows(load_profile())]
+    assert "G11" not in rows

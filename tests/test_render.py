@@ -67,3 +67,10 @@ def test_status_cells_are_word_chips_coloured_by_status():
     html = gate_table([ROW], ["G1", "G2"], set(), {"a": "eligible_modeled"})
     assert '<span class="chip chip-rejected">Rejected</span>' in html
     assert '<span class="chip chip-eligible_modeled">Eligible (modeled)</span>' in html
+
+
+def test_gate_table_can_show_a_monthly_cost_column_with_over_budget_marked():
+    html = gate_table([ROW], ["G1", "G2"], set(), None,
+                      cost={"a": ("₹1,500", True)})
+    assert '<td class="num cost over">₹1,500 <span class="ob">over budget</span></td>' in html
+    assert "Monthly cost" in html

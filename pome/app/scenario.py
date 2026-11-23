@@ -64,6 +64,7 @@ class Scenario:
     gpu: str = "azure-ci-a100"
     gpus: int = 1
     ops_monthly_usd: float = 0.0
+    max_spend_usd: float = 1500.0  # the user's monthly budget; it is the G11 threshold
 
 
 def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
@@ -80,7 +81,10 @@ def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
 
 
 def _profile(s: Scenario) -> Profile:
-    return load_profile().model_copy(update={"volume_tickets_per_month": s.volume})
+    base = load_profile()
+    gates = {**base.gates,
+             "G11": base.gates["G11"].model_copy(update={"value": float(s.max_spend_usd)})}
+    return base.model_copy(update={"volume_tickets_per_month": s.volume, "gates": gates})
 
 
 def decide(s: Scenario, records: Path = RECORDS,

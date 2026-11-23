@@ -94,11 +94,14 @@ def _chip(status: str) -> str:
 
 
 def gate_table(rows: list[dict], gates: list[str], off: set[str],
-               what_if: dict[str, str] | None = None) -> str:
+               what_if: dict[str, str] | None = None,
+               cost: dict[str, tuple[str, bool]] | None = None) -> str:
     head = "".join(
         f'<th scope="col" class="g{" off" if g in off else ""}">{g}'
         f'{"<small>off</small>" if g in off else ""}</th>' for g in gates)
     wi_head = '<th scope="col">What-if</th>' if what_if is not None else ""
+    if cost is not None:
+        wi_head += '<th scope="col">Monthly cost</th>'
     body = []
     for r in rows:
         cells = "".join(
@@ -106,6 +109,10 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
             if g in r["gates"] else '<td class="g">—</td>' for g in gates)
         wi = (f'<td class="stat">{_chip(what_if[r["config"]])}</td>'
               if what_if is not None else "")
+        if cost is not None:
+            txt, over = cost.get(r["config"], ("—", False))
+            tag = ' <span class="ob">over budget</span>' if over else ""
+            wi += f'<td class="num cost{" over" if over else ""}">{escape(txt)}{tag}</td>'
         body.append(f'<tr><th scope="row" class="cid">{escape(r["config"])}</th>'
                     f'<td class="stat">{_chip(r["status"])}</td>{wi}{cells}</tr>')
     return (f'<div class="tw"><table class="gm"><caption class="sr">Gate results per '
@@ -267,6 +274,9 @@ thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 td.gi{font-size:.9375rem;color:var(--text)}
 .gi-t th.cid{font-weight:500;color:var(--accent)}
 .foot{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.8125rem;color:var(--muted)}
+.gm td.cost{text-align:right}
+.gm td.over{color:var(--coraltext)}
+.ob{font:500 .6875rem/1 "Fira Sans",sans-serif;margin-left:.3rem}
 /* chart bars grow from their baseline (motion.js) */
 .js-plotly-plot .bars path{transform-box:fill-box;transform-origin:0 50%}
 /* Streamlit chrome in the Gossamer look */
