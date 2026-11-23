@@ -5,6 +5,7 @@ a multi-stage production container, and Docker Compose files for both dev and pr
 
 ## Contents
 
+- [POME decision app (Streamlit)](#pome-decision-app-streamlit)
 - [Overview](#overview)
 - [Tech stack](#tech-stack)
 - [Prerequisites](#prerequisites)
@@ -17,6 +18,23 @@ a multi-stage production container, and Docker Compose files for both dev and pr
 - [Git](#git)
 - [Agent skills](#agent-skills)
 - [Troubleshooting](#troubleshooting)
+
+## POME decision app (Streamlit)
+
+The Python app in `pome/` is separate from the Next.js scaffold below. It replays
+recorded results from `runs/records`, so it needs no API key and makes no live calls.
+
+```bash
+uv sync
+uv run python -m streamlit run pome/app/home.py
+```
+
+Open http://localhost:8501. Use `python -m streamlit`, not `streamlit run` on its own:
+the plain command does not put the repo root on the import path and fails with
+`ModuleNotFoundError: No module named 'pome'`.
+
+In a container: `docker compose -f compose.pome.yaml up --build`, then open the same address.
+Tests: `uv run pytest -q`. Lint: `uv run ruff check .`.
 
 ## Overview
 
