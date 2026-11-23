@@ -140,6 +140,88 @@ def gate_info_table(rows: list[dict[str, str]]) -> str:
             f"<tbody>{body}</tbody></table></div>")
 
 
+def config_fan(items: list[dict], focus: str) -> str:
+    """Configurations tab: a horizontal fan of config cards (the focused one sharp, the rest
+    blurred) above that config's build steps. Static text only in the script."""
+    cards, panels = [], []
+    for it in items:
+        cid = escape(it["config"])
+        cur = ' aria-current="true"' if it["config"] == focus else ""
+        cards.append(
+            f'<button type="button" class="fan-card" data-cid="{cid}"{cur}>'
+            f'<span class="fc-id">{cid}</span><span class="fc-model">{escape(it["model"])}</span>'
+            f'<span class="fc-host">{escape(it["host"])}</span>'
+            f'<span class="fc-foot">{_chip(it["status"])}<span class="num">{escape(it["cost"])}'
+            f'</span></span></button>')
+        steps = "".join(
+            f'<li><span class="fs-n num">{i}</span><span class="fs-t">{escape(t)}</span>'
+            f'<span class="fs-d">{escape(d)}</span></li>'
+            for i, (t, d) in enumerate(it["steps"], 1))
+        hidden = "" if it["config"] == focus else " hidden"
+        panels.append(f'<section class="fan-steps" data-cid="{cid}"{hidden}>'
+                      f'<h3>How to build <code>{cid}</code></h3><ol>{steps}</ol></section>')
+    return (f'<div class="fan"><div class="fan-bar"><button type="button" class="fan-prev" '
+            f'aria-label="Previous configuration">&larr;</button><p class="fan-live" '
+            f'aria-live="polite"></p><button type="button" class="fan-next" '
+            f'aria-label="Next configuration">&rarr;</button></div>'
+            f'<div class="fan-rail" tabindex="0" aria-label="Configurations">{"".join(cards)}'
+            f'</div>{"".join(panels)}</div>{_FAN_JS}')
+
+
+_FAN_JS = """<script>(function () {
+  const root = [...document.querySelectorAll(".fan")].pop();
+  if (!root || root.dataset.ready) return;
+  root.dataset.ready = "1";
+  const rail = root.querySelector(".fan-rail");
+  const cards = [...rail.querySelectorAll(".fan-card")];
+  const live = root.querySelector(".fan-live");
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let current = null;
+  function show(card) {
+    if (card === current) return;
+    current = card;
+    cards.forEach((c) => c.toggleAttribute("aria-current", c === card));
+    const cid = card.dataset.cid;
+    root.querySelectorAll(".fan-steps").forEach((p) => { p.hidden = p.dataset.cid !== cid; });
+    live.textContent = cid + " (" + (cards.indexOf(card) + 1) + " of " + cards.length + ")";
+    const items = root.querySelectorAll('.fan-steps:not([hidden]) li');
+    if (window.anime && !still) window.anime.animate(items, { opacity: [0, 1],
+      translateX: [-10, 0], duration: 320, ease: "outExpo", delay: window.anime.stagger(45) });
+  }
+  function fan() {
+    const mid = rail.getBoundingClientRect().left + rail.clientWidth / 2;
+    let best = cards[0], bestD = Infinity;
+    cards.forEach((c) => {
+      const r = c.getBoundingClientRect();
+      const d = (r.left + r.width / 2 - mid) / r.width;   // distance in card widths
+      const a = Math.min(Math.abs(d), 3);
+      c.style.transform = `rotate(${Math.max(-12, Math.min(12, d * 5))}deg) ` +
+        `translateY(${a * 10}px) scale(${1 - a * 0.07})`;
+      c.style.filter = a < 0.5 ? "none" : `blur(${Math.min(a * 2.2, 6)}px)`;
+      c.style.opacity = String(1 - Math.min(a * 0.22, 0.6));
+      if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = c; }
+    });
+    show(best);
+  }
+  let raf = 0;
+  rail.addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fan); },
+                        { passive: true });
+  const go = (c) => c && c.scrollIntoView({ behavior: still ? "auto" : "smooth",
+                                            inline: "center", block: "nearest" });
+  const step = (n) => go(cards[Math.max(0, Math.min(cards.length - 1, cards.indexOf(current) + n))]);
+  root.querySelector(".fan-prev").addEventListener("click", () => step(-1));
+  root.querySelector(".fan-next").addEventListener("click", () => step(1));
+  cards.forEach((c) => c.addEventListener("click", () => go(c)));
+  rail.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+  });
+  const first = rail.querySelector("[aria-current]") || cards[0];
+  const start = () => { rail.scrollLeft = first.offsetLeft - (rail.clientWidth - first.offsetWidth) / 2; fan(); };
+  new ResizeObserver(() => { if (rail.clientWidth) start(); }).observe(rail);
+})();</script>"""
+
+
 def evidence_table(rows: list[dict[str, str]]) -> str:
     body = "".join(
         f'<tr><th scope="row" class="cid">{escape(r["config"])}</th>'
@@ -280,6 +362,37 @@ td.gi{font-size:.9375rem;color:var(--text)}
 .gm td.cost{text-align:right}
 .gm td.over{color:var(--coraltext)}
 .ob{font:500 .6875rem/1 "Fira Sans",sans-serif;margin-left:.3rem}
+.fan{margin-top:.5rem}
+.fan-bar{display:flex;align-items:center;gap:.75rem;margin-bottom:.25rem}
+.fan-bar button{width:2.25rem;height:2.25rem;border-radius:999px;border:1px solid var(--line);
+  background:var(--panel);color:var(--text);cursor:pointer;font-size:1rem;
+  transition:border-color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
+.fan-bar button:hover{border-color:var(--teal);background:var(--tint)}
+.fan-live{margin:0;font:500 .875rem "Fira Code",monospace;color:var(--accent);flex:1;text-align:center}
+.fan-rail{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding:2rem 40% 2.5rem;scrollbar-width:none;outline-offset:4px;perspective:900px}
+.fan-rail::-webkit-scrollbar{display:none}
+.fan-card{flex:0 0 17rem;scroll-snap-align:center;display:flex;flex-direction:column;gap:.35rem;
+  text-align:left;padding:1rem 1.1rem;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel);color:var(--text);cursor:pointer;font:inherit;
+  box-shadow:0 6px 18px rgba(28,29,31,.06);transform-origin:50% 120%;
+  transition:box-shadow var(--dur) var(--ease-out),border-color var(--dur) var(--ease-out)}
+.fan-card[aria-current]{border-color:var(--teal);box-shadow:0 14px 32px rgba(11,115,114,.18)}
+.fc-id{font:500 .9375rem "Fira Code",monospace}
+.fc-model{font-size:.8125rem;color:var(--muted)}
+.fc-host{font-size:.8125rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-foot{display:flex;justify-content:space-between;align-items:center;margin-top:.35rem}
+.fan-steps h3{font-size:1.05rem;font-weight:600;margin:.25rem 0 .75rem}
+.fan-steps ol{list-style:none;margin:0;padding:0;display:grid;gap:.1rem;max-width:72ch;
+  position:relative}
+.fan-steps li{display:grid;grid-template-columns:2rem 1fr;column-gap:.75rem;padding:.55rem 0;
+  border-bottom:1px solid var(--line)}
+.fan-steps li:last-child{border-bottom:0}
+.fs-n{grid-row:span 2;width:1.75rem;height:1.75rem;border-radius:999px;display:grid;
+  place-items:center;background:var(--tint);color:var(--accent);font-weight:500;font-size:.8125rem}
+.fs-t{font-weight:500}
+.fs-d{color:var(--muted);font-size:.875rem}
+@media (prefers-reduced-motion:reduce){.fan-card{transition:none}}
 /* chart bars grow from their baseline (motion.js) */
 .js-plotly-plot .bars path{transform-box:fill-box;transform-origin:0 50%}
 /* Streamlit chrome in the Gossamer look */

@@ -19,6 +19,7 @@ from pome.app.views import (
     SHOWN_GATES,
     USD_INR,
     answer_line,
+    architecture_steps,
     cost_curves,
     display_gate,
     evidence_rows,
@@ -47,7 +48,7 @@ with st.sidebar:
     st.header("Scenario")
     volume = st.slider("Tickets per month", 10_000, 10_000_000,
                        profile.volume_tickets_per_month, step=10_000, format="%d")
-    st.caption("One ticket = one customer question = one model call.")
+    st.caption("1 ticket = 1 customer question.")
     max_spend_inr = st.number_input(
         "Max monthly spend, INR", 0, 10_00_00_000,
         round(float(profile.gates["G11"].value) * RATE), step=5_000,
@@ -197,10 +198,25 @@ with tab_var:
                 + render.variant_table(rows))
 
 with tab_cfg:
-    st.dataframe(pd.DataFrame([{
-        "config": c.config_id, "model": c.model_id, "host": c.host, "region": c.region,
-        "serving": c.serving, "quant": c.quant, "mode": c.evaluation_mode, "notes": c.notes,
-    } for c in registry if c.config_id in ids]), hide_index=True, width="stretch")
+    status = {v.config_id: v.status for v in d.verdicts}
+    order = [r["config"] for r in gate_matrix(d)]
+    gpu_label = GPU_OPTIONS[gpu].label + (f" x{int(gpus)}" if int(gpus) > 1 else "")
+    fan_items = []
+    for cid in order:
+        c = by_id[cid]
+        cost = snap.values.get(f"{cid}.cost.monthly_usd")
+        fan_items.append({
+            "config": cid, "model": c.model_id, "host": c.host.split(" (")[0],
+            "status": status[cid], "cost": f"{inr(float(cost.value))}/mo" if cost else "—",
+            "steps": architecture_steps(c, gpu=gpu_label)})
+    st.caption("Scroll or use the arrows; the card in the middle shows its build steps.")
+    st.html(render.config_fan(fan_items, focus=d.recommended or order[0]),
+            unsafe_allow_javascript=True)
+    with st.expander("All configuration details (table)"):
+        st.dataframe(pd.DataFrame([{
+            "config": c.config_id, "model": c.model_id, "host": c.host, "region": c.region,
+            "serving": c.serving, "quant": c.quant, "mode": c.evaluation_mode, "notes": c.notes,
+        } for c in registry if c.config_id in ids]), hide_index=True, width="stretch")
 
 st.html(f'<p class="foot">All costs are shown in INR. Conversion: US$1 = '
         f'₹{RATE:.4f} (RBI reference rate, {USD_INR.retrieved_at.date().isoformat()}). '

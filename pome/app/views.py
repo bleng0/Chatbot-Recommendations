@@ -220,3 +220,37 @@ def gate_info_rows(profile: Profile) -> list[dict[str, str]]:
                        f"{_UNIT_TXT.get(gate.unit, '')}")
         rows.append({"gate": display_gate(g), "checks": GATE_INFO[g], "pass_if": pass_if})
     return rows
+
+
+def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sidebar"
+                       ) -> list[tuple[str, str]]:
+    """How a bank would build this config: short title + one-line detail per step."""
+    route = ("Classify each ticket into a banking intent, then answer FAQs from the bank's "
+             "own approved text; send anything out of scope to a human agent.")
+    if cfg.host.startswith("self-hosted"):
+        return [
+            ("Rent GPUs in India", f"Rent {gpu} in an India region for {cfg.model_id}."),
+            ("Serve the model", f"Run {cfg.serving} with {cfg.model_id} at {cfg.quant}, "
+                                "behind a private endpoint."),
+            ("Add a gateway", "Put an API gateway and request queue in front; keep logs "
+                              "off or redacted."),
+            ("Route tickets", route),
+            ("Watch and scale", "Track latency, errors and GPU load; add GPUs before peak "
+                                "hours."),
+        ]
+    if cfg.provider == "ollama":
+        return [
+            ("Install Ollama", f"Install Ollama and pull {cfg.model_id} ({cfg.quant})."),
+            ("Run locally", "Serve it on one machine for testing quality only."),
+            ("Route test tickets", route),
+            ("Move to a server", "For production, use the matching self-hosted GPU config."),
+        ]
+    provider = cfg.host.split(" (")[0]
+    return [
+        ("Open a provider account", f"Create a paid {provider} account and an API key."),
+        ("Pick model and region", f"Call {cfg.model_id}; region: {cfg.region}."),
+        ("Set data controls", "Turn on zero data retention if offered; never send card or "
+                              "account numbers."),
+        ("Route tickets", route),
+        ("Watch cost and errors", "Set a monthly spend alert and retry failed calls once."),
+    ]
