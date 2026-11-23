@@ -49,7 +49,7 @@ with st.sidebar:
                "costs grow with tickets; a self-hosted GPU costs the same every month.")
     max_spend_inr = st.number_input(
         "Max monthly spend, INR", 0, 10_00_00_000,
-        int(round(float(profile.gates["G11"].value) * RATE)), step=5_000,
+        round(float(profile.gates["G11"].value) * RATE), step=5_000,
         help="The most you are willing to pay per month. Configurations that cost more "
              "are rejected.")
     gpu = st.selectbox("Self-host GPU (India price)", list(GPU_OPTIONS),
@@ -70,7 +70,7 @@ with st.sidebar:
 
 default_usd = float(profile.gates["G11"].value)
 # the default INR budget maps back to the exact banking_mvp value, so the official hash holds
-max_spend_usd = (default_usd if max_spend_inr == int(round(default_usd * RATE))
+max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
                  else float(max_spend_inr) / RATE)
 scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
                     max_spend_usd=max_spend_usd)
