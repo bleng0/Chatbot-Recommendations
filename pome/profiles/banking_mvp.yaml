@@ -4,7 +4,7 @@ name: banking_mvp
 tasks: [intent, oos, faq]
 languages: [en, hi, hinglish]
 volume_tickets_per_month: 100000
-peak_rps: 8
+peak_rps: 5
 region: India
 gates:
   G1:  {op: ">=", value: 0.80, unit: ratio}

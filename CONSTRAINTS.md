@@ -18,6 +18,8 @@ A config is `eligible` only if every gate passes. A gate whose evidence is missi
 `unverified`, never `pass`. Evidence marked `modeled` can pass a gate but the config is
 flagged `eligible (modeled)` and the UI says so.
 What-if profiles may omit gates for exploration only; the official recommendation always uses banking_mvp as written.
+On screen (owner decision 2026-11-23) G10 and G11 are sidebar settings and the remaining gates
+are numbered G1-G10 without gaps (G14 shows as G10); ids in this file and the code are unchanged.
 Gap fill (owner decision 2026-11-23, replaces D2): a gate key POME did not measure is filled
 with a vendor-doc value or a `modeled` proxy (formula and inputs in `pome/registry/gapfill.yaml`),
 never `measured`. A config that passes on such evidence is only ever `eligible (modeled)`.
@@ -32,8 +34,8 @@ never `measured`. A config that passes on such evidence is only ever `eligible (
 | G6 | Language gap: Hindi vs English on every quality metric with both languages (MASSIVE hi-IN vs en-US macro-F1; FAQ G4, G5) | en − hi ≤ 0.10 | measured, else modeled proxy | Owner default (10 points absolute) |
 | G7 | Language gap: Hinglish vs English on every quality metric with Hinglish data (FAQ G4, G5 only; no Hinglish intent benchmark exists) | en − hinglish ≤ 0.10 | measured, else modeled proxy | Owner default; scope per SPEC A3 |
 | G8 | p95 latency at the concurrency level that sustains peak load | ≤ 20000 ms | measured, else modeled (published medians / decode model) | Owner decision 2026-11-23 (was 3000 ms) |
-| G9 | Sustainable throughput (p95 ≤ G8 and error rate ≤ G10) | ≥ 5 req/s | measured / modeled | Owner decision 2026-11-23 (was 8, the profile peak) |
-| G10 | Error rate after retries, at that concurrency | ≤ 1.0% | measured / modeled | Default: errors above 1% at peak are visible to customers |
+| G9 | Sustainable throughput (p95 ≤ G8 and error rate ≤ G10) | ≥ 5 req/s | measured / modeled | Owner decision 2026-11-23: profile peak is 5 req/s (was 8) |
+| G10 | Error rate after retries, at that concurrency | ≤ 1.0% by default; the user sets their own max error rate in the app sidebar | measured / modeled | Owner decision 2026-11-23: a user input, not a gate column |
 | G11 | Monthly cost at the app's ticket volume | ≤ $1,500 by default (₹1,39,195); the user sets their own max monthly spend in the app sidebar | measured tokens × vendor-doc prices; self-host modeled | Owner decision 2026-11-23: budget is a user input, shown as a cost column, not a gate column |
 | G14 | Licence/terms permit commercial use | required | vendor-doc | Owner default |
 

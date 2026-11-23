@@ -42,7 +42,7 @@ def test_profile_basics():
     p = load_profile()
     assert p.name == "banking_mvp"
     assert p.volume_tickets_per_month == 100_000
-    assert p.peak_rps == 8
+    assert p.peak_rps == 5  # owner 2026-11-23 (was 8)
     assert p.region == "India"
     assert p.languages == ["en", "hi", "hinglish"]
 
