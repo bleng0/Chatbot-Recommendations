@@ -160,44 +160,44 @@ None of these models can claim "99% accuracy". Every modeled value needs its err
 
 ## Sources by gate (all 20 configs; retrieved 2026-11-22 and 2026-11-23)
 
-Every source behind a gate value the app shows, grouped by gate. `measured` = a POME run record; `vendor-doc` = a provider, price or study page; `modeled` = a formula whose inputs and their sources are listed in `pome/registry/gapfill.yaml`. Proxies reuse POME's own run of the named model. G11 (monthly cost) is checked against the user's max monthly spend in the app.
+Every source behind a gate value the app shows, grouped by gate. `measured` (self-tested) = a run record; `vendor-doc` = a provider, price or study page; `modeled` = a formula whose inputs and their sources are listed in `pome/registry/gapfill.yaml`. Proxies reuse the self-tested run of the named model. G11 (monthly cost) is checked against the user's max monthly spend in the app.
 
 ### G1: Understands which banking request the customer means
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gem25f-api-global (modeled)
-- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gemma4-26b-api-global (modeled)
+- proxy: self-tested run of gem25f-api-global (modeled)
+- proxy: self-tested run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: self-tested run of gemma4-26b-api-global (modeled)
 - runs/records/gem25f-api-global/banking77_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/banking77_run0.jsonl (measured)
 - runs/records/gemma4-26b-api-global/banking77_run0.jsonl (measured)
 
 ### G2: Spots questions the bot must not answer
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: self-tested run of gemma4-12b-ollama-local-q4 (modeled)
 - runs/records/gemma4-12b-ollama-local-q4/clinc150_run0.jsonl (measured)
 
 ### G3: Does not wrongly refuse real banking questions
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: self-tested run of gemma4-12b-ollama-local-q4 (modeled)
 - runs/records/gemma4-12b-ollama-local-q4/clinc150_run0.jsonl (measured)
 
 ### G4: Answers FAQ questions correctly in every language
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: self-tested run of gemma4-12b-ollama-local-q4 (modeled)
 - runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/faq_hi_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/faq_hinglish_run0.jsonl (measured)
 
 ### G5: Declines FAQ questions it cannot answer
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: self-tested run of gemma4-12b-ollama-local-q4 (modeled)
 - runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/faq_hi_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/faq_hinglish_run0.jsonl (measured)
 
 ### G6: Hindi quality stays close to English
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: self-tested run of gemma4-12b-ollama-local-q4 (modeled)
 - runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/faq_hi_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/massive_en_run0.jsonl (measured)
@@ -205,7 +205,7 @@ Every source behind a gate value the app shows, grouped by gate. `measured` = a 
 
 ### G7: Hinglish quality stays close to English
 - carried over from hosted copy gemma4-12b-ollama-local-q4 (modeled)
-- proxy: POME measured run of gemma4-12b-ollama-local-q4 (modeled)
+- proxy: self-tested run of gemma4-12b-ollama-local-q4 (modeled)
 - runs/records/gemma4-12b-ollama-local-q4/faq_en_run0.jsonl (measured)
 - runs/records/gemma4-12b-ollama-local-q4/faq_hinglish_run0.jsonl (measured)
 
@@ -234,7 +234,7 @@ Every source behind a gate value the app shows, grouped by gate. `measured` = a 
 - https://www.nvidia.com/en-us/data-center/a100/ (modeled)
 
 ### G10: Rarely fails a request after retries
-- POME runs of gem25f-api-global (modeled)
+- self-tested runs of gem25f-api-global (modeled)
 - https://cloud.google.com/vertex-ai/generative-ai/sla (modeled)
 - https://docs.mistral.ai/inference/priority-tier (modeled)
 - https://openai.com/api-scale-tier (modeled)

@@ -115,7 +115,7 @@ configs:
       region_processing: null
       retention_days: null
       commercial_use: null
-    notes: 'Published price only; not evaluated by POME. Deprecated: shutdown 2027-04-01, replacement gpt-6-luna has no price yet.'
+    notes: 'Published price only; not self-tested. Deprecated: shutdown 2027-04-01, replacement gpt-6-luna has no price yet.'
   - config_id: gpt54mini-api-global
     model_id: gpt-5.4-mini
     version: alias; no pinned version string on the pricing page
@@ -138,7 +138,7 @@ configs:
         source: https://developers.openai.com/api/docs/pricing
         retrieved_at: '2026-11-23T12:00:00+05:30'
     deployment: *id001
-    notes: Published price only; not evaluated by POME.
+    notes: Published price only; not self-tested.
   - config_id: haiku55-api-global
     model_id: claude-haiku-5-5
     version: alias; no pinned version string on the pricing page
@@ -161,7 +161,7 @@ configs:
         source: https://platform.claude.com/docs/en/about-claude/pricing
         retrieved_at: '2026-11-23T12:00:00+05:30'
     deployment: *id001
-    notes: Price is for prompts up to 100K tokens (above that $0.50 / $2.50). Published price only; not evaluated by POME.
+    notes: Price is for prompts up to 100K tokens (above that $0.50 / $2.50). Published price only; not self-tested.
   - config_id: sonnet55-api-global
     model_id: claude-sonnet-5-5
     version: alias; no pinned version string on the pricing page
@@ -184,7 +184,7 @@ configs:
         source: https://platform.claude.com/docs/en/about-claude/pricing
         retrieved_at: '2026-11-23T12:00:00+05:30'
     deployment: *id001
-    notes: Published price only; not evaluated by POME.
+    notes: Published price only; not self-tested.
   - config_id: gem35f-vertex-global
     model_id: gemini-3.5-flash
     version: alias; no pinned version string on the pricing page
@@ -207,7 +207,7 @@ configs:
         source: https://cloud.google.com/vertex-ai/generative-ai/pricing
         retrieved_at: '2026-11-23T12:00:00+05:30'
     deployment: *id001
-    notes: Published price only; not evaluated by POME. The model is deprecated on the Gemini API and routes to gemini-3.6-flash there.
+    notes: Published price only; not self-tested. The model is deprecated on the Gemini API and routes to gemini-3.6-flash there.
   - config_id: mistralsmall4-api-global
     model_id: mistral-small-2603
     version: alias; no pinned version string on the pricing page
@@ -230,7 +230,7 @@ configs:
         source: https://docs.mistral.ai/models/mistral-small-4-0-26-03
         retrieved_at: '2026-11-23T12:00:00+05:30'
     deployment: *id001
-    notes: Published price only; not evaluated by POME. 119B total / 6.5B active MoE.
+    notes: Published price only; not self-tested. 119B total / 6.5B active MoE.
   - config_id: sarvam105b-api-in
     model_id: sarvam-105b
     version: alias; no pinned version string on the pricing page
@@ -263,7 +263,7 @@ configs:
         retrieved_at: '2026-11-23T12:00:00+05:30'
       retention_days: null
       commercial_use: null
-    notes: Introductory INR price through the end of 2026; reasoning tokens bill as output. Published rate limits (60/200/300 req/min by plan) are below the 480 req/min needed for 8 req/s, so G9 would fail. Not evaluated by POME.
+    notes: Introductory INR price through the end of 2026; reasoning tokens bill as output. Published rate limits (60/200/300 req/min by plan) are below the 480 req/min needed for 8 req/s, so G9 would fail. Not self-tested.
   - config_id: deepseekflash-api-global
     model_id: deepseek-flash
     version: alias; no pinned version string on the pricing page
@@ -286,7 +286,7 @@ configs:
         source: https://api-docs.deepseek.com/quick_start/pricing
         retrieved_at: '2026-11-23T12:00:00+05:30'
     deployment: *id001
-    notes: Peak-hour price; off-peak is half. deepseek-v4-flash is retired. Published price only; not evaluated by POME.
+    notes: Peak-hour price; off-peak is half. deepseek-v4-flash is retired. Published price only; not self-tested.
   - config_id: deepseekv41flash-sarvam-in
     model_id: deepseekv4.1-flash-1017
     version: alias; no pinned version string on the pricing page
@@ -311,7 +311,7 @@ configs:
         retrieved_at: '2026-11-23T12:00:00+05:30'
         formula: INR 55 per 1M tokens (excl. GST) / 92.7968 INR per USD (RBI reference rate 2026-11-23)
     deployment: *id002
-    notes: Introductory INR price through the end of 2026. Not evaluated by POME.
+    notes: Introductory INR price through the end of 2026. Not self-tested.
   - config_id: gemma4-31b-vllm-in-bf16
     model_id: google/gemma-4-31B-it
     version: open weights
@@ -333,7 +333,7 @@ configs:
         provenance: vendor-doc
         source: https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html
         retrieved_at: '2026-11-23T12:00:00+05:30'
-    notes: Dense 30.7B, Apache 2.0. Published settings and memory only; quality not measured by POME.
+    notes: Dense 30.7B, Apache 2.0. Published settings and memory only; quality not self-tested.
     variants:
     - variant_id: vllm-bf16-2gpu
       stack: vLLM >=0.19.1
@@ -455,7 +455,7 @@ configs:
       region_processing: null
       retention_days: null
       commercial_use: *id003
-    notes: 25.2B total / 3.8B active MoE, Apache 2.0. Published settings and memory only; quality not measured by POME.
+    notes: 25.2B total / 3.8B active MoE, Apache 2.0. Published settings and memory only; quality not self-tested.
     variants:
     - variant_id: vllm-bf16-1gpu
       stack: vLLM >=0.25.0
@@ -625,7 +625,7 @@ configs:
       region_processing: null
       retention_days: null
       commercial_use: null
-    notes: Only model with MATCH-length serving rows (MLPerf, 8x B300). English MASSIVE composite 0.822 in arXiv 2607.27421 is context only; it is not a POME gate input.
+    notes: Only model with MATCH-length serving rows (MLPerf, 8x B300). English MASSIVE composite 0.822 in arXiv 2607.27421 is context only; it is not a gate input.
     variants:
     - variant_id: mlperf-server
       stack: TensorRT (version n/s)
@@ -653,7 +653,7 @@ configs:
             mean_input_tokens: 778
             mean_output_tokens: 73
             benchmark: MLPerf Inference v6.1 Closed
-      note: Lengths match the POME workload; system throughput over 8 GPUs, not per GPU. TTFT <= 2000 ms, TPOT <= 100 ms are limits, not measured percentiles.
+      note: Lengths match the self-test workload; system throughput over 8 GPUs, not per GPU. TTFT <= 2000 ms, TPOT <= 100 ms are limits, not measured percentiles.
     - variant_id: mlperf-interactive
       stack: TensorRT (version n/s)
       quant: 'not stated (MLPerf closed: accuracy >= 99% of FP16 reference)'

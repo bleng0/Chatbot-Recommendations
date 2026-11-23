@@ -45,7 +45,8 @@ def _mask(name: str) -> str:
 def badge(label: str) -> str:
     if not label:
         return ""
-    return f'<span class="bdg bdg-{escape(label.lower())}">{escape(label)}</span>'
+    cls = {"SELF-TESTED": "measured"}.get(label, label.lower())
+    return f'<span class="bdg bdg-{escape(cls)}">{escape(label)}</span>'
 
 
 def cell(status: str) -> str:

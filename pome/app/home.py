@@ -29,7 +29,7 @@ from pome.app.views import (
 from pome.profiles.loader import load_profile, what_if_profile
 from pome.registry.loader import load_registry
 
-st.set_page_config(page_title="POME: model and hosting selection", layout="wide")
+st.set_page_config(page_title="Model and hosting selection", layout="wide")
 T = render.TOKENS["light"]
 st.html(render.css("light"))
 

@@ -22,7 +22,8 @@ def test_registry_and_source_text_is_escaped():
 
 
 def test_badge_shape_follows_provenance():
-    assert "bdg-measured" in badge("MEASURED") and "bdg-modeled" in badge("MODELED")
+    assert "bdg-measured" in badge("SELF-TESTED") and "bdg-modeled" in badge("MODELED")
+    assert ">SELF-TESTED<" in badge("SELF-TESTED")
     assert badge("") == ""
 
 

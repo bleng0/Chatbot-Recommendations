@@ -34,12 +34,28 @@ def test_more_self_host_gpu_options_each_with_a_sourced_price():
 def test_max_spend_sets_the_budget_gate_and_can_change_the_decision():
     from pome.app.scenario import Scenario, decide
     _, default = decide(Scenario())
-    _, tight = decide(Scenario(max_spend_usd=10.0))
-    assert default.recommended == "gpt54mini-api-global"   # ₹12,528 fits the default budget
-    assert tight.recommended != "gpt54mini-api-global"     # ~₹928 cap rules it out
+    rec = next(v for v in default.verdicts if v.config_id == default.recommended)
+    _, tight = decide(Scenario(max_spend_usd=rec.monthly_cost - 0.01))  # just under its cost
+    assert default.recommended and tight.recommended != default.recommended
     assert default.decision_hash != tight.decision_hash
 
 
 def test_gate_information_no_longer_lists_the_budget_gate():
     rows = [r["gate"] for r in gate_info_rows(load_profile())]
     assert "G11" not in rows
+
+
+def test_owner_thresholds_2026_11_23_g8_20_seconds_g9_5_per_second():
+    gates = load_profile().gates
+    assert gates["G8"].value == 20000 and gates["G9"].value == 5
+
+
+def test_no_visible_text_says_pome_tested_it():
+    from pome.app.scenario import Scenario, decide
+    from pome.app.views import BADGE, evidence_rows
+    from pome.registry.loader import load_registry
+    snap, _ = decide(Scenario())
+    shown = " ".join(r["source"] + r["formula"] for r in evidence_rows(snap))
+    shown += " ".join(c.notes for c in load_registry()) + " ".join(BADGE.values())
+    assert "POME" not in shown and "MEASURED" not in BADGE.values()
+    assert "self-tested" in shown.lower()

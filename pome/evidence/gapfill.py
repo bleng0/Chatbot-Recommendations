@@ -79,10 +79,10 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
             if anchor is None:
                 continue
             src = ev[f"{anchor}.{key}"]
-            kind = "POME measured run" if src.provenance == "measured" else f"{src.provenance} value"
+            kind = "self-tested run" if src.provenance == "measured" else f"{src.provenance} value"
             put(cid, key, lambda src=src, anchor=anchor, key=key, kind=kind: _modeled(
                 src.value, src.unit, f"proxy: {kind} of {anchor} ({src.source})",
-                f"value = {key} of {anchor} (proxy; this model was not run by POME)", at))
+                f"value = {key} of {anchor} (proxy; this model was not self-tested)", at))
 
         # serving
         if cid in d["api_speed"]:
@@ -116,7 +116,7 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
                     + (f"; {e['note']}" if e.get("note") else ""), at))
             elif err_proxy is not None:
                 put(cid, "serving.error_pct", lambda: _modeled(
-                    err_proxy, "percent", f"POME runs of {d['error_proxy']['anchor']}",
+                    err_proxy, "percent", f"self-tested runs of {d['error_proxy']['anchor']}",
                     f"Wilson 95% upper bound of {fail} failed / {n} calls after retries "
                     "(proxy; provider publishes no SLA)", at))
         elif cid in sh["params_b"]:

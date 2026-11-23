@@ -7,7 +7,7 @@ from pome.profiles.loader import Profile
 from pome.registry.loader import ConfigEntry
 from pome.selection.engine import CHECKS, Decision
 
-BADGE = {"measured": "MEASURED", "vendor-doc": "VENDOR-DOC", "modeled": "MODELED",
+BADGE = {"measured": "SELF-TESTED", "vendor-doc": "VENDOR-DOC", "modeled": "MODELED",
          "study": "PUBLISHED"}
 _STATUS = {"eligible": "Eligible", "eligible_modeled": "Eligible (modeled inputs)",
            "rejected": "Rejected", "unverified": "Unverified (evidence missing)"}
@@ -61,7 +61,7 @@ def answer_line(d: Decision, snap: Snapshot, profile: Profile) -> str:
         v = next(x for x in d.verdicts if x.config_id == d.recommended)
         cost = "no cost evidence" if v.monthly_cost is None else (
             f"{inr(v.monthly_cost)}/month (cost MODELED)")
-        lead = ("Recommended on modeled evidence (not measured)" if d.recommended_is_modeled
+        lead = ("Recommended on modeled evidence (not self-tested)" if d.recommended_is_modeled
                 else "Recommended")
         return f"{lead}: {d.recommended} at {cost}"
     parts = []
