@@ -287,3 +287,67 @@ def what_if_pick(wi: Decision, not_rec: dict[str, list[str]]) -> tuple[str | Non
         return valid[0].config_id, False
     flagged = sorted((v for v in passing if v.config_id in not_rec), key=cost)
     return (flagged[0].config_id, True) if flagged else (None, False)
+
+
+_QUALITY_KEYS = {"G1": ("intent.banking77.macro_f1",), "G2": ("oos.clinc150.recall",),
+                 "G3": ("oos.clinc150.precision",),
+                 "G4": tuple(f"faq.correct.{lang}" for lang in ("en", "hi", "hinglish")),
+                 "G5": tuple(f"faq.declined.{lang}" for lang in ("en", "hi", "hinglish"))}
+
+
+def _quality(cid: str, snap: Snapshot) -> float:
+    """Average of the G1-G5 scores (worst language for G4 and G5); a missing score counts 0."""
+    total = 0.0
+    for keys in _QUALITY_KEYS.values():
+        vals = [float(e.value) for k in keys if (e := snap.values.get(f"{cid}.{k}")) is not None]
+        total += min(vals) if vals else 0.0
+    return total / len(_QUALITY_KEYS)
+
+
+def baselines(d: Decision, snap: Snapshot, registry: list[ConfigEntry]) -> list[dict]:
+    """PLAN F8: what three simple rules would pick instead of the gates, next to our pick.
+    Highest benchmark score uses self-tested quality only (proxies copy another model's
+    score); lowest price ignores every gate; self-host only is the cheapest rented-GPU config."""
+    reg = {c.config_id: c for c in registry}
+    by_id = {v.config_id: v for v in d.verdicts if v.config_id in reg}
+    costed = [v for v in by_id.values() if v.monthly_cost is not None]
+    key_cost = lambda v: (v.monthly_cost, v.config_id)
+    self_tested = [v for v in costed
+                   if (e := snap.values.get(f"{v.config_id}.intent.banking77.macro_f1"))
+                   is not None and e.provenance == "measured"]
+    picks = [
+        ("Our rule", "Cheapest config that passes every gate", by_id.get(d.recommended or "")),
+        ("Highest benchmark score", ("Best average of G1-G5 among the models we self-tested, "
+                                     "cost ignored"), max(self_tested, key=lambda v: (_quality(v.config_id, snap),
+                                                          -v.monthly_cost, v.config_id),
+                             default=None)),
+        ("Lowest price", "Cheapest monthly cost, gates ignored", min(costed, key=key_cost,
+                                                                     default=None)),
+        ("Self-host only", "Cheapest config on our own rented GPU in India, gates ignored",
+         min((v for v in costed if reg[v.config_id].host.startswith("self-hosted")),
+             key=key_cost, default=None)),
+    ]
+    ours = picks[0][2].monthly_cost if picks[0][2] and picks[0][2].monthly_cost is not None else None
+    cards = []
+    for title, rule, v in picks:
+        if v is None:
+            continue
+        cfg = reg[v.config_id]
+        e = snap.values.get(f"{v.config_id}.cost.monthly_usd")
+        delta = 0.0 if ours is None else v.monthly_cost - ours
+        if title == "Our rule" or ours is None:
+            delta_txt = ""
+        elif abs(delta * float(USD_INR.value)) < 0.5:
+            delta_txt = "same cost as our pick"
+        else:
+            delta_txt = (f"{inr(abs(delta))} {'more' if delta > 0 else 'less'} a month "
+                         "than our pick")
+        fails = [f"{display_gate(g.gate)}{' ' + SHORT_NAME[g.gate] if g.gate in SHORT_NAME else ''}"
+                 + (" (no evidence)" if g.status == "unverified" else "")
+                 for g in sorted(v.gates, key=lambda g: int(g.gate[1:]))
+                 if g.status in ("fail", "unverified")]
+        cards.append({"title": title, "rule": rule, "config": v.config_id,
+                      "model": cfg.model_id, "host": cfg.host.split(" (")[0],
+                      "cost": inr(v.monthly_cost), "badge": badge(e) if e else "",
+                      "delta": delta_txt, "delta_usd": round(delta, 6), "fails": fails})
+    return cards

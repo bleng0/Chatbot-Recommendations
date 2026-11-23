@@ -172,6 +172,31 @@ def answer_card(*, model: str, config: str, host: str, region: str, cost: str, m
         'with these inputs gives the same hash.</p></details></div>')
 
 
+def baseline_cards(cards: list[dict]) -> str:
+    """Our pick next to what simple rules would pick: cost, change versus ours, gates failed."""
+    out = []
+    for c in cards:
+        if c["delta_usd"] > 0:
+            cls = "up"
+        elif c["delta_usd"] < 0:
+            cls = "down"
+        else:
+            cls = "eq"
+        delta = f'<span class="bl-d {cls}">{escape(c["delta"])}</span>' if c["delta"] else ""
+        n = len(c["fails"])
+        verdict = ('<span class="bl-ok">Passes every gate</span>' if not n else
+                   f'<span class="bl-bad">Fails {n} check{"s" if n > 1 else ""}</span>'
+                   '<span class="bl-fs">' + "".join(
+                       f'<span class="bl-f">{escape(f)}</span>' for f in c["fails"]) + "</span>")
+        out.append(
+            f'<article class="bl-c"><h3>{escape(c["title"])}</h3>'
+            f'<p class="bl-r">{escape(c["rule"])}</p><p class="bl-p">{escape(c["config"])}</p>'
+            f'<p class="bl-m">{escape(c["model"])} · {escape(c["host"])}</p>'
+            f'<p class="bl-cost">{escape(c["cost"])}{badge(c["badge"])}</p>{delta}'
+            f'<div class="bl-v">{verdict}</div></article>')
+    return f'<div class="bl">{"".join(out)}</div>'
+
+
 def _details(summary: str, lines: list[tuple[str, str]]) -> str:
     inner = "".join(f"<dt>{escape(k)}</dt><dd>{escape(val)}</dd>" for k, val in lines if val)
     return (f"<details><summary>{escape(summary)}</summary>"
@@ -333,6 +358,28 @@ h1.q .k::after{content:"";position:absolute;left:0;right:0;bottom:-.08em;height:
 .ac details.repro p{margin:.3rem 0 0}
 .ac details.repro code{font-size:.75rem}
 @media (max-width:760px){.ac .slots{grid-template-columns:1fr}}
+.bl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;
+ background:var(--panel);overflow:hidden;margin:.5rem 0 1rem}
+.bl-c{padding:1.1rem 1.1rem 1.2rem;border-left:1px solid #E6E6E8;display:flex;flex-direction:column;gap:.3rem}
+.bl-c:first-child{border-left:0;background:var(--tint)}
+.bl-c h3{margin:0!important;padding:0!important;font-size:.8125rem!important;font-weight:600;color:var(--muted)}
+.bl-c:first-child h3{color:var(--accent)}
+.bl-c p{margin:0}
+.bl-r{font-size:.75rem;color:var(--muted);min-height:2.4em}
+.bl-p{font:500 .9375rem "Fira Code",monospace;word-break:break-all;margin-top:.25rem!important}
+.bl-m{font-size:.8125rem;color:var(--muted)}
+.bl-cost{font-size:1.375rem;font-weight:600;margin-top:.4rem!important}
+.bl-cost .bdg{margin-left:.4rem;vertical-align:.25em}
+.bl-d{font:500 .8125rem "Fira Code",monospace}
+.bl-d.up{color:var(--coraltext)}.bl-d.down{color:var(--accent)}.bl-d.eq{color:var(--muted)}
+.bl-v{margin-top:.6rem;padding-top:.6rem;border-top:1px solid #E6E6E8;font-size:.8125rem}
+.bl-ok{color:var(--accent);font-weight:500}.bl-bad{color:var(--coraltext);font-weight:500}
+.bl-fs{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem}
+.bl-f{font:500 .6875rem/1 "Fira Sans",sans-serif;padding:.28rem .45rem;border-radius:999px;border:1px solid var(--coral);
+ color:var(--coraltext);background:var(--panel)}
+.bl-note{font-size:.8125rem;color:var(--muted);max-width:80ch}
+@media (max-width:1000px){.bl{grid-template-columns:1fr 1fr}.bl-c:nth-child(3){border-left:0}.bl-c{border-top:1px solid #E6E6E8}}
+@media (max-width:560px){.bl{grid-template-columns:1fr}.bl-c{border-left:0}}
 .gm.fx{table-layout:fixed;width:max-content;min-width:100%}
 .gm.fx col.c-id{width:12.75rem}.gm.fx col.c-st{width:8.25rem}.gm.fx col.c-wi{width:8.75rem}
 .gm.fx col.c-cost{width:7rem}.gm.fx col.c-err{width:5rem}.gm.fx col.c-g{width:3.25rem}

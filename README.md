@@ -35,7 +35,9 @@ the plain command does not put the repo root on the import path and fails with
 
 What the page shows (2026-11-23): the question "Which model and hosting plan should you use?",
 an answer box with the recommended model, hosting plan and monthly cost (INR), and tabs for
-Gates, Cost, Evidence, Deployment variants and Configurations. The sidebar sets tickets per
+Gates, Baselines, Cost, Evidence, Deployment variants and Configurations. Baselines shows
+what three simple rules (highest self-tested benchmark score, lowest price, self-host only)
+would pick instead, with the cost difference and the gates each one fails. The sidebar sets tickets per
 month, max monthly spend, max error rate and the self-host GPU, and has a Tweak mode toggle per
 gate. In the Gates tab a vertical slider above each gate column moves that gate's threshold for
 a what-if view; the recommendation never changes, and a config that passes only because a gate

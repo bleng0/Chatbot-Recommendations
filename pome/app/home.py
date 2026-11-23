@@ -22,6 +22,7 @@ from pome.app.views import (
     USD_INR,
     answer_line,
     architecture_steps,
+    baselines,
     cost_curves,
     display_gate,
     evidence_rows,
@@ -106,8 +107,17 @@ wi_box = st.container()  # filled once the sliders in the Gates tab are read
 
 ids = {c.config_id for c in registry}
 
-tab_gates, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
-    ["Gates", "Cost", "Evidence", "Deployment variants", "Configurations"])
+tab_gates, tab_base, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
+    ["Gates", "Baselines", "Cost", "Evidence", "Deployment variants", "Configurations"])
+
+with tab_base:
+    st.html('<p class="one">What three simple rules would pick instead of the gates, at the '
+            'settings in the sidebar.</p>')
+    cards = baselines(d, snap, registry)
+    st.html(render.baseline_cards(cards))
+    if d.recommended and not by_id[d.recommended].host.startswith(("self-hosted", "local")):
+        st.html('<p class="bl-note">An API-only rule picks the same config as ours, because '
+                'our pick is already an API.</p>')
 
 with tab_gates:
     st.html('<p class="one">Slide a gate to explore. Configs that pass only because a gate is '
