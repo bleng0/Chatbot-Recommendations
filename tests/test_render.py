@@ -60,3 +60,9 @@ def test_motion_loader_points_at_self_hosted_files_that_exist():
         assert f"app/static/js/{name}" in MOTION and (static / name).is_file()
     js = (static / "motion.js").read_text(encoding="utf-8")
     assert "prefers-reduced-motion" in js and "window.anime" in js
+
+
+def test_status_cells_are_word_chips_coloured_by_status():
+    html = gate_table([ROW], ["G1", "G2"], set(), {"a": "eligible_modeled"})
+    assert '<span class="chip chip-rejected">Rejected</span>' in html
+    assert '<span class="chip chip-eligible_modeled">Eligible (modeled)</span>' in html

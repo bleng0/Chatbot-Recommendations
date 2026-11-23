@@ -108,25 +108,28 @@ with tab_cost:
         items = sorted(costs.items(), key=lambda kv: float(kv[1].value))
         names_ = [cid for cid, _ in items]
         vals = [float(e.value) for _, e in items]
-        colors = [T["coral"] if v > budget else T["teal"] for v in vals]
+        colors = [T["coral"] if v > budget else T["line"] if v == 0 else T["teal"]
+                  for v in vals]
         fig = go.Figure(go.Bar(
             x=vals, y=names_, orientation="h", marker={"color": colors, "cornerradius": 4},
             text=[f"${v:,.0f}" + (" over budget" if v > budget else "") for v in vals],
             textposition="outside", cliponaxis=False,
             hovertemplate="%{y}: $%{x:,.2f}/month (MODELED)<extra></extra>"))
-        fig.add_vline(x=budget, line={"dash": "dash", "width": 1, "color": T["muted"]},
+        fig.add_vline(x=budget, line={"dash": "dash", "width": 1.5, "color": T["coral"]},
                       annotation_text=f"G11 budget ${budget:,.0f}",
-                      annotation_position="top", annotation_font_color=T["muted"])
+                      annotation_position="top", annotation_font_color=T["coraltext"])
         fig.update_layout(
             height=60 + 34 * len(vals), margin={"l": 10, "r": 90, "t": 36, "b": 30},
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", bargap=0.35,
             font={"family": "Fira Sans, sans-serif", "color": T["text"], "size": 13},
             xaxis={"title": f"USD per month at {int(volume):,} tickets (MODELED)",
-                   "gridcolor": T["line"], "zeroline": False, "tickprefix": "$",
+                   "gridcolor": T["line"], "zeroline": False, "linecolor": T["grey"],
+                   "tickfont": {"color": T["muted"]}, "tickprefix": "$",
                    "range": [0, max(budget, *vals) * 1.18]},
             yaxis={"autorange": "reversed",
                    "tickfont": {"family": "Fira Code, monospace", "color": T["muted"]}},
-            hoverlabel={"font": {"family": "Fira Sans, sans-serif"}})
+            hoverlabel={"font": {"family": "Fira Sans, sans-serif", "color": T["text"]},
+                        "bgcolor": T["panel"], "bordercolor": T["teal"]})
         st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
         sh = snap.values.get(f"{SELFHOST}.cost.monthly_usd")
         for cid in names_:

@@ -88,6 +88,10 @@ def answer(text: str, *, recommended: bool, what_if: bool = False) -> str:
     return f'<p class="{cls}" role="status" aria-live="polite">{text}</p>'
 
 
+def _chip(status: str) -> str:
+    return f'<span class="chip chip-{escape(status)}">{escape(_SHORT[status])}</span>'
+
+
 def gate_table(rows: list[dict], gates: list[str], off: set[str],
                what_if: dict[str, str] | None = None) -> str:
     head = "".join(
@@ -99,10 +103,10 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
         cells = "".join(
             f'<td class="g{" off" if g in off else ""}">{cell(r["gates"][g])}</td>'
             if g in r["gates"] else '<td class="g">—</td>' for g in gates)
-        wi = (f'<td class="stat">{escape(_SHORT[what_if[r["config"]]])}</td>'
+        wi = (f'<td class="stat">{_chip(what_if[r["config"]])}</td>'
               if what_if is not None else "")
         body.append(f'<tr><th scope="row" class="cid">{escape(r["config"])}</th>'
-                    f'<td class="stat">{escape(_SHORT[r["status"]])}</td>{wi}{cells}</tr>')
+                    f'<td class="stat">{_chip(r["status"])}</td>{wi}{cells}</tr>')
     return (f'<div class="tw"><table class="gm"><caption class="sr">Gate results per '
             f'configuration, failing first</caption><thead><tr><th scope="col">Configuration'
             f'</th><th scope="col">Official status</th>{wi_head}{head}</tr></thead>'
@@ -230,6 +234,38 @@ table details[open] .dx{animation:open var(--dur) var(--ease-out)}
 .dx dt{color:var(--muted)}.dx dd{margin:0;overflow-wrap:anywhere}
 .vh{font-size:1rem;font-weight:600;margin:1.5rem 0 .5rem}
 .one{margin:.35rem 0;color:var(--muted);font-size:.875rem}
+/* Gossamer palette spread across the UI: teal = good/selected, orange = bad/attention,
+   greys = structure. Coloured fills always carry a word, never colour alone. */
+.chip{display:inline-block;font-size:.75rem;font-weight:500;padding:.15rem .5rem;
+  border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--bg)}
+.chip-eligible,.chip-eligible_modeled{background:var(--tint);border-color:var(--teal);
+  color:var(--accent)}
+.chip-eligible_modeled{border-style:dashed}
+.chip-rejected{background:rgba(236,77,37,.08);border-color:rgba(236,77,37,.45);
+  color:var(--coraltext)}
+.kp{border-top:3px solid var(--grey)}
+.kp:nth-child(2){border-top-color:var(--teal)}
+.kp:nth-child(3){border-top-color:var(--coral)}
+.kp:nth-child(4){border-top-color:var(--line)}
+thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
+.gm tbody tr:nth-child(even)>*{background:color-mix(in srgb,var(--bg) 60%,var(--panel))}
+.gm tbody tr:hover>*{background:var(--tint)}
+.gm thead th.off{color:var(--grey)}
+.bdg-measured{border-color:var(--teal)!important;background:var(--tint)}
+.bdg-vendor-doc{border-color:var(--grey)!important}
+.bdg-modeled{border-color:var(--grey)!important}
+.bdg-published{background:rgba(43,207,206,.22)!important}
+.wi{border-left:3px solid var(--grey);padding-left:1rem;margin-top:1.25rem}
+.ans-wi{border-color:var(--grey);background:var(--bg)}
+.vh code{background:var(--tint);padding:.05rem .35rem;border-radius:3px}
+.mt-match{background:var(--tint);padding:.1rem .4rem;border-radius:3px}
+*{scrollbar-color:var(--line) transparent}
+[data-testid="stSidebar"] h2{border-bottom:2px solid var(--teal);padding-bottom:.3rem;
+  display:inline-block}
+[data-testid="stExpander"] details{border-color:var(--line)!important}
+[data-testid="stExpander"] summary:hover{color:var(--accent)}
+[role="tab"][aria-selected="true"]{color:var(--accent)!important}
+::selection{background:var(--teal);color:var(--text)}
 /* chart bars grow from their baseline (motion.js) */
 .js-plotly-plot .bars path{transform-box:fill-box;transform-origin:0 50%}
 /* Streamlit chrome in the Gossamer look */
