@@ -34,7 +34,7 @@ never `measured`. A config that passes on such evidence is only ever `eligible (
 | G8 | p95 latency at the concurrency level that sustains peak load | ≤ 3000 ms | measured, else modeled (published medians / decode model) | Owner default |
 | G9 | Sustainable throughput (p95 ≤ G8 and error rate ≤ G10) | ≥ 8 req/s | measured / modeled | Profile peak |
 | G10 | Error rate after retries, at that concurrency | ≤ 1.0% | measured / modeled | Default: errors above 1% at peak are visible to customers |
-| G11 | Monthly cost at 100,000 tickets/month, measured avg tokens | ≤ $1,500 | measured tokens × vendor-doc prices; self-host modeled | Owner default |
+| G11 | Monthly cost at the app's ticket volume | ≤ the user's max monthly spend (app sidebar, INR; default ₹1,39,195 = $1,500) | measured tokens × vendor-doc prices; self-host modeled | Owner decision 2026-11-23: budget is a user input, shown as a cost column, not a gate column |
 | G14 | Licence/terms permit commercial use | required | vendor-doc | Owner default |
 
 Gate rules:
