@@ -35,13 +35,13 @@ def test_answer_line_flags_a_recommendation_built_on_modeled_evidence():
     snap_, d = decide(Scenario())
     assert d.recommended_is_modeled
     assert answer_line(d, snap_, load_profile()).startswith(
-        f"Recommended on modeled evidence (not measured): {d.recommended} at $")
+        f"Recommended on modeled evidence (not measured): {d.recommended} at ₹")
 
 
 def test_answer_line_for_a_recommendation_states_config_and_modeled_cost():
     s = snap(passing("a", cost=1234.6))
     assert answer_line(select(s, LENIENT), s, LENIENT) == (
-        "Recommended: a at $1,235/month (cost MODELED)")
+        "Recommended: a at ₹1,14,567/month (cost MODELED)")
 
 
 def test_answer_line_omits_the_value_when_failing_configs_differ():

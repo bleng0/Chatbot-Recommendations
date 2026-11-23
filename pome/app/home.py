@@ -16,10 +16,13 @@ from pome.app.scenario import (
     decide_what_if,
 )
 from pome.app.views import (
+    USD_INR,
     answer_line,
     cost_curves,
     evidence_rows,
+    gate_info_rows,
     gate_matrix,
+    inr,
     status_label,
     variant_rows,
 )
@@ -37,16 +40,17 @@ GATES = sorted(profile.gates, key=lambda g: int(g[1:]))
 
 with st.sidebar:
     st.header("Scenario")
-    volume = st.slider("Tickets per month", 10_000, 1_000_000, profile.volume_tickets_per_month,
-                       step=10_000, format="%d")
+    volume = st.slider("Tickets per month", 10_000, 10_000_000,
+                       profile.volume_tickets_per_month, step=10_000, format="%d")
     gpu = st.selectbox("Self-host GPU (India price)", list(GPU_OPTIONS),
                        format_func=lambda k: GPU_OPTIONS[k].label)
     st.caption(GPU_OPTIONS[gpu].note)
-    gpus = st.number_input("GPUs (assumption, not load-tested)", 1, 8, 1)
-    ops = st.number_input("Self-host ops cost, USD/month (owner input)", 0.0, 50_000.0, 0.0,
-                          step=100.0)
-    if ops == 0:
-        st.caption("Ops cost is $0. Set it for a realistic self-host total.")
+    gpus = st.number_input("GPUs (assumption, not load-tested)", 1, 64, 1)
+    ops_inr = st.number_input("Self-host ops cost, INR/month (owner input)", 0, 10_00_00_000, 0,
+                              step=10_000)
+    if ops_inr == 0:
+        st.caption("Ops cost is ₹0. Set it for a realistic self-host total.")
+    ops = float(ops_inr) / float(USD_INR.value)
     st.header("Tweak mode")
     kept = st.pills("Gates to check against", GATES, selection_mode="multi", default=GATES,
                     help="Switch gates off to explore. Thresholds never change, and the "
@@ -82,8 +86,12 @@ if wi:
 
 ids = {c.config_id for c in registry}
 
-tab_gates, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
-    ["Gates", "Cost", "Evidence", "Deployment variants", "Configurations"])
+RATE = float(USD_INR.value)
+tab_gates, tab_info, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
+    ["Gates", "Gate information", "Cost", "Evidence", "Deployment variants", "Configurations"])
+
+with tab_info:
+    st.html(render.gate_info_table(gate_info_rows(profile)))
 
 with tab_gates:
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
@@ -105,27 +113,27 @@ with tab_cost:
     if not costs:
         st.write("No configuration has a cost yet.")
     else:
-        budget = float(profile.gates["G11"].value)
+        budget = float(profile.gates["G11"].value) * RATE
         items = sorted(costs.items(), key=lambda kv: float(kv[1].value))
         names_ = [cid for cid, _ in items]
-        vals = [float(e.value) for _, e in items]
+        vals = [float(e.value) * RATE for _, e in items]
         colors = [T["coral"] if v > budget else T["line"] if v == 0 else T["teal"]
                   for v in vals]
         fig = go.Figure(go.Bar(
             x=vals, y=names_, orientation="h", marker={"color": colors, "cornerradius": 4},
-            text=[f"${v:,.0f}" + (" over budget" if v > budget else "") for v in vals],
+            text=[inr(v / RATE) + (" over budget" if v > budget else "") for v in vals],
             textposition="outside", cliponaxis=False,
-            hovertemplate="%{y}: $%{x:,.2f}/month (MODELED)<extra></extra>"))
+            hovertemplate="%{y}: ₹%{x:,.0f}/month (MODELED)<extra></extra>"))
         fig.add_vline(x=budget, line={"dash": "dash", "width": 1.5, "color": T["coral"]},
-                      annotation_text=f"G11 budget ${budget:,.0f}",
+                      annotation_text=f"G11 budget {inr(budget / RATE)}",
                       annotation_position="top", annotation_font_color=T["coraltext"])
         fig.update_layout(
             height=60 + 34 * len(vals), margin={"l": 10, "r": 90, "t": 36, "b": 30},
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", bargap=0.35,
             font={"family": "Fira Sans, sans-serif", "color": T["text"], "size": 13},
-            xaxis={"title": f"USD per month at {int(volume):,} tickets (MODELED)",
+            xaxis={"title": f"INR per month at {int(volume):,} tickets (MODELED)",
                    "gridcolor": T["line"], "zeroline": False, "linecolor": T["grey"],
-                   "tickfont": {"color": T["muted"]}, "tickprefix": "$",
+                   "tickfont": {"color": T["muted"]}, "tickprefix": "₹",
                    "range": [0, max(budget, *vals) * 1.18]},
             yaxis={"autorange": "reversed",
                    "tickfont": {"family": "Fira Code, monospace", "color": T["muted"]}},
@@ -141,13 +149,15 @@ with tab_cost:
                                    selfhost_monthly=float(sh.value))
             if be:
                 st.markdown(f"`{cid}` vs self-host: self-host is cheaper above **{be:,} tickets"
-                            f"/month** (MODELED; API ${per_ticket:.6f}/ticket, self-host "
-                            f"${float(sh.value):,.0f}/month fixed).")
+                            f"/month** (MODELED; API {inr(per_ticket, 4)}/ticket, self-host "
+                            f"{inr(float(sh.value))}/month fixed).")
         with st.expander("Cost at other volumes (table)"):
             points = sorted({10_000, *range(100_000, 1_000_001, 100_000), int(volume)})
             curves = {k: v for k, v in cost_curves(snap, volume=int(volume),
                                                    points=points).items() if k in ids}
-            st.dataframe(pd.DataFrame({"tickets": points, **curves}), hide_index=True)
+            inr_curves = {k: [round(v * RATE) for v in vs] for k, vs in curves.items()}
+            st.caption("INR per month")
+            st.dataframe(pd.DataFrame({"tickets": points, **inr_curves}), hide_index=True)
 
 with tab_ev:
     st.html(render.evidence_table([r for r in evidence_rows(snap) if r["config"] in ids]))
@@ -159,7 +169,7 @@ with tab_var:
     for c in shown:
         rows = variant_rows(c)
         cost = snap.values.get(f"{c.config_id}.cost.monthly_usd")
-        cost_txt = (f" · modeled cost ${float(cost.value):,.0f}/month {render.badge('MODELED')}"
+        cost_txt = (f" · modeled cost {inr(float(cost.value))}/month {render.badge('MODELED')}"
                     if cost else " · no modeled monthly cost yet")
         if not any(r["figure"] for r in rows):
             st.html(f'<p class="one"><code>{c.config_id}</code>: {len(rows)} published '
@@ -173,6 +183,10 @@ with tab_cfg:
         "config": c.config_id, "model": c.model_id, "host": c.host, "region": c.region,
         "serving": c.serving, "quant": c.quant, "mode": c.evaluation_mode, "notes": c.notes,
     } for c in registry if c.config_id in ids]), hide_index=True, width="stretch")
+
+st.html(f'<p class="foot">All costs are shown in INR. Conversion: US$1 = '
+        f'₹{RATE:.4f} (RBI reference rate, {USD_INR.retrieved_at.date().isoformat()}). '
+        f'Prices published in USD were converted at this rate.</p>')
 
 # Last element, so the rows and answers above exist when the motion script runs.
 st.html(render.MOTION, unsafe_allow_javascript=True)

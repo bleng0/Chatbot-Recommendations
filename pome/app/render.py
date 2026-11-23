@@ -23,7 +23,8 @@ _PATHS = {
 }
 _SHORT = {"eligible": "Eligible", "eligible_modeled": "Eligible (modeled)",
           "rejected": "Rejected", "unverified": "Unverified"}
-_UNIT = {"usd_per_month": "USD/month", "req_per_s": "req/s", "tok_per_s": "tok/s",
+_UNIT = {"usd_per_month": "USD/month", "inr_per_month": "/month", "inr_per_hour": "/hour",
+         "inr_per_1m_tokens": "/1M tokens", "req_per_s": "req/s", "tok_per_s": "tok/s",
          "ratio": "", "ratio_gap": "", "bool": "", "region": ""}
 _WORD = {"pass": "pass", "fail": "fail", "unverified": "unverified", "not_tested": "not tested"}
 
@@ -117,6 +118,16 @@ def _details(summary: str, lines: list[tuple[str, str]]) -> str:
     inner = "".join(f"<dt>{escape(k)}</dt><dd>{escape(val)}</dd>" for k, val in lines if val)
     return (f"<details><summary>{escape(summary)}</summary>"
             f'<div class="dx"><dl>{inner}</dl></div></details>')
+
+
+def gate_info_table(rows: list[dict[str, str]]) -> str:
+    body = "".join(
+        f'<tr><th scope="row" class="cid">{escape(r["gate"])}</th>'
+        f'<td class="gi">{escape(r["checks"])}</td><td class="num">{escape(r["pass_if"])}</td></tr>'
+        for r in rows)
+    return (f'<div class="tw"><table class="gi-t"><thead><tr><th scope="col">Gate</th>'
+            f'<th scope="col">What it checks</th><th scope="col">Passes if</th></tr></thead>'
+            f"<tbody>{body}</tbody></table></div>")
 
 
 def evidence_table(rows: list[dict[str, str]]) -> str:
@@ -253,6 +264,9 @@ thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 [data-testid="stExpander"] summary:hover{color:var(--accent)}
 [role="tab"][aria-selected="true"]{color:var(--accent)!important}
 ::selection{background:var(--teal);color:var(--text)}
+td.gi{font-size:.9375rem;color:var(--text)}
+.gi-t th.cid{font-weight:500;color:var(--accent)}
+.foot{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.8125rem;color:var(--muted)}
 /* chart bars grow from their baseline (motion.js) */
 .js-plotly-plot .bars path{transform-box:fill-box;transform-origin:0 50%}
 /* Streamlit chrome in the Gossamer look */

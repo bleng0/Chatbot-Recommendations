@@ -35,6 +35,8 @@ def _price(v: float, src: str) -> EvidenceValue:
 
 _AZURE = "https://prices.azure.com/api/retail/prices (filter: centralindia)"
 _E2E = "https://www.e2enetworks.com/pricing"
+_AWS = ("https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/"
+        "ec2-ondemand-without-sec-sel/Asia%20Pacific%20(Mumbai)/Linux/index.json")
 GPU_OPTIONS: dict[str, GpuOption] = {
     "azure-ci-a100": GpuOption("Azure Central India, 1x A100 80GB (NC24ads_A100_v4)",
                                "On-demand Linux; India region confirmed.", _price(5.142, _AZURE)),
@@ -44,6 +46,15 @@ GPU_OPTIONS: dict[str, GpuOption] = {
     "e2e-l40s": GpuOption("E2E Networks, 1x L40S 48GB",
                           "Page shows no region or date; price excludes tax. Fits the 12B at "
                           "bf16 (Google lists ~26.7 GB to load the weights).", _price(1.20, _E2E)),
+    "e2e-h100": GpuOption("E2E Networks, 1x H100 80GB",
+                          "Page shows no region or date; price excludes tax.", _price(3.99, _E2E)),
+    "aws-mum-h100": GpuOption("AWS Mumbai, 1x H100 80GB (p5.4xlarge)",
+                              "On-demand Linux, ap-south-1.", _price(8.256, _AWS)),
+    "azure-ci-h100": GpuOption("Azure Central India, 1x H100 NVL 94GB (NC40ads_H100_v5)",
+                               "On-demand Linux; India region confirmed.", _price(9.772, _AZURE)),
+    "aws-mum-4l40s": GpuOption("AWS Mumbai, 4x L40S 48GB (g6e.12xlarge)",
+                               "On-demand Linux; smallest L40S size in ap-south-1 has 4 GPUs.",
+                               _price(12.601, _AWS)),
 }
 
 

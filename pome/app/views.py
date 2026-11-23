@@ -1,4 +1,6 @@
 """Pure table and chart data for the app (tested); the Streamlit page only renders them."""
+from datetime import UTC, datetime
+
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot
 from pome.profiles.loader import Profile
@@ -58,7 +60,7 @@ def answer_line(d: Decision, snap: Snapshot, profile: Profile) -> str:
     if d.recommended:
         v = next(x for x in d.verdicts if x.config_id == d.recommended)
         cost = "no cost evidence" if v.monthly_cost is None else (
-            f"${v.monthly_cost:,.0f}/month (cost MODELED)")
+            f"{inr(v.monthly_cost)}/month (cost MODELED)")
         lead = ("Recommended on modeled evidence (not measured)" if d.recommended_is_modeled
                 else "Recommended")
         return f"{lead}: {d.recommended} at {cost}"
@@ -119,7 +121,10 @@ def evidence_rows(snap: Snapshot) -> list[dict[str, str]]:
     for key in sorted(snap.values):
         e = snap.values[key]
         cid, metric = key.split(".", 1)
-        out.append({"config": cid, "metric": metric, "value": str(e.value), "unit": e.unit,
+        value, unit = str(e.value), e.unit
+        if unit.startswith("usd_per") and isinstance(e.value, int | float):
+            value, unit = inr(e.value, 2 if abs(e.value) < 100 else 0), unit.replace("usd", "inr")
+        out.append({"config": cid, "metric": metric, "value": value, "unit": unit,
                     "provenance": badge(e), "source": e.source,
                     "formula": e.formula or "", "retrieved": e.retrieved_at.date().isoformat()})
     return out
@@ -138,3 +143,62 @@ def cost_curves(snap: Snapshot, *, volume: int, points: list[int]) -> dict[str, 
         out[cid] = [round(float(e.value), 2) if fixed else round(per_ticket * n, 2)
                     for n in points]
     return out
+
+
+# Display currency (owner request 2026-11-23): the engine stays in USD; the UI shows INR.
+USD_INR = EvidenceValue(
+    value=92.7968, unit="inr_per_usd", provenance="vendor-doc",
+    source="https://www.rbi.org.in/scripts/ReferenceRateArchive.aspx",
+    retrieved_at=datetime(2026, 11, 23, 6, 30, tzinfo=UTC))
+
+
+def inr(usd: float, decimals: int = 0) -> str:
+    """USD amount shown as rupees with Indian digit grouping (₹1,39,195)."""
+    amount = round(float(usd) * float(USD_INR.value), decimals)
+    whole, _, frac = f"{abs(amount):.{decimals}f}".partition(".")
+    head, tail = whole[:-3], whole[-3:]
+    while len(head) > 2:
+        tail = f"{head[-2:]},{tail}"
+        head = head[:-2]
+    grouped = f"{head},{tail}" if head else tail
+    return ("-" if amount < 0 else "") + "₹" + grouped + (f".{frac}" if frac else "")
+
+
+# One phrase per gate: what it checks, in the reviewer's words.
+GATE_INFO = {
+    "G1": "Understands which banking request the customer means",
+    "G2": "Spots questions the bot must not answer",
+    "G3": "Does not wrongly refuse real banking questions",
+    "G4": "Answers FAQ questions correctly in every language",
+    "G5": "Declines FAQ questions it cannot answer",
+    "G6": "Hindi quality stays close to English",
+    "G7": "Hinglish quality stays close to English",
+    "G8": "Replies fast enough at peak load",
+    "G9": "Keeps up with peak ticket traffic",
+    "G10": "Rarely fails a request after retries",
+    "G11": "Monthly cost stays within budget",
+    "G12": "Customer data is processed in India",
+    "G13": "Provider deletes customer data quickly",
+    "G14": "Licence allows commercial use",
+}
+_UNIT_TXT = {"ratio": "", "ratio_gap": " gap", "ms": " ms", "req_per_s": " req/s",
+             "percent": "%"}
+
+
+def gate_info_rows(profile: Profile) -> list[dict[str, str]]:
+    rows = []
+    for g in sorted(profile.gates, key=lambda x: int(x[1:])):
+        gate = profile.gates[g]
+        if gate.op == "required":
+            pass_if = "required"
+        elif gate.unit == "usd_per_month":
+            pass_if = f"{gate.op.replace('<=', '≤').replace('>=', '≥')} {inr(gate.value)} / month"
+        else:
+            num = f"{gate.value:,.0f}" if gate.unit == "ms" else (
+                f"{gate.value:g}" if gate.unit in ("req_per_s", "percent") else f"{gate.value:.2f}")
+            if gate.unit == "percent":
+                num = f"{gate.value:.1f}"
+            pass_if = (f"{gate.op.replace('<=', '≤').replace('>=', '≥')} {num}"
+                       f"{_UNIT_TXT.get(gate.unit, '')}")
+        rows.append({"gate": g, "checks": GATE_INFO[g], "pass_if": pass_if})
+    return rows
