@@ -73,15 +73,16 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
         cid = cfg.config_id
         # quality proxies
         for key in QUALITY:
-            anchor = (d["quality_anchor"].get(cid) if key.startswith("intent.banking77")
-                      else None) or d["quality_default_anchor"]
-            src = ev.get(f"{anchor}.{key}") or ev.get(f"{d['quality_default_anchor']}.{key}")
-            if src is None:
+            first = d["quality_anchor"].get(cid) if key.startswith("intent.banking77") else None
+            anchor = next((a for a in (first, d["quality_default_anchor"])
+                           if a and f"{a}.{key}" in ev), None)
+            if anchor is None:
                 continue
-            put(cid, key, lambda src=src, anchor=anchor, key=key: _modeled(
-                src.value, src.unit, f"proxy: POME measured run of {anchor} ({src.source})",
-                f"value = measured {key} of {anchor} (proxy; this model was not run by POME)",
-                at))
+            src = ev[f"{anchor}.{key}"]
+            kind = "POME measured run" if src.provenance == "measured" else f"{src.provenance} value"
+            put(cid, key, lambda src=src, anchor=anchor, key=key, kind=kind: _modeled(
+                src.value, src.unit, f"proxy: {kind} of {anchor} ({src.source})",
+                f"value = {key} of {anchor} (proxy; this model was not run by POME)", at))
 
         # serving
         if cid in d["api_speed"]:
@@ -122,7 +123,9 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
             w_gb = sh["params_b"][cid] * 2
             t_step = w_gb / (sh["gpu_bw_tbps"] * 1000 * sh["eta"])
             e2e = sh["ttft_s"] + out_tok * t_step
-            base = (f"1x A100 80GB bf16: weights {w_gb:.1f} GB / ({sh['gpu_bw_tbps']} TB/s x "
+            proxy = sh.get("proxy_of", {}).get(cid)
+            base = ((f"proxy: modeled as {proxy} (same weights); " if proxy else "")
+                    + f"1x A100 80GB bf16: weights {w_gb:.1f} GB / ({sh['gpu_bw_tbps']} TB/s x "
                     f"eta {sh['eta']}) = {t_step * 1000:.1f} ms per token")
             put(cid, "serving.p95_ms", lambda e2e=e2e, base=base: _modeled(
                 round(e2e * 1000), "ms", sh["gpu_bw_url"],
@@ -135,9 +138,24 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
                 round(100 - sh["vm_sla_pct"], 2), "percent", sh["vm_sla_url"],
                 f"100 - single-VM uptime SLA {sh['vm_sla_pct']}% (serving errors ignored)", at))
 
-        # cost for API configs with a price but no cost yet; free / local configs at $0
+        # cost for configs with a price but no cost yet, else a priced proxy
         p_in, p_out = cfg.pricing.input_per_1m, cfg.pricing.output_per_1m
-        if p_in and p_out:
+        pp = d.get("price_proxy", {}).get(cid)
+        cp = d.get("cost_proxy", {}).get(cid)
+        if pp:
+            b = api_monthly_cost(tickets=profile.volume_tickets_per_month,
+                                 in_tokens_per_ticket=in_tok, out_tokens_per_ticket=out_tok,
+                                 in_price_per_1m=pp["in"], out_price_per_1m=pp["out"])
+            put(cid, "cost.monthly_usd", lambda b=b, pp=pp: _modeled(
+                b.total, "usd_per_month", pp["url"],
+                f"{b.formula} | proxy price: {pp['note']} | tokens assumed: {in_tok} in, "
+                f"{out_tok} out", at))
+        elif cp and f"{cp}.cost.monthly_usd" in ev:
+            c = ev[f"{cp}.cost.monthly_usd"]
+            put(cid, "cost.monthly_usd", lambda c=c, cp=cp: _modeled(
+                c.value, c.unit, c.source,
+                f"proxy: cost of {cp} (the deployment this config stands for): {c.formula}", at))
+        elif p_in and p_out:
             b = api_monthly_cost(tickets=profile.volume_tickets_per_month,
                                  in_tokens_per_ticket=in_tok, out_tokens_per_ticket=out_tok,
                                  in_price_per_1m=float(p_in.value),
@@ -145,11 +163,6 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
             put(cid, "cost.monthly_usd", lambda b=b, src=p_in.source: _modeled(
                 b.total, "usd_per_month", f"list price {src}; tokens assumed",
                 f"{b.formula} | tokens per ticket assumed: {in_tok} in, {out_tok} out", at))
-        elif not cfg.host.startswith("self-hosted"):
-            put(cid, "cost.monthly_usd", lambda host=cfg.host: _modeled(
-                0.0, "usd_per_month", host,
-                "no per-call price: free tier or local machine; $0 holds only within its "
-                "limits and is not a production price", at))
 
         # deployment
         facts = dict(d["deploy"].get(cid, {}))

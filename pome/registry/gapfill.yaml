@@ -36,7 +36,7 @@ api_speed:
   haiku55-api-global:        {ttft_s: 6.02, tok_s: 218, variant: low, url: "https://artificialanalysis.ai/models/claude-haiku-5-5"}
   sonnet55-api-global:       {ttft_s: 2.99, tok_s: 134, variant: low, url: "https://artificialanalysis.ai/models/claude-sonnet-5-5"}
   mistralsmall4-api-global:  {ttft_s: 1.59, tok_s: 121, variant: non-reasoning, url: "https://artificialanalysis.ai/models/mistral-small-4"}
-  sarvam105b-api-in:         {ttft_s: 6.76, tok_s: 282, variant: high, url: "https://artificialanalysis.ai/models/sarvam-105b"}
+  sarvam105b-api-in:         {ttft_s: 6.76, tok_s: 282, variant: "high (only variant listed)", url: "https://artificialanalysis.ai/models/sarvam-105b"}
   deepseekflash-api-global:  {ttft_s: 0.78, tok_s: 227, variant: "V4.1 Flash non-reasoning", url: "https://artificialanalysis.ai/models/deepseek-v4-1-flash"}
   deepseekv41flash-sarvam-in: {ttft_s: 0.78, tok_s: 227, variant: "V4.1 Flash non-reasoning (median across providers)", url: "https://artificialanalysis.ai/models/deepseek-v4-1-flash"}
 
@@ -68,13 +68,15 @@ error_proxy:               # providers with no published SLA: 95% upper bound of
 
 # Self-hosted decode model (docs/research/evidence-plan.md section B), 1x A100 80GB bf16.
 selfhost:
-  gpu_bw_tbps: 2.039
+  gpu_bw_tbps: 1.935          # A100 80GB PCIe (NC24ads_A100_v4 is the PCIe card)
   gpu_bw_url: "https://www.nvidia.com/en-us/data-center/a100/"
   eta: 0.7
   ttft_s: 0.2
   concurrency: 32
   vm_sla_pct: 99.9
   vm_sla_url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services"
+  proxy_of:                  # laptop quality config: serving modeled as its bf16 deployment
+    gemma4-12b-ollama-local-q4: gemma4-12b-vllm-in-bf16
   params_b:
     gemma4-12b-vllm-in-bf16: 12.0
     gemma4-12b-ollama-local-q4: 12.0
@@ -84,6 +86,12 @@ selfhost:
     llama31-8b-vllm-in-bf16: 8.03
     sarvam30b-vllm-in-bf16: 32.0
     museglimmer30b-vllm-in-bf16: 29.6
+
+# Monthly cost for configs with no paid price of their own.
+price_proxy:               # same weights at another host's published price
+  gemma4-26b-api-global: {in: 0.15, out: 0.60, url: "https://cloud.google.com/vertex-ai/generative-ai/pricing", note: "Vertex AI Gemma 4 26B price (Gemini API lists free tier only)"}
+cost_proxy:                # copy the cost of the deployment it stands for
+  gemma4-12b-ollama-local-q4: gemma4-12b-vllm-in-bf16
 
 # Deployment facts (EvidenceValue fields). Only used where the registry has none.
 deploy:
@@ -112,7 +120,7 @@ deploy:
     retention_days: {value: 1, unit: days, provenance: vendor-doc, source: "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/data-governance"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://cloud.google.com/terms/service-terms"}
   mistralsmall4-api-global:
-    region:   {value: "EU", unit: region, provenance: vendor-doc, source: "https://help.mistral.ai/en/articles/156207-how-long-are-model-inputs-or-outputs-stored-on-mistral-ai-servers"}
+    region:   {value: "EU (default endpoint)", unit: region, provenance: modeled, source: "https://docs.mistral.ai/admin/monitor-comply/privacy-data-controls", formula: "EU by default per third-party summaries; no Mistral page read states the processing region"}
     retention_days: {value: 30, unit: days, provenance: vendor-doc, source: "https://help.mistral.ai/en/articles/156207-how-long-are-model-inputs-or-outputs-stored-on-mistral-ai-servers"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://legal.mistral.ai/terms"}
   sarvam105b-api-in: &sarvam

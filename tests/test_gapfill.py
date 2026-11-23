@@ -52,3 +52,22 @@ def test_decision_is_deterministic():
     a = decide(Scenario())[1].decision_hash
     b = decide(Scenario())[1].decision_hash
     assert a == b
+
+
+def test_no_config_gets_a_free_zero_cost_placeholder():
+    snap = _snap()
+    for cid in ("gemma4-26b-api-global", "gemma4-12b-ollama-local-q4"):
+        assert float(snap.values[f"{cid}.cost.monthly_usd"].value) > 0, cid
+
+
+def test_proxy_names_the_anchor_it_actually_used():
+    # gpt54mini's banking77 anchor is gem25f; gem25f has no FAQ run, so FAQ comes from the 12B
+    snap = _snap()
+    faq = snap.values["gpt54mini-api-global.faq.correct.en"]
+    assert "gemma4-12b-ollama-local-q4" in faq.formula and "gem25f" not in faq.formula
+    assert "measured" not in faq.source or "POME measured run" in faq.source
+
+
+def test_laptop_config_serving_is_labelled_as_a_proxy_of_the_bf16_deployment():
+    v = _snap().values["gemma4-12b-ollama-local-q4.serving.p95_ms"]
+    assert "proxy" in v.formula and "gemma4-12b-vllm-in-bf16" in v.formula
