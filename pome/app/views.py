@@ -1,6 +1,8 @@
 """Pure table and chart data for the app (tested); the Streamlit page only renders them."""
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
+from pome.app.scenario import breakeven_tickets
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot
 from pome.profiles.loader import Profile
@@ -143,6 +145,33 @@ def cost_curves(snap: Snapshot, *, volume: int, points: list[int]) -> dict[str, 
         out[cid] = [round(float(e.value), 2) if fixed else round(per_ticket * n, 2)
                     for n in points]
     return out
+
+
+@dataclass(frozen=True)
+class ApiCostComparison:
+    config_id: str
+    usd_per_ticket: float
+    breakeven: int | None
+
+
+def api_cost_comparisons(
+    costs: dict[str, EvidenceValue], *, volume: int, selfhost_monthly: float,
+) -> list[ApiCostComparison]:
+    """Compare ticket-priced costs to a fixed deployment cost, earliest crossover first."""
+    rows = []
+    for cid, cost in costs.items():
+        # The API cost model starts with ticket volume. GPU deployments and their
+        # local measurement proxies use fixed monthly cost formulas.
+        if not (cost.formula or "").startswith("tickets *"):
+            continue
+        per_ticket = float(cost.value) / volume
+        rows.append(ApiCostComparison(
+            config_id=cid,
+            usd_per_ticket=per_ticket,
+            breakeven=breakeven_tickets(api_cost_per_ticket=per_ticket,
+                                       selfhost_monthly=selfhost_monthly),
+        ))
+    return sorted(rows, key=lambda row: (row.breakeven is None, row.breakeven or 0, row.config_id))
 
 
 # Display currency (owner request 2026-11-23): the engine stays in USD; the UI shows INR.

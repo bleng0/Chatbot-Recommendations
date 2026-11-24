@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from pome.app import render
+from pome.app import cost_charts, render
 from pome.app.scenario import (
     GPU_OPTIONS,
     SELFHOST,
@@ -234,6 +234,7 @@ with tab_cost:
                 st.markdown(f"`{cid}` vs self-host: self-host is cheaper above **{be:,} tickets"
                             f"/month** (MODELED; API {inr(per_ticket, 4)}/ticket, self-host "
                             f"{inr(float(sh.value))}/month fixed).")
+        cost_charts.show_api_comparison(costs, volume=int(volume))
         with st.expander("Cost at other volumes (table)"):
             points = sorted({10_000, *range(100_000, 1_000_001, 100_000), int(volume)})
             curves = {k: v for k, v in cost_curves(snap, volume=int(volume),
