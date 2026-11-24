@@ -7,7 +7,7 @@ from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot
 from pome.profiles.loader import Profile
 from pome.registry.loader import ConfigEntry
-from pome.selection.engine import CHECKS, Decision
+from pome.selection.engine import CHECKS, Decision, check_observation
 
 BADGE = {"measured": "SELF-TESTED", "vendor-doc": "VENDOR-DOC", "modeled": "MODELED",
          "study": "PUBLISHED"}
@@ -38,6 +38,45 @@ def gate_matrix(d: Decision) -> list[dict]:
              "gates": {g.gate: g.status for g in sorted(v.gates, key=lambda g: int(g.gate[1:]))}}
             for v in d.verdicts]
     return sorted(rows, key=lambda r: (_ROW_ORDER[r["status"]], r["config"]))
+
+
+GateValues = dict[str, list[tuple[str, str, tuple[str, ...]]]]
+_LANGUAGE_LABELS = {"en": "English", "hi": "Hindi", "hinglish": "Hinglish"}
+_GATE_VALUE_UNITS = {"ms": " ms", "req_per_s": " req/s"}
+
+
+def gate_values(snap: Snapshot, config_id: str, gates: list[str]) -> GateValues:
+    """One display line per check, with the provenance of the inputs it uses."""
+    values: GateValues = {}
+    for check in CHECKS:
+        if check.gate not in gates:
+            continue
+        evidence = [snap.values[key] for metric in check.keys
+                    if (key := f"{config_id}.{metric}") in snap.values]
+        value = check_observation(check, evidence)
+        label = ""
+        if check.gate in {"G4", "G5"}:
+            label = _LANGUAGE_LABELS[check.keys[0].rsplit(".", 1)[1]]
+        elif check.kind == "gap":
+            label = check.label.split(" ", 2)[2]
+
+        provenance = ()
+        if value is None:
+            display = "Unavailable" if len(evidence) < len(check.keys) else "Invalid"
+        else:
+            provenance = tuple(dict.fromkeys(badge(item) for item in evidence))
+            if check.kind == "gap":
+                display = f"{float(value) * 100:+.2f} pp"
+            elif isinstance(value, bool):
+                display = "Yes" if value else "No"
+            elif evidence[0].unit == "ratio":
+                display = f"{float(value):.2%}"
+            elif isinstance(value, (int, float)):
+                display = f"{value:,.6g}{_GATE_VALUE_UNITS.get(evidence[0].unit, '')}"
+            else:
+                display = value
+        values.setdefault(check.gate, []).append((label, display, provenance))
+    return values
 
 
 def _fail_value(cid: str, gate: str, snap: Snapshot, profile: Profile) -> str | None:

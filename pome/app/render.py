@@ -2,6 +2,8 @@
 from html import escape
 from urllib.parse import quote
 
+from pome.app.views import GateValues
+
 # Gossamer palette (light only, owner 2026-11-23): #FAFAFA #CDCDCF #939599 #2BCFCE #EC4D25.
 # Text tokens are >= 4.5:1 on bg and panel; teal #2BCFCE is a fill (bars, tints) only and
 # coral #EC4D25 an icon/outline colour (>= 3:1); their darker text twins carry words.
@@ -97,15 +99,27 @@ def _chip(status: str) -> str:
     return f'<span class="chip chip-{escape(status)}">{escape(_SHORT[status])}</span>'
 
 
+def _gate_observations(lines: list[tuple[str, str, tuple[str, ...]]]) -> str:
+    parts = []
+    for label, value, sources in lines:
+        name = f'<span class="gate-value-label">{escape(label)}</span>' if label else ""
+        provenance = " ".join(badge(source) for source in sources)
+        parts.append(
+            f'<div class="gate-value">{name}<span class="num">{escape(value)}</span>'
+            f' {provenance}</div>'
+        )
+    return "".join(parts)
+
+
 def gate_table(rows: list[dict], gates: list[str], off: set[str],
                what_if: dict[str, str] | None = None,
                cost: dict[str, tuple[str, bool]] | None = None,
                labels: dict[str, str] | None = None,
                error: dict[str, tuple[str, bool]] | None = None,
                notes: dict[str, str] | None = None,
-               short: dict[str, str] | None = None) -> str:
-    """Gate matrix. Fixed column widths so all gates fit at 1280 px; the slider frame adds
-    one header row above this one, a slider per gate column."""
+               short: dict[str, str] | None = None, *,
+               values: dict[str, GateValues] | None = None) -> str:
+    """Gate matrix with optional evidence lines below the check statuses."""
     labels, notes, short = labels or {}, notes or {}, short or {}
     head = "".join(
         f'<th scope="col" class="g{" off" if g in off else ""}" data-gate="{escape(g)}">'
@@ -132,9 +146,12 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
 
     body = []
     for r in rows:
-        cells = "".join(
-            f'<td class="g{" off" if g in off else ""}">{cell(r["gates"][g])}</td>'
-            if g in r["gates"] else '<td class="g">—</td>' for g in gates)
+        observed = (values or {}).get(r["config"], {})
+        cells = []
+        for g in gates:
+            status = cell(r["gates"][g]) if g in r["gates"] else ""
+            details = _gate_observations(observed.get(g, []))
+            cells.append(f'<td class="g{" off" if g in off else ""}">{status + details or "—"}</td>')
         note = (f'<small class="nr">{escape(notes[r["config"]])}</small>'
                 if r["config"] in notes else "")
         wi = (f'<td class="stat">{_chip(what_if[r["config"]])}{note}</td>'
@@ -145,8 +162,9 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
             wi += _num(*error.get(r["config"], ("—", False)), "Over the error limit")
         body.append(f'<tr><th scope="row" class="cid" title="{escape(r["config"])}">'
                     f'{escape(r["config"])}</th>'
-                    f'<td class="stat">{_chip(r["status"])}</td>{wi}{cells}</tr>')
-    return (f'<div class="tw"><table class="gm fx"><caption class="sr">Gate results per '
+                    f'<td class="stat">{_chip(r["status"])}</td>{wi}{"".join(cells)}</tr>')
+    extra_class = " gm-values" if values is not None else ""
+    return (f'<div class="tw"><table class="gm fx{extra_class}"><caption class="sr">Gate results per '
             f'configuration</caption><colgroup>{"".join(cols)}</colgroup><thead><tr>'
             f'<th scope="col">Configuration</th><th scope="col">Recommended status</th>'
             f'{wi_head}{head}</tr></thead><tbody>{"".join(body)}</tbody></table></div>')
@@ -493,6 +511,13 @@ td.set{white-space:normal;min-width:22rem;color:var(--muted)}
 .gm .st{font-size:.8125rem}
 .gm th.g small{display:block;font-size:.6875rem;font-weight:400}
 .gm .off{opacity:.42}
+.gm.fx.gm-values col.c-g{width:7.5rem}
+.gm-values tbody td.g{vertical-align:top}
+.gm-values .gate-value{font-size:.75rem;line-height:1.5;text-align:left;
+  margin:.3rem .25rem;white-space:normal;overflow-wrap:anywhere}
+.gm-values .gate-value-label{display:block;color:var(--muted)}
+.gm-values td.off:has(.gate-value){opacity:1}
+.gm-values td.off .st{opacity:.42}
 .gm thead th.off{text-decoration:line-through}
 .st{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
 .ic{display:inline-block;width:1.05rem;height:1.05rem;flex:none;background:currentColor;

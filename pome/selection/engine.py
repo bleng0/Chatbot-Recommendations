@@ -185,6 +185,20 @@ def _validate_profile(profile: Profile) -> None:
         raise InvalidProfile(f"profile has unknown gates {extra}")
 
 
+def _language_gap(evidence: list[EvidenceValue]) -> float:
+    en, other = (float(item.value) for item in evidence)
+    return round(en - other, 9)  # 0.81 - 0.71 must count as exactly 0.10
+
+
+def check_observation(ch: _Check, evidence: list[EvidenceValue]) -> float | str | bool | None:
+    """Read the value used by a check when all of its inputs are present and valid."""
+    if len(evidence) != len(ch.keys) or any(
+        _invalid(key, item) for key, item in zip(ch.keys, evidence, strict=True)
+    ):
+        return None
+    return _language_gap(evidence) if ch.kind == "gap" else evidence[0].value
+
+
 def _evaluate_check(ch: _Check, ev: list[EvidenceValue], profile: Profile
                     ) -> tuple[bool, str, float | None]:
     """-> (passed, detail, quality slack or None). Evidence is already validated."""
@@ -197,8 +211,7 @@ def _evaluate_check(ch: _Check, ev: list[EvidenceValue], profile: Profile
         return ok, f"{ch.label}: {ev[0].value!r} vs required True", None
     g = profile.gates[ch.gate]
     if ch.kind == "gap":
-        en, other = float(ev[0].value), float(ev[1].value)
-        gap = round(en - other, 9)  # 0.81 - 0.71 must count as exactly 0.10
+        gap = _language_gap(ev)
         ok = _OPS[g.op](gap, float(g.value))
         return ok, f"{ch.label}: {gap:+.3f} vs required {g.op} {g.value}", float(g.value) - gap
     val = float(ev[0].value)

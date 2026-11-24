@@ -1,5 +1,9 @@
 """Per-gate threshold sliders (CLAUDE.md section 3 exception): session-only what-if."""
+import json
+from pathlib import Path
+
 import pytest
+from streamlit.testing.v1 import AppTest
 
 from pome.app.scenario import Scenario, decide, decide_sliders
 from pome.profiles.loader import load_profile, profile_hash, what_if_profile
@@ -64,3 +68,33 @@ def test_not_recommended_chip_and_note_render_in_the_what_if_column():
     html = render.gate_table([{"config": "a", "status": "rejected", "gates": {}}], [], set(),
                              {"a": "not_recommended"}, notes={"a": "G8 official ≤ 20,000 ms"})
     assert "Not recommended" in html and "G8 official" in html
+
+
+def test_gate_values_toggle_shows_evidence_in_the_slider_table():
+    home = Path(__file__).resolve().parents[1] / "pome/app/home.py"
+    app = AppTest.from_file(home, default_timeout=20).run()
+
+    def table():
+        assert not app.exception
+        component, = app.get("component_instance")
+        return json.loads(component.proto.json_args)["table"]
+
+    def nano_row(html):
+        return next(row for row in html.split("</tr>") if ">gpt54nano-api-global</th>" in row)
+
+    initial = table()
+    assert "gate-value" not in initial
+    assert "st-pass" in nano_row(initial)
+
+    app.toggle(key="show_gate_values").set_value(True).run()
+    row = nano_row(table())
+    assert "st-pass" in row and "81.25%" in row and "3,207 ms" in row
+    assert "MODELED" in row and "Hinglish" in row and " pp" in row
+
+    app.toggle(key="gate_G1").set_value(False).run()
+    row = nano_row(table())
+    assert '<td class="g off">' in row and "81.25%" in row
+
+    app.toggle(key="gate_G1").set_value(True).run()
+    app.toggle(key="show_gate_values").set_value(False).run()
+    assert table() == initial

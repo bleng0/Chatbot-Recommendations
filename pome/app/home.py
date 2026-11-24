@@ -29,6 +29,7 @@ from pome.app.views import (
     evidence_sections,
     gate_info_rows,
     gate_matrix,
+    gate_values,
     indian,
     inr,
     relabel,
@@ -153,7 +154,13 @@ with tab_gates:
     sort_by = st.segmented_control(
         "Sort by", ["Status", "Monthly cost", "Error rate"], default="Status")
     order = st.segmented_control("Order", ["Ascending", "Descending"], default="Ascending")
+    show_gate_values = st.toggle(
+        "Show gate values", key="show_gate_values",
+        help="Show the evidence used by each gate, including modeled values and language gaps.",
+    )
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
+    observations = ({row["config"]: gate_values(snap, row["config"], GATES) for row in rows}
+                    if show_gate_values else None)
     wi_status = ({v.config_id: ("not_recommended" if v.config_id in not_rec else v.status)
                   for v in wi.verdicts} if wi else None)
     nr_notes = {cid: "; ".join(f"{display_gate(g)} recommended {info[g]['pass_if']}" for g in gs)
@@ -179,7 +186,7 @@ with tab_gates:
                  render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
                                    labels={g: display_gate(g) for g in GATES},
                                    short=SHORT_NAME,
-                                   error=error_cells, notes=nr_notes),
+                                   error=error_cells, notes=nr_notes, values=observations),
                  render.css("light"), key="gate_sliders")
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
