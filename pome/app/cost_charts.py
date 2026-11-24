@@ -50,6 +50,7 @@ def _breakeven_chart(rows: list[ApiCostComparison], *, volume: int) -> go.Figure
 
 def _monthly_cost_chart(
     row: ApiCostComparison, *, selfhost_monthly: float, volume: int,
+    baseline_label: str = "Self-hosted",
 ) -> go.Figure:
     crossing = selfhost_monthly / row.usd_per_ticket if row.breakeven is not None else None
     x_max = max(volume, crossing or 0) * 1.1
@@ -68,9 +69,9 @@ def _monthly_cost_chart(
             hovertemplate="API · %{x:,.0f} tickets/month<br>%{customdata}/month<extra></extra>",
         ),
         go.Scatter(
-            x=tickets, y=[fixed_inr] * len(tickets), name="Self-hosted", mode="lines",
+            x=tickets, y=[fixed_inr] * len(tickets), name=baseline_label, mode="lines",
             line={"color": T["coraltext"], "width": 2.5, "dash": "dash"},
-            hovertemplate=("Self-hosted · %{x:,.0f} tickets/month"
+            hovertemplate=(baseline_label + " · %{x:,.0f} tickets/month"
                            f"<br>{inr(selfhost_monthly)}/month<extra></extra>"),
         ),
     ])
@@ -88,11 +89,12 @@ def _monthly_cost_chart(
     return figure
 
 
-def show_api_comparison(costs: dict[str, EvidenceValue], *, volume: int) -> None:
-    st.subheader("API versus self-hosted costs")
-    baseline = costs.get(SELFHOST)
+def show_api_comparison(costs: dict[str, EvidenceValue], *, volume: int,
+                        baseline_id: str = SELFHOST, baseline_label: str = "Self-hosted") -> None:
+    st.subheader(f"API versus {baseline_label.lower()} costs")
+    baseline = costs.get(baseline_id)
     if baseline is None:
-        st.write("No modeled self-hosted cost is available for this scenario.")
+        st.write("The selected infrastructure plan has no complete monthly estimate.")
         return
     selfhost_monthly = float(baseline.value)
     rows = api_cost_comparisons(costs, volume=volume, selfhost_monthly=selfhost_monthly)
@@ -100,12 +102,12 @@ def show_api_comparison(costs: dict[str, EvidenceValue], *, volume: int) -> None
         st.write("No API configurations have a modeled cost per ticket.")
         return
 
-    st.caption(f"MODELED · Self-hosted baseline `{SELFHOST}` costs "
+    st.caption(f"MODELED · {baseline_label} baseline `{baseline_id}` costs "
                f"{inr(selfhost_monthly)} per month with the selected GPU and ops settings.")
     st.markdown("#### Break-even by API")
     breakeven_chart = _breakeven_chart(rows, volume=volume)
     if breakeven_chart is not None:
-        st.caption("Above each break-even volume, self-hosting has the lower modeled cost.")
+        st.caption("Above each break-even volume, this infrastructure plan has the lower modeled cost.")
         st.plotly_chart(breakeven_chart, width="stretch", config=MODEBAR, key="api-breakeven-chart")
     else:
         st.caption("The available APIs have zero modeled cost per ticket and no break-even volume.")
@@ -116,10 +118,11 @@ def show_api_comparison(costs: dict[str, EvidenceValue], *, volume: int) -> None
     row = by_id[selected]
     if row.breakeven is None and breakeven_chart is not None:
         st.caption("This API has zero modeled cost per ticket and no break-even volume.")
-    st.plotly_chart(_monthly_cost_chart(row, selfhost_monthly=selfhost_monthly, volume=volume),
+    st.plotly_chart(_monthly_cost_chart(row, selfhost_monthly=selfhost_monthly, volume=volume,
+                                         baseline_label=baseline_label),
                     width="stretch", config=MODEBAR, key="api-monthly-cost-chart")
 
-    with st.expander("API versus self-hosted details"):
+    with st.expander(f"API versus {baseline_label.lower()} details"):
         st.dataframe([{
             "API configuration": row.config_id,
             "API cost per ticket": inr(row.usd_per_ticket, 4),

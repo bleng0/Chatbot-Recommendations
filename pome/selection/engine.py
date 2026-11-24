@@ -295,7 +295,8 @@ def _hash(payload: dict) -> str:
     return hashlib.sha256(canon.encode()).hexdigest()
 
 
-def select(snapshot: Snapshot, profile: Profile) -> Decision:
+def select(snapshot: Snapshot, profile: Profile, *,
+           deployment_blocks: dict[str, str] | None = None) -> Decision:
     if not snapshot.values:
         raise ValueError("snapshot is empty: nothing was evaluated")
     if content_hash(snapshot) != snapshot.sha256:
@@ -303,6 +304,14 @@ def select(snapshot: Snapshot, profile: Profile) -> Decision:
     _validate_profile(profile)
     config_ids = sorted({key.split(".", 1)[0] for key in snapshot.values})
     verdicts = [_verdict(cid, snapshot.values, profile) for cid in config_ids]
+    if deployment_blocks:
+        verdicts = [
+            v.model_copy(update={
+                "status": "rejected" if v.status == "rejected" else "unverified",
+                "reasons": [*v.reasons, deployment_blocks[v.config_id]],
+            }) if v.config_id in deployment_blocks else v
+            for v in verdicts
+        ]
     feasible = sorted(
         (v for v in verdicts if v.status in ("eligible", "eligible_modeled")),
         # equal cost: a config with serving evidence beats one whose serving is not tested

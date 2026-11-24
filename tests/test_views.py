@@ -84,18 +84,19 @@ def test_deployment_tab_keeps_scenario_cost_separate_from_published_setups():
     app = AppTest.from_file(home, default_timeout=15).run()
     tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
     assert not app.exception
-    summary, evidence = [element.proto.body for element in tab.get("html")]
-    assert "₹3,48,328/month" in summary and "Ollama" not in summary
-    assert "₹3,48,328/month" not in evidence and "20 GB model weights" in evidence
-    assert "Setup guidance only" in evidence and "No published benchmark matches" in evidence
+    app.selectbox(key="deployment_model").select("gemma4-31b-vllm-in-bf16").run()
+    tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
+    assert not app.exception
+    evidence = tab.get("html")[0].proto.body
+    assert any("₹3,48,328" in entry.value for entry in tab.markdown)
+    assert "₹3,48,328" not in evidence
+    assert "Published variants" in tab.caption[-1].value
 
     app.selectbox(key="deployment_model").select("llama31-8b-vllm-in-bf16").run()
     tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
     assert not app.exception
-    summary, evidence = [element.proto.body for element in tab.get("html")]
-    assert "llama31-8b-vllm-in-bf16" in summary
+    evidence = tab.get("html")[0].proto.body
     assert "POME workload matches" in evidence and "173,950 tok/s (system)" in evidence
-    assert "20 GB model weights" not in evidence
 
 
 def test_every_evidence_row_carries_a_provenance_badge(tmp_path):

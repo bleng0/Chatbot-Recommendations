@@ -19,6 +19,7 @@ WORKDIR /app
 COPY --link --from=build /opt/venv /opt/venv
 COPY --link --chown=1001:1001 pome ./pome
 COPY --link --chown=1001:1001 runs/records ./runs/records
+COPY --link --chown=1001:1001 runs/serving ./runs/serving
 # theme, fonts and static serving; Streamlit reads .streamlit/ from the working directory
 COPY --link --chown=1001:1001 .streamlit/config.toml ./.streamlit/config.toml
 ENV PATH=/opt/venv/bin:$PATH PYTHONPATH=/app PYTHONDONTWRITEBYTECODE=1 \

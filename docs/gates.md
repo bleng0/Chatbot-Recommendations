@@ -27,7 +27,7 @@ Dividing tokens by tokens per second gives the estimated decode time in seconds.
 
 **GPT-5.4 Mini example.** Stored TTFT is 1.18 s and stored speed is 125 tokens/s. Decode time is `200 / 125 = 1.60 s`. Then `1.18 + 1.60 = 2.78 s`, stored as **2,780 ms**. [Stored inputs](../pome/registry/gapfill.yaml#L29) · [Benchmark source recorded in the repo](https://artificialanalysis.ai/models/gpt-5-4-mini)
 
-### Self-hosted
+### Historical rented-GPU reference
 
 ```text
 weights_GB = parameters_in_billions × 2
@@ -37,7 +37,7 @@ T = assumed_time_to_first_token_seconds + output_tokens × decode_seconds_per_to
 G8 = round(1,000 × T) milliseconds
 ```
 
-BF16 uses 16 bits, or two bytes, per parameter. POME estimates each decode step as one read of the modeled weight footprint. The implementation uses one A100 80 GB with **1.935 TB/s** of nominal bandwidth and project assumptions of **70%** bandwidth efficiency and **0.2 s** TTFT. It uses total configured parameters and ignores factors such as attention cache traffic, queueing, and how batching changes latency. The source note’s **±50%** is an uncertainty annotation. The engine compares the point estimate with the gate. GPU choices in the sidebar affect the rental estimate while serving estimates continue to use the stored A100 assumptions. [POME evidence plan, section B](research/evidence-plan.md#b-self-host-inputs-config-4) · [NVIDIA A100 specs](https://www.nvidia.com/en-us/data-center/a100/) · [vLLM technical report on the weight-read bandwidth limit](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2025/Archive/EECS-2025-192.pdf) · [POME implementation](../pome/evidence/gapfill.py#L122)
+BF16 uses 16 bits, or two bytes, per parameter. POME estimates each decode step as one read of the modeled weight footprint. The implementation uses one A100 80 GB with **1.935 TB/s** of nominal bandwidth and project assumptions of **70%** bandwidth efficiency and **0.2 s** TTFT. It uses total configured parameters and ignores factors such as attention cache traffic, queueing, and how batching changes latency. The source note’s **±50%** is an uncertainty annotation. The app retains this estimate as reference evidence. The selected GPU plan needs applicable serving evidence for its own verdict. See [Hosting distinction](distinction.md). [POME evidence plan, section B](research/evidence-plan.md#b-self-host-inputs-config-4) · [NVIDIA A100 specs](https://www.nvidia.com/en-us/data-center/a100/) · [vLLM technical report on the weight-read bandwidth limit](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2025/Archive/EECS-2025-192.pdf) · [POME implementation](../pome/evidence/gapfill.py#L122)
 
 **Gemma 4 12B BF16 example.** The modeled weights are `12 × 2 = 24 GB`. Effective bandwidth is `1.935 × 1,000 × 0.70 = 1,354.5 GB/s`. A decode step takes `24 / 1,354.5 ≈ 0.01772 s`. Adding TTFT gives `0.2 + 200 × (24 / 1,354.5) ≈ 3.74374 s`, stored as **3,744 ms**. The same serving proxy is used for the local Ollama 12B quality configuration. [Stored self-hosting inputs](../pome/registry/gapfill.yaml#L70)
 
@@ -54,7 +54,7 @@ POME chooses the API calculation from the quota type in the repository. The stor
 
 The concurrency formula comes from **Little’s law**, `L = λ × W`. In a stable system, the average number of requests in the system equals the average request rate times the average time a request spends in the system. Rearranging gives `λ = L / W`. POME substitutes a maximum or assumed concurrency for the average number of requests and the G8 estimate for average request time. That makes the result a planning estimate. A single quota or spend cap can also overstate throughput when another limit binds. [Little (1961), original proof](https://pubsonline.informs.org/doi/10.1287/opre.9.3.383)
 
-**Self-hosted example.** POME uses **32 concurrent sequences** as a project assumption. Using the unrounded Gemma 4 12B latency gives `32 / 3.74374 ≈ 8.55 req/s`. This estimate exceeds the default 5 req/s floor. The same configuration’s G8 estimate would exceed a tighter 3-second target. [Self-hosting inputs](../pome/registry/gapfill.yaml#L70) · [Self-hosting calculation](../pome/evidence/gapfill.py#L130)
+**Historical rented-GPU example.** POME uses **32 concurrent sequences** as a project assumption. Using the unrounded Gemma 4 12B latency gives `32 / 3.74374 ≈ 8.55 req/s`. This estimate exceeds the default 5 req/s floor. The same configuration’s G8 estimate would exceed a tighter 3-second target. [Self-hosting inputs](../pome/registry/gapfill.yaml#L70) · [Self-hosting calculation](../pome/evidence/gapfill.py#L130)
 
 ## G10 · Request failures after retries
 
@@ -64,7 +64,7 @@ The concurrency formula comes from **Little’s law**, `L = λ × W`. In a stabl
 G10 = round(100 − uptime_SLA_percent, 2)
 ```
 
-This complement converts an uptime percentage into the share of time outside the uptime commitment. POME uses that as a proxy for request failures. It does not account for how traffic is distributed during outages, what retries recover, or what failures occur while the service is available. For GPT-5.4 Mini, the stored **Scale Tier** SLA gives `100 − 99.9 = 0.10%`. The G9 example uses a **Tier 1** quota. For modeled self-hosting, the same calculation uses a **99.9% single-VM** SLA and does not include failures in the model server. [POME formula](../pome/evidence/gapfill.py#L111) · [OpenAI Scale Tier](https://openai.com/api-scale-tier) · [Microsoft cloud service SLAs](https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services)
+This complement converts an uptime percentage into the share of time outside the uptime commitment. POME uses that as a proxy for request failures. It does not account for how traffic is distributed during outages, what retries recover, or what failures occur while the service is available. For GPT-5.4 Mini, the stored **Scale Tier** SLA gives `100 − 99.9 = 0.10%`. The G9 example uses a **Tier 1** quota. For the historical rental proxy, the same calculation uses a **99.9% single-VM** SLA and does not include failures in the model server. [POME formula](../pome/evidence/gapfill.py#L111) · [OpenAI Scale Tier](https://openai.com/api-scale-tier) · [Microsoft cloud service SLAs](https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services)
 
 ### Saved-run proxy for APIs without a configured SLA
 

@@ -36,7 +36,7 @@ def test_benchmark_card_uses_only_self_tested_quality():
 def test_self_host_card_is_a_rented_gpu_config():
     reg = {c.config_id: c for c in load_registry()}
     _, cards = _cards()
-    assert reg[cards[3]["config"]].host.startswith("self-hosted")
+    assert reg[cards[3]["config"]].hosting_kind == "rental"
 
 
 def test_baselines_are_pure_and_repeatable():

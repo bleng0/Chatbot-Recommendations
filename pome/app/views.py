@@ -6,6 +6,7 @@ from pome.app.scenario import breakeven_tickets
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot
 from pome.profiles.loader import Profile
+from pome.registry.hosting import HOSTING
 from pome.registry.loader import ConfigEntry
 from pome.selection.engine import CHECKS, Decision, check_observation
 
@@ -248,7 +249,16 @@ def evidence_sections(
             for key, row in rows.items():
                 recorded = snap.values[f"{cid}.{key}"]
                 row.update(value=str(recorded.value), unit=recorded.unit)
-            groups["Other evidence"] = list(rows.values())
+            reference = [rows.pop(k) for k in list(rows) if k.startswith("reference.")]
+            if reference:
+                groups["Reference only · excluded from this deployment's verdict"] = reference
+            if rows:
+                groups["Other evidence"] = list(rows.values())
+        for group in groups.values():
+            for row in group:
+                observed = snap.values[f"{cid}.{row['metric']}"]
+                row["conditions"] = ", ".join(
+                    f"{name}: {value}" for name, value in (observed.measured_under or {}).items())
         sections[cid] = groups
     return sections
 
@@ -261,7 +271,7 @@ def cost_curves(snap: Snapshot, *, volume: int, points: list[int]) -> dict[str, 
         if not key.endswith(".cost.monthly_usd"):
             continue
         cid = key.split(".", 1)[0]
-        fixed = "gpu_hourly" in (e.formula or "")
+        fixed = not (e.formula or "").startswith("tickets *")
         per_ticket = float(e.value) / volume
         out[cid] = [round(float(e.value), 2) if fixed else round(per_ticket * n, 2)
                     for n in points]
@@ -387,7 +397,7 @@ def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sideb
     """How a bank would build this config: short title + one-line detail per step."""
     route = ("Classify each ticket into a banking intent, then answer FAQs from the bank's "
              "own approved text; send anything out of scope to a human agent.")
-    if cfg.host.startswith("self-hosted"):
+    if cfg.hosting_kind == "rental":
         return [
             ("Rent GPUs in India", f"Rent {gpu} in an India region for {cfg.model_id}."),
             ("Serve the model", (f"Run {cfg.serving} with {cfg.model_id} at {cfg.quant}, "
@@ -398,12 +408,23 @@ def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sideb
             ("Watch and scale", ("Track latency, errors and GPU load; add GPUs before peak "
                                  "hours.")),
         ]
+    if cfg.hosting_kind == "owned" and not cfg.lab_only:
+        return [
+            ("Build the nodes", ("Assemble the selected BOM; confirm GPU clearance, power, "
+             "cooling, UPS runtime and private network capacity.")),
+            ("Serve the checkpoint", (f"Install Linux, NVIDIA drivers and Container Toolkit. "
+             f"Run the pinned {cfg.model_id} checkpoint at {cfg.quant} with vLLM.")),
+            ("Connect the bank gateway", ("Use a private authenticated endpoint; redact "
+             "logs and keep approved FAQ content under bank control.")),
+            ("Verify capacity", ("Replay the quality suite and measure p95 latency, "
+             "sustainable throughput and retry failures. See docs/distinction.md.")),
+        ]
     if cfg.provider == "ollama":
         return [
             ("Install Ollama", f"Install Ollama and pull {cfg.model_id} ({cfg.quant})."),
             ("Run locally", "Serve it on one machine for testing quality only."),
             ("Route test tickets", route),
-            ("Move to a server", "For production, use the matching self-hosted GPU config."),
+            ("Move to a server", "For production, use the matching rented or owned infrastructure plan."),
         ]
     provider = cfg.host.split(" (")[0]
     return [
@@ -454,7 +475,8 @@ def _quality(cid: str, snap: Snapshot) -> float:
     return total / len(_QUALITY_KEYS)
 
 
-def baselines(d: Decision, snap: Snapshot, registry: list[ConfigEntry]) -> list[dict]:
+def baselines(d: Decision, snap: Snapshot, registry: list[ConfigEntry], *,
+              by_hosting: bool = False) -> list[dict]:
     """PLAN F8: what three simple rules would pick instead of the gates, next to our pick.
     Highest benchmark score uses self-tested quality only (proxies copy another model's
     score); lowest price ignores every gate; self-host only is the cheapest rented-GPU config."""
@@ -474,9 +496,16 @@ def baselines(d: Decision, snap: Snapshot, registry: list[ConfigEntry]) -> list[
         ("Lowest price", "Cheapest monthly cost, gates ignored", min(costed, key=key_cost,
                                                                      default=None)),
         ("Self-host only", "Cheapest config on our own rented GPU in India, gates ignored",
-         min((v for v in costed if reg[v.config_id].host.startswith("self-hosted")),
+         min((v for v in costed if reg[v.config_id].hosting_kind == "rental"),
              key=key_cost, default=None)),
     ]
+    if by_hosting:
+        picks = picks[:-1] + [
+            (HOSTING[kind], f"Lowest complete monthly price within {HOSTING[kind]}, gates ignored",
+             min((v for v in costed if reg[v.config_id].hosting_kind == kind),
+                 key=key_cost, default=None))
+            for kind in ("api", "rental", "owned")
+        ]
     ours = picks[0][2].monthly_cost if picks[0][2] and picks[0][2].monthly_cost is not None else None
     cards = []
     for title, rule, v in picks:
@@ -496,6 +525,10 @@ def baselines(d: Decision, snap: Snapshot, registry: list[ConfigEntry]) -> list[
                  + (" (no evidence)" if g.status == "unverified" else "")
                  for g in sorted(v.gates, key=lambda g: int(g.gate[1:]))
                  if g.status in ("fail", "unverified")]
+        if by_hosting:
+            fails.extend(reason for reason in v.reasons if reason.startswith((
+                "Planning only", "Does not fit", "Monthly cost incomplete", "Lab evidence only",
+            )))
         cards.append({"title": title, "rule": rule, "config": v.config_id,
                       "model": cfg.model_id, "host": cfg.host.split(" (")[0],
                       "cost": inr(v.monthly_cost), "badge": badge(e) if e else "",

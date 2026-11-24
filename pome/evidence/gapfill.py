@@ -166,7 +166,7 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
 
         # deployment
         facts = dict(d["deploy"].get(cid, {}))
-        if cfg.host.startswith("self-hosted"):
+        if cfg.hosting_kind == "rental":
             facts = {**d["selfhost_deploy"], **facts}
         for name, key in _DEPLOY.items():
             if name in facts:

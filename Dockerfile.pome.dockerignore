@@ -5,6 +5,7 @@
 !uv.lock
 !pome/
 !runs/records/
+!runs/serving/
 !.streamlit/config.toml
 **/__pycache__
 **/*.pyc

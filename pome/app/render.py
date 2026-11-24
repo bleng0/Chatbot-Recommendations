@@ -118,7 +118,8 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
                error: dict[str, tuple[str, bool]] | None = None,
                notes: dict[str, str] | None = None,
                short: dict[str, str] | None = None, *,
-               values: dict[str, GateValues] | None = None) -> str:
+               values: dict[str, GateValues] | None = None,
+               deployment: dict[str, tuple[str, str]] | None = None) -> str:
     """Gate matrix with optional evidence lines below the check statuses."""
     labels, notes, short = labels or {}, notes or {}, short or {}
     head = "".join(
@@ -160,8 +161,12 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
             wi += _num(*cost.get(r["config"], ("—", False)), "Over the monthly budget")
         if error is not None:
             wi += _num(*error.get(r["config"], ("—", False)), "Over the error limit")
+        meta = ""
+        if deployment and r["config"] in deployment:
+            kind, readiness = deployment[r["config"]]
+            meta = f'<small class="gate-host">{escape(kind)} · {escape(readiness)}</small>'
         body.append(f'<tr><th scope="row" class="cid" title="{escape(r["config"])}">'
-                    f'{escape(r["config"])}</th>'
+                    f'{escape(r["config"])}{meta}</th>'
                     f'<td class="stat">{_chip(r["status"])}</td>{wi}{"".join(cells)}</tr>')
     extra_class = " gm-values" if values is not None else ""
     return (f'<div class="tw"><table class="gm fx{extra_class}"><caption class="sr">Gate results per '
@@ -337,7 +342,7 @@ def evidence_display(sections: dict) -> str:
                 detail = _details("Source details", [
                     ("Metric key", row["metric"]), ("Recorded ratio", row.get("raw", "")),
                     ("Source", row["source"]), ("Retrieved", row["retrieved"]),
-                    ("Formula", row["formula"]),
+                    ("Formula", row["formula"]), ("Test settings", row.get("conditions", "")),
                 ])
                 parts.append(f'<div class="ev-metric"><dt>{label}'
                              f'<span class="ev-description">{description}</span></dt>'
@@ -508,6 +513,7 @@ th.cid{font-weight:400}
 .gm thead th:first-child{z-index:2}
 td.set{white-space:normal;min-width:22rem;color:var(--muted)}
 .gm td.g,.gm th.g{text-align:center;padding-inline:.3rem}
+.gm .gate-host{display:block;white-space:normal;color:var(--muted);font-size:.75rem}
 .gm .st{font-size:.8125rem}
 .gm th.g small{display:block;font-size:.6875rem;font-weight:400}
 .gm .off{opacity:.42}

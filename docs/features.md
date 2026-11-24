@@ -15,36 +15,33 @@ uv run python -m streamlit run pome/app/home.py
 
 Open [localhost:8501](http://localhost:8501). The dashboard reads the bundled records and recalculates the evidence snapshot and decision as inputs change. It needs no API key and makes no live model calls. The repository also includes a separate Next.js scaffold with a health endpoint. The evaluation dashboard runs in Streamlit. [Project README](../README.md)
 
-1. Set monthly tickets and the maximum spend in the sidebar. If exploring self-managed hosting, choose a cloud GPU rental offering, quantity, and operating cost.
-2. Read the official recommendation, configuration counts and the abbreviated decision hash at the top.
+1. Set monthly tickets and the maximum spend in the sidebar. If exploring self-managed hosting, choose a rental machine or an owned preset and enter its costs.
+2. Read the recommendation, configuration counts and the abbreviated decision hash at the top.
 3. Open **Gates** to inspect the verdicts. Expand a configuration’s reasons to see what failed or lacked evidence.
 4. Compare estimates in **Cost**, then trace any number to its **Source** and **Formula** in **Evidence**.
 5. Use **Tweak mode** to switch off a requirement or move a threshold with the sliders in **Gates**. The app shows a separate result and keeps the recommendation at the top.
 
 ## Sidebar controls
 
-| Control | How it affects the decision and main page |
+| Control | How it affects the decision |
 |---|---|
-| **Tickets per month** | One ticket represents one model call. Changing ticket volume changes estimated usage-priced API costs, cost bars, and budget verdicts. At a fixed rental quantity, the self-managed cloud GPU cost stays flat. |
-| **Max monthly spend, INR** | Sets G11. It moves the budget line on the Cost chart and changes which candidates are over budget. The candidate cost estimates themselves stay the same. |
-| **Self-host GPU (India price)** | Selects the recorded hourly price of a cloud GPU rental offering. Changing it updates self-hosted cost cells, chart bars, evidence entries, and the scenario estimate panel in Deployment variants. |
-| **GPUs** | For pricing, this field acts as a rental **instance count**. A four-GPU offering at quantity 2 prices two machines, with eight GPUs in total. |
-| **Self-host ops cost, INR/month** | Adds a fixed amount to each self-hosted estimate. It defaults to ₹0 and affects budget verdicts and break-even points. |
-| **Max error rate after retries, %** | Sets the official G10 failure-rate limit. The verdicts and the error-rate display in **Gates** use it. |
-| **Tweak mode** | Switching off a gate adds a separate what-if decision. The sliders in **Gates** adjust thresholds for that same what-if view. Candidates that pass only after a threshold is loosened are marked **Not recommended**. |
-
-Cost and workload edits can change the official recommendation. They do not rerun the benchmarks or resize the serving model. The sidebar’s rental selection and quantity affect cost, while the modeled self-hosted performance continues to use its fixed A100 assumptions. [Dashboard implementation](../pome/app/home.py) · [Scenario implementation](../pome/app/scenario.py)
+| **Tickets per month** | Changes usage-priced API estimates. Rental and ownership estimates stay fixed for the selected infrastructure. |
+| **Hosting scope** | Filters the recommendation and tabs to managed cloud APIs, rented cloud GPUs, or owned self-hosting. |
+| **Rented cloud GPU** | Prices whole machines, billed hours, storage, network and operator costs. |
+| **Owned self-hosting** | Edits the bill of materials, node count, amortization, power and recurring costs for each preset. |
+| **Budget and error limit** | Set the recommendation's G11 and G10 limits. |
+| **Tweak mode** | Shows separate what-if results from sidebar gate switches and in-table threshold sliders. |
 
 ## What each tab shows
 
 | Tab | What to look for |
 |---|---|
-| **Gates** | A side-by-side matrix of gate outcomes and costs, with expandable reasons for individual verdicts. When Tweak mode is active, the table also shows the what-if verdicts. |
-| **Baselines** | Compares the recommendation with the app’s benchmark-score, lowest-price, and self-host-only rules. The gate descriptions and default targets appear in the sidebar’s toggle help. |
-| **Cost** | Modeled monthly costs in INR, a budget line, a table at other ticket volumes, and interactive API cost curves and break-even estimates against the reference Gemma 4 12B self-hosted configuration. |
-| **Evidence** | Expand a configuration to see its evidence grouped by quality, serving, cost, and deployment. Each metric includes provenance and source details, with formulas where available. |
-| **Deployment variants** | Select a model to see its registered deployment, the sidebar-based rent estimate, and cards for published setups. Expand a card to see its source and conditions. |
-| **Configurations** | The candidates in the registry, with model, host, region, serving software, and quantization. Browse the cards to see each configuration’s build steps. |
+| **Gates** | Hosting type, readiness and verdict per configuration, with a toggle for actual values and a separate what-if column during exploration. |
+| **Baselines** | Alternative selection rules scoped to the current deployment filter. |
+| **Cost** | Upfront and monthly costs by hosting type, budget and break-even comparisons for complete estimates. |
+| **Evidence** | Metric provenance, test settings, formulas and serving references excluded from the current plan. |
+| **Deployment variants** | The selected candidate's infrastructure, serving steps and distinct published setups. |
+| **Configurations** | Model, hosting, runtime, region and build steps for the filtered candidates. |
 
 ### Configurations, variants, and evidence
 
@@ -112,11 +109,10 @@ The G8 estimate uses headline benchmark inputs, the G9 quota describes permitted
 
 **Managed model API.** Monthly cost is estimated as `tickets × (input tokens per ticket × input price per million + output tokens per ticket × output price per million) / 1,000,000`. POME uses measured average token counts where available for the cost calculation, and modeled token counts or proxy prices where configured.
 
-**Self-managed cloud GPU rental.** Monthly cost is `rental instances × hourly price × 730 hours + monthly operating costs`, converted to INR for display using the app’s stored exchange rate. The app currently applies the same sidebar scenario across self-hosted entries. The four-L40S example is `1 × $12.601 × 730 × ₹92.7968/$ ≈ ₹8,53,613` before any operating costs.
-
-Increasing quantity prices additional rental instances. Actual availability depends on account quota and capacity. Two one-GPU instances and one two-GPU instance have different interconnects and deployment requirements. Pricing a quantity does not verify that the model fits, can use the hardware together, or can sustain peak traffic.
-
-**On-premises hosting** would require a separate cost model for hardware purchase amortization, power, and maintenance. The current app estimates cloud rental for its self-managed deployment scenarios. The break-even estimate divides fixed monthly self-hosted cost by the API price per ticket. It compares costs at the assumed capacity. [Cost formulas](../pome/cost/model.py) · [Cost and scenario inputs](../pome/app/scenario.py)
+**Rented cloud GPU and owned self-hosting.** Rentals are billed per node-hour and
+include operator-entered add-ons. Owned estimates amortize the component bill and add power
+and recurring operating costs. A valid serving test must match the selected deployment.
+See the bills of materials, prices and runbooks in [Hosting distinction](distinction.md).
 
 ## How new evidence enters the dashboard
 

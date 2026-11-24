@@ -59,6 +59,8 @@ class ConfigEntry(BaseModel):
     deployment: Deployment
     notes: str = ""
     variants: list[Variant] = []
+    hosting_kind: Literal["api", "rental", "owned"] = "api"
+    lab_only: bool = False
 
 
 class _RegistryFile(BaseModel):

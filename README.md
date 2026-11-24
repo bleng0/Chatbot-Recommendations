@@ -36,13 +36,12 @@ the plain command does not put the repo root on the import path and fails with
 What the page shows (2026-11-23): the question "Which model and hosting plan should you use?",
 an answer box with the recommended model, hosting plan and monthly cost (INR), and tabs for
 Gates, Baselines, Cost, Evidence, Deployment variants and Configurations. Baselines shows
-what three simple rules (highest self-tested benchmark score, lowest price, self-host only)
-would pick instead, with the cost difference and the gates each one fails. The sidebar sets tickets per
-month, max monthly spend, max error rate and the self-host GPU, and has a Tweak mode toggle per
+what simpler benchmark and cost rules would pick instead, with the cost difference and the gates each one fails. The sidebar sets tickets per
+month, max monthly spend, max error rate, hosting scope and infrastructure costs. It has a Tweak mode toggle per
 gate. In the Gates tab a vertical slider above each gate column moves that gate's threshold for
 a what-if view; the recommendation never changes, and a config that passes only because a gate
 was loosened is marked "Not recommended". Rules: CONSTRAINTS.md section A; decisions: SPEC.md
-sections 15-16.
+sections 15-16. See [Hosting distinction](docs/distinction.md) for cost and deployment details.
 
 In a container: `docker compose -f compose.pome.yaml up --build`, then open the same address
 (start Docker Desktop first on Windows; verified on the owner's PC 2026-11-23).

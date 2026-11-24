@@ -80,7 +80,7 @@ def test_gate_values_toggle_shows_evidence_in_the_slider_table():
         return json.loads(component.proto.json_args)["table"]
 
     def nano_row(html):
-        return next(row for row in html.split("</tr>") if ">gpt54nano-api-global</th>" in row)
+        return next(row for row in html.split("</tr>") if 'title="gpt54nano-api-global"' in row)
 
     initial = table()
     assert "gate-value" not in initial

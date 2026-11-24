@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from pome.app.views import USD_INR, ApiCostComparison, api_cost_comparisons
+from pome.app.views import ApiCostComparison, api_cost_comparisons
 from tests.test_selection import ev
 
 
@@ -42,20 +42,22 @@ def test_cost_tab_updates_comparison_when_scenario_changes():
     tab = _cost_tab(app)
     monthly, thresholds, curves = _plots(tab)
     assert monthly["data"][0]["type"] == "bar"
-    assert any("self-host is cheaper above" in item.value for item in tab.markdown)
+    assert any("this infrastructure plan has the lower modeled cost" in item.value
+               for item in tab.caption)
     ranked = thresholds["data"][0]
     assert list(ranked["x"]) == sorted(ranked["x"])
-    assert tab.selectbox[0].value == ranked["y"][0]
+    assert tab.selectbox(key="cost-comparison-api").value == ranked["y"][0]
     assert "gemma4-31b-vllm-in-bf16" not in ranked["y"]
     assert "gemma4-12b-ollama-local-q4" not in ranked["y"]
     assert [expander.label for expander in tab.expander] == [
-        "API versus self-hosted details", "Cost at other volumes (table)",
+        "API versus rented cloud gpu details", "Cost at other volumes (table)",
     ]
-    assert list(tab.dataframe[0].value["API configuration"]) == ranked["y"]
+    table = next(frame.value for frame in tab.dataframe if "API configuration" in frame.value)
+    assert list(table["API configuration"]) == ranked["y"]
     assert curves["data"][2]["name"] == "Break-even"
 
     selected = "sarvam105b-api-in"
-    tab.selectbox[0].select(selected).run()
+    tab.selectbox(key="cost-comparison-api").select(selected).run()
     curves = _plots(_cost_tab(app))[2]
     crossing = curves["data"][2]["x"][0]
     assert crossing > 10_000_000
@@ -66,19 +68,19 @@ def test_cost_tab_updates_comparison_when_scenario_changes():
     app.sidebar.select_slider[0].set_value(500_000)
     app.sidebar.selectbox[0].select("e2e-l40s")
     for field in app.sidebar.number_input:
-        if field.label.startswith("GPUs"):
+        if field.label == "Rental nodes":
             field.set_value(2)
-        if field.label.startswith("Self-host ops cost"):
+        if field.label.startswith("Rented GPU operations"):
             field.set_value(10_000)
     app.run()
 
     tab = _cost_tab(app)
-    assert tab.selectbox[0].value == selected
+    assert tab.selectbox(key="cost-comparison-api").value == selected
     _, thresholds, curves = _plots(tab)
     for chart in [thresholds, curves]:
         assert chart["layout"]["shapes"][0]["x0"] == 500_000
     api, selfhost, marker = curves["data"]
-    expected_fixed_inr = 2 * 1.2 * 730 * float(USD_INR.value) + 10_000
+    expected_fixed_inr = 2 * 102 * 730 + 10_000
     assert selfhost["y"] == pytest.approx([expected_fixed_inr] * len(selfhost["y"]))
     assert api["y"][api["x"].index(500_000)] == pytest.approx(5 * old_api, rel=1e-6)
     assert marker["y"][0] == pytest.approx(api["y"][api["x"].index(marker["x"][0])])
@@ -101,7 +103,7 @@ def _comparison_app(case):
 
 
 @pytest.mark.parametrize(("case", "message"), [
-    ("missing-baseline", "No modeled self-hosted cost is available for this scenario."),
+    ("missing-baseline", "The selected infrastructure plan has no complete monthly estimate."),
     ("missing-api", "No API configurations have a modeled cost per ticket."),
 ])
 def test_comparison_explains_missing_costs(case, message):

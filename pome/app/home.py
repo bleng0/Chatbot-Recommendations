@@ -7,11 +7,11 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from pome.app import cost_charts, render
+from pome.app.hosting_controls import owned_plans, rented_plans
 from pome.app.scenario import (
     GPU_OPTIONS,
-    SELFHOST,
+    SERVING_METRICS,
     Scenario,
-    breakeven_tickets,
     decide,
     decide_sliders,
 )
@@ -22,7 +22,6 @@ from pome.app.views import (
     USD_INR,
     answer_line,
     architecture_steps,
-    badge,
     baselines,
     cost_curves,
     display_gate,
@@ -39,6 +38,7 @@ from pome.app.views import (
     what_if_pick,
 )
 from pome.profiles.loader import load_profile, what_if_profile
+from pome.registry.hosting import HOSTING, OWNED, RESPONSIBILITY, owned_config
 from pome.registry.loader import load_registry
 
 st.set_page_config(page_title="Model and hosting selection", layout="wide")
@@ -46,8 +46,7 @@ T = render.TOKENS["light"]
 st.html(render.css("light"))
 
 profile = load_profile()
-registry = load_registry()
-by_id = {c.config_id: c for c in registry}
+catalog = load_registry() + [owned_config(preset) for preset in OWNED.values()]
 # G10 (error limit) and G11 (budget) are sidebar settings; the rest are gates, numbered 1-10
 GATES = SHOWN_GATES
 RATE = float(USD_INR.value)
@@ -64,13 +63,19 @@ with st.sidebar:
     max_error = st.number_input(
         "Max error rate after retries, %", 0.0, 100.0, float(profile.gates["G10"].value),
         step=0.1, format="%.1f", help="Configs failing more requests are rejected.")
-    gpu = st.selectbox("Self-host GPU (India price)", list(GPU_OPTIONS),
-                       format_func=lambda k: GPU_OPTIONS[k].label)
-    st.caption(GPU_OPTIONS[gpu].note)
-    gpus = st.number_input("GPUs", 1, 64, 1, help="GPUs rented for self-hosting.")
-    ops_inr = st.number_input("Self-host ops cost, INR/month", 0, 10_00_00_000, 0,
-                              step=10_000, help="Staff and tooling to run your own GPUs.")
-    ops = float(ops_inr) / float(USD_INR.value)
+    scope = st.radio("Hosting scope", list(HOSTING), format_func=HOSTING.get)
+    with st.expander("Rented cloud GPU"):
+        gpu = st.selectbox("Rental machine", list(GPU_OPTIONS),
+                           format_func=lambda k: GPU_OPTIONS[k].label)
+        st.caption(GPU_OPTIONS[gpu].note)
+        gpus = st.number_input("Rental nodes", 1, 64, 1,
+                               help="Number of whole rental machines, including bundled GPUs.")
+        ops_inr = st.number_input("Rented GPU operations, ₹/month", 0, 10_00_00_000, 0,
+                                  step=10_000)
+        plans = rented_plans(catalog, gpu, gpus, ops_inr, RATE)
+    st.subheader("Owned self-hosting")
+    plans.update(owned_plans())
+    ops = float(ops_inr) / RATE
     st.header("Tweak mode")
     st.caption("Switch a gate off to see a what-if view; the recommendation is unchanged.")
     info = dict(zip(GATES, gate_info_rows(profile), strict=True))
@@ -84,17 +89,46 @@ max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
                  else float(max_spend_inr) / RATE)
 scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
                     max_spend_usd=max_spend_usd, max_error_pct=float(max_error))
-snap, d = decide(scenario)
+snap, d = decide(scenario, registry=catalog, deployment_plans=plans,
+                 scope=scope, inr_per_usd=RATE)
+registry = [c for c in catalog if scope == "all" or scope == c.hosting_kind]
+by_id = {c.config_id: c for c in registry}
+
+
+def hosting_label(cid: str) -> str:
+    cfg = by_id[cid]
+    return HOSTING[cfg.hosting_kind] + (" · lab only" if cfg.lab_only else "")
+
+
+def readiness(cid: str) -> str:
+    cfg = by_id[cid]
+    if cfg.hosting_kind == "api":
+        return "Provider-operated"
+    plan = plans.get(cid)
+    if plan is None:
+        return "Lab evidence only"
+    if plan.minimum_gb is not None and plan.vram_gb < plan.minimum_gb:
+        return "Does not fit"
+    if all(f"{cid}.{metric}" in snap.values for metric in SERVING_METRICS):
+        return "Serving evidence available"
+    return "Planning only · needs validation"
+
+
 
 st.html('<h1 class="q">Which <span class="k">model</span> and <span class="k">hosting plan</span> '
         'should you use?</h1>')
+for column, kind in zip(st.columns(3), RESPONSIBILITY, strict=True):
+    column.markdown(f"**{HOSTING[kind]}**")
+    column.caption(RESPONSIBILITY[kind])
+st.caption(f"Comparing {HOSTING[scope].lower()}.")
+
 passing = sum(v.status.startswith("eligible") for v in d.verdicts)
 if d.recommended:
     rec_cfg, rec_v = by_id[d.recommended], next(v for v in d.verdicts
                                                 if v.config_id == d.recommended)
     st.html(render.answer_card(
         model=rec_cfg.model_id, config=d.recommended,
-        host=rec_cfg.host.split(" (")[0], region=rec_cfg.region.split(" (")[0],
+        host=f"{hosting_label(rec_cfg.config_id)} · {rec_cfg.host}", region=rec_cfg.region.split(" (")[0],
         cost="no cost evidence" if rec_v.monthly_cost is None else inr(rec_v.monthly_cost),
         modeled=rec_v.monthly_cost is not None, passing=passing, total=len(d.verdicts),
         decision_hash=d.decision_hash[:12],
@@ -113,11 +147,14 @@ tab_gates, tab_base, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
     ["Gates", "Baselines", "Cost", "Evidence", "Deployment variants", "Configurations"])
 
 with tab_base:
-    st.html('<p class="one">What three simple rules would pick instead of the gates, at the '
+    st.html('<p class="one">What simple selection rules would pick instead of the gates, at the '
             'settings in the sidebar.</p>')
-    cards = baselines(d, snap, registry)
-    st.html(render.baseline_cards(cards))
-    if d.recommended and not by_id[d.recommended].host.startswith(("self-hosted", "local")):
+    cards = baselines(d, snap, registry, by_hosting=True)
+    if cards:
+        st.html(render.baseline_cards(cards))
+    else:
+        st.write("No complete priced candidates for these comparison rules.")
+    if d.recommended and by_id[d.recommended].hosting_kind == "api":
         st.html('<p class="bl-note">An API-only rule picks the same config as ours, because '
                 'our pick is already an API.</p>')
 
@@ -186,13 +223,15 @@ with tab_gates:
                  render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
                                    labels={g: display_gate(g) for g in GATES},
                                    short=SHORT_NAME,
-                                   error=error_cells, notes=nr_notes, values=observations),
+                                   error=error_cells, notes=nr_notes, values=observations,
+                                   deployment={cid: (hosting_label(cid), readiness(cid))
+                                               for cid in ids}),
                  render.css("light"), key="gate_sliders")
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
         st.html(f'<p class="one">No evidence recorded yet: {", ".join(no_ev)}</p>')
     st.caption("Failing first, then missing evidence, then passing. Unverified: evidence missing "
-               "or under 15 scored items. Not tested: no load test run; does not block.")
+               "or under 15 scored items. GPU deployments need matching serving evidence to qualify.")
     for v in d.verdicts:
         if v.config_id in ids and v.reasons:
             with st.expander(f"{v.config_id}: {status_label(v.status)}"):
@@ -201,10 +240,35 @@ with tab_gates:
 with tab_cost:
     costs = {k.split(".", 1)[0]: e for k, e in snap.values.items()
              if k.endswith(".cost.monthly_usd") and k.split(".", 1)[0] in ids}
+    st.caption("Monthly figures use prices as entered. Check quoted taxes and add-ons before "
+               "comparing a budget or purchasing hardware.")
+    for kind in RESPONSIBILITY:
+        group = [c for c in registry if c.hosting_kind == kind]
+        if not group:
+            continue
+        st.subheader(HOSTING[kind])
+        rows = []
+        for c in group:
+            plan = plans.get(c.config_id)
+            cost = costs.get(c.config_id)
+            estimate = plan.estimate if plan else None
+            rows.append({
+                "Configuration": c.config_id,
+                "Upfront hardware": ("₹" + indian(estimate.upfront)) if kind == "owned"
+                and estimate else "—",
+                "Operating per month": ("₹" + indian(estimate.operating)) if estimate else "—",
+                "Monthly comparison": inr(float(cost.value)) if cost else "Unavailable",
+                "Pricing notes": (
+                    f"Known-cost subtotal ₹{indian(estimate.monthly)}/month. "
+                    f"Missing: {', '.join(estimate.missing)}"
+                    if estimate and not estimate.complete else readiness(c.config_id)
+                ),
+            })
+        st.dataframe(pd.DataFrame(rows), hide_index=True)
     if not costs:
         st.write("No configuration has a cost yet.")
     else:
-        budget = float(max_spend_inr)
+        budget = max_spend_usd * RATE
         items = sorted(costs.items(), key=lambda kv: float(kv[1].value))
         names_ = [cid for cid, _ in items]
         vals = [float(e.value) * RATE for _, e in items]
@@ -231,18 +295,16 @@ with tab_cost:
             hoverlabel={"font": {"family": "Fira Sans, sans-serif", "color": T["text"]},
                         "bgcolor": T["panel"], "bordercolor": T["teal"]})
         st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
-        sh = snap.values.get(f"{SELFHOST}.cost.monthly_usd")
-        for cid in names_:
-            if cid == SELFHOST or sh is None:
-                continue
-            per_ticket = float(costs[cid].value) / int(volume)
-            be = breakeven_tickets(api_cost_per_ticket=per_ticket,
-                                   selfhost_monthly=float(sh.value))
-            if be:
-                st.markdown(f"`{cid}` vs self-host: self-host is cheaper above **{be:,} tickets"
-                            f"/month** (MODELED; API {inr(per_ticket, 4)}/ticket, self-host "
-                            f"{inr(float(sh.value))}/month fixed).")
-        cost_charts.show_api_comparison(costs, volume=int(volume))
+        infrastructure = [c.config_id for c in registry if c.hosting_kind != "api"
+                          and c.config_id in costs and readiness(c.config_id) != "Does not fit"]
+        api_costs = {cid: cost for cid, cost in costs.items() if by_id[cid].hosting_kind == "api"}
+        if infrastructure and api_costs:
+            compared = st.selectbox("Infrastructure plan to compare", infrastructure,
+                                    format_func=lambda cid: f"{hosting_label(cid)} · {cid}")
+            cost_charts.show_api_comparison(
+                {**api_costs, compared: costs[compared]}, volume=int(volume),
+                baseline_id=compared, baseline_label=hosting_label(compared),
+            )
         with st.expander("Cost at other volumes (table)"):
             points = sorted({10_000, *range(100_000, 1_000_001, 100_000), int(volume)})
             curves = {k: v for k, v in cost_curves(snap, volume=int(volume),
@@ -252,48 +314,65 @@ with tab_cost:
             st.dataframe(pd.DataFrame({"tickets": points, **inr_curves}), hide_index=True)
 
 with tab_ev:
-    st.html(render.evidence_display(evidence_sections(snap, ids)))
+    for kind in RESPONSIBILITY:
+        group_ids = {c.config_id for c in registry if c.hosting_kind == kind}
+        if group_ids:
+            st.subheader(HOSTING[kind])
+            st.html(render.evidence_display(evidence_sections(snap, group_ids)))
 
 with tab_var:
-    with_variants = [c.config_id for c in registry if c.variants]
-    if with_variants:
-        selected = st.selectbox(
-            "Model to inspect", with_variants, key="deployment_model",
-            format_func=lambda cid: by_id[cid].model_id,
-        )
-        c = by_id[selected]
-        cost = snap.values.get(f"{selected}.cost.monthly_usd")
-        st.html(render.deployment_summary(
-            config=c.config_id, runtime=c.serving, precision=c.quant, host=c.host,
-            price=f"{inr(float(cost.value))}/month" if cost else "Unavailable",
-            provenance=badge(cost) if cost else "",
-            rental=GPU_OPTIONS[scenario.gpu].label, units=scenario.gpus,
-            ops=inr(scenario.ops_monthly_usd),
-        ))
+    selected = st.selectbox("Deployment to inspect", list(by_id), key="deployment_model",
+                            format_func=lambda cid: f"{hosting_label(cid)} · {cid}")
+    c = by_id[selected]
+    plan = plans.get(selected)
+    st.subheader(hosting_label(selected))
+    st.caption(RESPONSIBILITY[c.hosting_kind])
+    st.write(f"{c.model_id} · {c.serving} · {c.quant} · {readiness(selected)}")
+    cost = snap.values.get(f"{selected}.cost.monthly_usd")
+    st.write(f"Monthly comparison: {inr(float(cost.value))}" if cost else
+             "A complete monthly comparison is unavailable.")
+    if plan:
+        hardware = GPU_OPTIONS[gpu].label if c.hosting_kind == "rental" else next(
+            preset.parts[0].name for preset in OWNED.values() if preset.id == selected)
+        st.write(f"{hardware} · {plan.nodes} nodes · "
+                 f"{plan.gpus_per_node} GPU(s) per node · {plan.vram_gb} GB per GPU")
+        if plan.minimum_gb is not None:
+            st.caption(f"Planning floor: {plan.minimum_gb} GB per GPU at short context.")
+        else:
+            st.caption("A verified memory requirement is unavailable for this checkpoint.")
+        serving = snap.values.get(f"{selected}.serving.p95_ms")
+        if serving and serving.measured_under:
+            tags = serving.measured_under
+            st.caption(f"Serving evidence · runtime {tags['runtime_version']} · "
+                       f"checkpoint revision {tags['checkpoint_revision']} · "
+                       f"{tags['input_tokens']} input / {tags['output_tokens']} output tokens")
+    if c.variants:
+        st.caption("Published variants below describe their own test hardware and workload.")
         st.html(render.deployment_evidence(variant_rows(c)))
-    else:
-        st.write("No open-weight model lists published deployment settings.")
+    for title, detail in architecture_steps(c, gpu=hardware if plan else ""):
+        st.markdown(f"**{title}** · {detail}")
 
 with tab_cfg:
     st.html(render.config_table([{
-        "config": c.config_id, "model": c.model_id, "host": c.host.split(" (")[0],
+        "config": c.config_id, "model": c.model_id, "host": f"{hosting_label(c.config_id)} · {c.host}",
         "region": c.region.split(" (")[0].split(";")[0], "serving": c.serving,
         "quant": c.quant.split(" (")[0]} for c in registry if c.config_id in ids]))
     status = {v.config_id: v.status for v in d.verdicts}
     order = [r["config"] for r in gate_matrix(d)]
-    gpu_label = GPU_OPTIONS[gpu].label + (f" x{int(gpus)}" if int(gpus) > 1 else "")
+    gpu_label = f"{GPU_OPTIONS[gpu].label} · {gpus} billed nodes"
     fan_items = []
     for cid in order:
         c = by_id[cid]
         cost = snap.values.get(f"{cid}.cost.monthly_usd")
         fan_items.append({
-            "config": cid, "model": c.model_id, "host": c.host.split(" (")[0],
+            "config": cid, "model": c.model_id, "host": f"{hosting_label(c.config_id)} · {c.host}",
             "status": status[cid], "cost": f"{inr(float(cost.value))}/mo" if cost else "—",
             "steps": architecture_steps(c, gpu=gpu_label)})
     st.caption("Scroll the list on the right or use the arrows; the middle card's build steps "
                "show on the left.")
-    st.html(render.config_fan(fan_items, focus=d.recommended or order[0]),
-            unsafe_allow_javascript=True)
+    if order:
+        st.html(render.config_fan(fan_items, focus=d.recommended or order[0]),
+                unsafe_allow_javascript=True)
 
 st.html(f'<p class="foot">All costs are shown in INR. Conversion: US$1 = '
         f'₹{RATE:.4f} (RBI reference rate, {USD_INR.retrieved_at.date().isoformat()}). '

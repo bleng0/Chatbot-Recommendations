@@ -5,6 +5,7 @@ configs:
     model_id: gemini-3.5-flash-lite
     version: "alias; no pinned version string on the pricing page"
     host: "Gemini API (AI Studio)"
+    hosting_kind: api
     region: "global (no regional processing commitment found)"
     serving: managed
     quant: "n/a (vendor-managed)"
@@ -22,6 +23,7 @@ configs:
     model_id: gemini-2.5-flash
     version: "alias; no pinned version string on the pricing page"
     host: "Gemini API (AI Studio, paid tier)"
+    hosting_kind: api
     region: "global (no regional processing commitment found)"
     serving: managed
     quant: "n/a (vendor-managed)"
@@ -39,6 +41,7 @@ configs:
     model_id: gemma-4-26b-a4b-it
     version: "alias listed at ai.google.dev/gemma/docs/core/gemma_on_gemini_api"
     host: "Gemini API (free tier only for Gemma 4)"
+    hosting_kind: api
     region: "global (no regional processing commitment found)"
     serving: managed
     quant: "n/a (vendor-managed)"
@@ -55,7 +58,8 @@ configs:
   - config_id: gemma4-12b-vllm-in-bf16
     model_id: gemma-4-12b
     version: "open weights; Hugging Face instruct ID not confirmed on ai.google.dev/gemma/docs/core (2026-11-22)"
-    host: "self-hosted GPU (India region)"
+    host: "rented cloud GPU (India region)"
+    hosting_kind: rental
     region: India
     serving: vLLM
     quant: bf16
@@ -75,6 +79,8 @@ configs:
     model_id: gemma-4-12b
     version: "Ollama tag gemma4:12b (Q4_K_M, 7.7-8.0 GB), https://ollama.com/library/gemma4"
     host: "local Ollama on the owner's laptop (quality measurement only)"
+    hosting_kind: owned
+    lab_only: true
     region: "local machine"
     serving: Ollama
     quant: Q4_K_M
@@ -94,6 +100,7 @@ configs:
     model_id: gpt-5.4-nano
     version: alias; no pinned version string on the pricing page
     host: OpenAI API (Standard tier)
+    hosting_kind: api
     region: global endpoint (data-residency endpoints cost +10%)
     serving: managed
     quant: n/a (vendor-managed)
@@ -120,6 +127,7 @@ configs:
     model_id: gpt-5.4-mini
     version: alias; no pinned version string on the pricing page
     host: OpenAI API (Standard tier)
+    hosting_kind: api
     region: global endpoint (data-residency endpoints cost +10%)
     serving: managed
     quant: n/a (vendor-managed)
@@ -143,6 +151,7 @@ configs:
     model_id: claude-haiku-5-5
     version: alias; no pinned version string on the pricing page
     host: Anthropic API (Standard)
+    hosting_kind: api
     region: global (no India processing offered for this model)
     serving: managed
     quant: n/a (vendor-managed)
@@ -166,6 +175,7 @@ configs:
     model_id: claude-sonnet-5-5
     version: alias; no pinned version string on the pricing page
     host: Anthropic API (Standard)
+    hosting_kind: api
     region: global (no India processing offered for this model)
     serving: managed
     quant: n/a (vendor-managed)
@@ -189,6 +199,7 @@ configs:
     model_id: gemini-3.5-flash
     version: alias; no pinned version string on the pricing page
     host: Vertex AI (Standard PayGo, global endpoint)
+    hosting_kind: api
     region: global; asia-south1 has no Standard PayGo (Provisioned Throughput only, price not collected)
     serving: managed
     quant: n/a (vendor-managed)
@@ -212,6 +223,7 @@ configs:
     model_id: mistral-small-2603
     version: alias; no pinned version string on the pricing page
     host: Mistral API
+    hosting_kind: api
     region: global (no regional commitment found)
     serving: managed
     quant: n/a (vendor-managed)
@@ -235,6 +247,7 @@ configs:
     model_id: sarvam-105b
     version: alias; no pinned version string on the pricing page
     host: Sarvam API
+    hosting_kind: api
     region: India (Azure Central India; inference on Yotta and NxtGen GPUs)
     serving: managed
     quant: n/a (vendor-managed)
@@ -268,6 +281,7 @@ configs:
     model_id: deepseek-flash
     version: alias; no pinned version string on the pricing page
     host: DeepSeek API
+    hosting_kind: api
     region: 'China (privacy policy: data stored in the PRC)'
     serving: managed
     quant: n/a (vendor-managed)
@@ -291,6 +305,7 @@ configs:
     model_id: deepseekv4.1-flash-1017
     version: alias; no pinned version string on the pricing page
     host: Sarvam API (hosted DeepSeek)
+    hosting_kind: api
     region: India (Sarvam hosting)
     serving: managed
     quant: n/a (vendor-managed)
@@ -315,7 +330,8 @@ configs:
   - config_id: gemma4-31b-vllm-in-bf16
     model_id: google/gemma-4-31B-it
     version: open weights
-    host: self-hosted GPU (India region)
+    host: rented cloud GPU (India region)
+    hosting_kind: rental
     region: India
     serving: vLLM
     quant: bf16
@@ -442,7 +458,8 @@ configs:
   - config_id: gemma4-26b-vllm-in-bf16
     model_id: google/gemma-4-26B-A4B-it
     version: open weights
-    host: self-hosted GPU (India region)
+    host: rented cloud GPU (India region)
+    hosting_kind: rental
     region: India
     serving: vLLM
     quant: bf16
@@ -564,7 +581,8 @@ configs:
   - config_id: qwen38-27b-vllm-in-bf16
     model_id: Qwen/Qwen3.8-27B
     version: open weights
-    host: self-hosted GPU (India region)
+    host: rented cloud GPU (India region)
+    hosting_kind: rental
     region: India
     serving: vLLM
     quant: bf16
@@ -612,7 +630,8 @@ configs:
   - config_id: llama31-8b-vllm-in-bf16
     model_id: meta-llama/Llama-3.1-8B-Instruct
     version: open weights
-    host: self-hosted GPU (India region)
+    host: rented cloud GPU (India region)
+    hosting_kind: rental
     region: India
     serving: vLLM
     quant: bf16
@@ -802,7 +821,8 @@ configs:
   - config_id: sarvam30b-vllm-in-bf16
     model_id: sarvamai/sarvam-30b
     version: open weights
-    host: self-hosted GPU (India region)
+    host: rented cloud GPU (India region)
+    hosting_kind: rental
     region: India
     serving: vLLM
     quant: bf16
@@ -859,7 +879,8 @@ configs:
   - config_id: museglimmer30b-vllm-in-bf16
     model_id: meta-models/Muse-Glimmer-30B
     version: open weights
-    host: self-hosted GPU (India region)
+    host: rented cloud GPU (India region)
+    hosting_kind: rental
     region: India
     serving: vLLM
     quant: bf16
