@@ -22,6 +22,7 @@ from pome.app.views import (
     USD_INR,
     answer_line,
     architecture_steps,
+    badge,
     baselines,
     cost_curves,
     display_gate,
@@ -247,20 +248,24 @@ with tab_ev:
     st.html(render.evidence_display(evidence_sections(snap, ids)))
 
 with tab_var:
-    shown = [c for c in registry if c.config_id in ids and c.variants]
-    if not shown:
+    with_variants = [c.config_id for c in registry if c.variants]
+    if with_variants:
+        selected = st.selectbox(
+            "Model to inspect", with_variants, key="deployment_model",
+            format_func=lambda cid: by_id[cid].model_id,
+        )
+        c = by_id[selected]
+        cost = snap.values.get(f"{selected}.cost.monthly_usd")
+        st.html(render.deployment_summary(
+            config=c.config_id, runtime=c.serving, precision=c.quant, host=c.host,
+            price=f"{inr(float(cost.value))}/month" if cost else "Unavailable",
+            provenance=badge(cost) if cost else "",
+            rental=GPU_OPTIONS[scenario.gpu].label, units=scenario.gpus,
+            ops=inr(scenario.ops_monthly_usd),
+        ))
+        st.html(render.deployment_evidence(variant_rows(c)))
+    else:
         st.write("No open-weight model lists published deployment settings.")
-    for c in shown:
-        rows = variant_rows(c)
-        cost = snap.values.get(f"{c.config_id}.cost.monthly_usd")
-        cost_txt = (f" · modeled cost {inr(float(cost.value))}/month {render.badge('MODELED')}"
-                    if cost else " · no modeled monthly cost yet")
-        if not any(r["figure"] for r in rows):
-            st.html(f'<p class="one"><code>{c.config_id}</code>: {len(rows)} published '
-                    f'settings, none with a figure{cost_txt}</p>')
-            continue
-        st.html(f'<h3 class="vh"><code>{c.config_id}</code>{cost_txt}</h3>'
-                + render.variant_table(rows))
 
 with tab_cfg:
     st.html(render.config_table([{

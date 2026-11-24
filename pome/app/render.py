@@ -331,23 +331,72 @@ def evidence_display(sections: dict) -> str:
     return "".join(parts) + "</div>"
 
 
-def variant_table(rows: list[dict]) -> str:
-    body = []
-    for r in rows:
-        under = ", ".join(f"{k}: {v}" for k, v in (r["measured_under"] or {}).items())
-        detail = _details(r["variant"], [("Source", r["source"]), ("Measured under", under),
-                                         ("Note", r["note"])])
-        fig = (f'{escape(r["figure"])} {badge(r["badge"])}' if r["figure"]
-               else '<span class="muted">no published figure</span>')
-        body.append(f'<tr><td>{detail}</td><td class="set">{escape(r["settings"])}</td>'
-                    f'<td class="num">{fig}</td><td><span class="mt mt-{r["match"].lower()}">'
-                    f'{escape(r["match"].title())}</span></td>'
-                    f'<td class="num">{escape(r["retrieved"])}</td></tr>')
-    return (f'<div class="tw"><table class="vt"><thead><tr><th scope="col">Setting</th>'
-            f'<th scope="col">Stack · quant · hardware · load · lengths</th>'
-            f'<th scope="col">Figure</th><th scope="col">Match</th>'
-            f'<th scope="col">Retrieved</th></tr></thead><tbody>{"".join(body)}</tbody>'
-            f"</table></div>")
+def deployment_summary(*, config: str, runtime: str, precision: str, host: str,
+                       price: str, provenance: str, rental: str, units: int, ops: str) -> str:
+    return (
+        '<div class="deployment deployment-summary">'
+        '<section><h2>POME configuration</h2>'
+        f'<p class="deployment-setup">{escape(runtime)} · {escape(precision)}</p>'
+        f'<p>{escape(host)}</p><p><code>{escape(config)}</code></p></section>'
+        '<section><h2>Monthly estimate from sidebar settings</h2>'
+        f'<p class="deployment-price"><strong>{escape(price)}</strong>{badge(provenance)}</p>'
+        f'<p>{escape(rental)}</p>'
+        f'<p class="muted">{units} rental {"unit" if units == 1 else "units"}'
+        f' · {escape(ops)}/month operations</p></section></div>'
+    )
+
+
+def _deployment_variant(row: dict) -> str:
+    figures = []
+    sources = []
+    for result in row["results"]:
+        figures.append(f'<li><span>{escape(result["figure"])}</span>{badge(result["badge"])}</li>')
+        source = escape(result["source"])
+        if result["source"].startswith(("https://", "http://")):
+            source = f'<a href="{source}" target="_blank" rel="noopener noreferrer">Published source</a>'
+        sources.append(
+            f'<div class="deployment-source"><dt>{escape(result["figure"])}</dt>'
+            f'<dd>{source}</dd>'
+            f'<dd>Retrieved <time>{escape(result["retrieved"])}</time></dd>'
+            f'<dd>{escape(result["conditions"])}</dd></div>'
+        )
+    evidence = (f'<ul class="deployment-results">{"".join(figures)}</ul>' if figures else
+                '<p class="deployment-results muted">Setup guidance only</p>')
+    lines = [("Variant ID", row["variant"]), *row["conditions"], ("Note", row["note"])]
+    details = "".join(f'<dt>{escape(k)}</dt><dd>{escape(v)}</dd>' for k, v in lines if v)
+    source_details = f'<dl class="deployment-sources">{"".join(sources)}</dl>' if sources else ""
+    return (
+        '<article class="deployment-variant">'
+        f'<h4>{escape(row["stack"])}</h4><p>{escape(row["quant"])}</p>'
+        f'<p class="muted">Hardware · {escape(row["hardware"])}</p>{evidence}'
+        '<details><summary>Setup and source details</summary>'
+        f'<div class="dx"><dl>{details}</dl></div>{source_details}</details></article>'
+    )
+
+
+def deployment_evidence(rows: list[dict]) -> str:
+    matched = [row for row in rows if row["match"] == "MATCH"]
+    references = [row for row in rows if row["match"] == "REFERENCE"]
+    parts = [
+        '<section class="deployment deployment-evidence"><h2>Published setups for this model</h2>',
+        '<p>Each result applies to the runtime, precision and hardware in its own card.</p>',
+    ]
+    if matched:
+        parts.append('<h3>POME workload matches</h3>'
+                     '<p>Benchmark conditions are close enough for POME’s workload.</p>'
+                     '<div class="deployment-grid">')
+        parts.extend(_deployment_variant(row) for row in matched)
+        parts.append('</div>')
+    else:
+        parts.append('<p class="deployment-no-match">No published benchmark matches the POME '
+                     'workload for this model.</p>')
+    if references:
+        parts.append('<h3>Reference setups</h3>'
+                     '<p>Setup guides, model weight sizes and benchmarks under other conditions.</p>'
+                     '<div class="deployment-grid">')
+        parts.extend(_deployment_variant(row) for row in references)
+        parts.append('</div>')
+    return "".join(parts) + "</section>"
 
 
 _CSS = """
@@ -498,7 +547,38 @@ table details[open] .dx{animation:open var(--dur) var(--ease-out)}
 .dx dl{margin:.4rem 0 .2rem;display:grid;grid-template-columns:auto 1fr;gap:.2rem .75rem;
   white-space:normal;max-width:64ch;font-size:.8125rem}
 .dx dt{color:var(--muted)}.dx dd{margin:0;overflow-wrap:anywhere}
-.vh{font-size:1rem;font-weight:600;margin:1.5rem 0 .5rem}
+.deployment{overflow-wrap:anywhere}
+.deployment h2{font-size:1.25rem;padding:0;margin:0 0 .35rem}
+.deployment h3{font-size:1rem;padding:0;margin:1.25rem 0 .25rem}
+.deployment h4{font-size:1rem;padding:0;margin:0 0 .2rem}
+.deployment p{margin:0 0 .25rem;font-size:.875rem}
+.deployment-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));
+  gap:1px;border:1px solid var(--line);border-radius:8px;background:var(--line);overflow:hidden}
+.deployment-summary>section{background:var(--panel);padding:1rem 1.15rem}
+.deployment-summary>section:last-child{background:color-mix(in srgb,var(--teal) 8%,var(--panel))}
+.deployment-summary h2{color:var(--muted);font-size:.875rem;font-weight:500;margin-bottom:.5rem}
+.deployment-summary .deployment-setup,.deployment-price strong{font-size:1.2rem;font-weight:600}
+.deployment-price{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.deployment-evidence{padding-top:.4rem}
+.deployment-evidence>p{color:var(--muted)}
+.deployment-evidence .deployment-no-match{margin:.75rem 0;padding:.55rem .75rem;
+  border-left:2px solid var(--grey);background:var(--bg)}
+.deployment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));
+  align-items:start;gap:.65rem;margin:.6rem 0}
+.deployment-variant{padding:.8rem .9rem;border:1px solid var(--line);border-radius:6px;
+  background:var(--panel)}
+.deployment-variant .deployment-results{list-style:none;padding:.55rem 0 0;margin:.55rem 0;
+  border-top:1px solid var(--line);font-size:.875rem}
+.deployment-results li{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.25rem}
+.deployment-variant details{color:var(--muted);font-size:.8125rem}
+.deployment-variant summary{cursor:pointer}
+.deployment-variant summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.deployment-variant .dx dl{grid-template-columns:minmax(0,auto) minmax(0,1fr)}
+.deployment-sources{margin:.55rem 0 0}
+.deployment-source{border-top:1px solid var(--line);margin-top:.4rem;padding-top:.4rem}
+.deployment-source dt{font-weight:500;color:var(--text)}
+.deployment-source dd{margin:0}
+.deployment-source dd:empty{display:none}
 .one{margin:.35rem 0;color:var(--muted);font-size:.875rem}
 /* Gossamer palette: teal = qualifies/selected, orange = fails/over budget,
    greys = structure. Coloured fills always carry a word, never colour alone. */
@@ -520,7 +600,6 @@ thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 .bdg-published{background:rgba(43,207,206,.22)!important}
 .wi{margin-top:1.25rem}
 .ans-wi{border-color:var(--grey);background:var(--bg)}
-.vh code{background:var(--tint);padding:.05rem .35rem;border-radius:3px}
 .mt-match{background:var(--tint);padding:.1rem .4rem;border-radius:3px}
 *{scrollbar-color:var(--line) transparent}
 [data-testid="stSidebar"] h2{border-bottom:2px solid var(--teal);padding-bottom:.3rem;

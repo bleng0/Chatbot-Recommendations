@@ -1,3 +1,7 @@
+from pathlib import Path
+
+from streamlit.testing.v1 import AppTest
+
 from pome.app.scenario import Scenario, decide
 from pome.app.views import (
     BADGE,
@@ -63,15 +67,35 @@ def test_variant_rows_carry_settings_figure_badge_and_match():
     rows = variant_rows(cfg)
     assert len(rows) == len(cfg.variants)
     first = rows[0]
-    assert first["match"] == "MATCH" and first["badge"] == "PUBLISHED"
-    assert "778 in / 73 out" in first["settings"] and "8x B300-SXM-270GB" in first["settings"]
-    assert first["figure"] == "173,950 tok/s (system)"
+    assert first["match"] == "MATCH" and first["results"][0]["badge"] == "PUBLISHED"
+    assert ("Token lengths", "778 in / 73 out") in first["conditions"]
+    assert first["hardware"] == "8 × B300-SXM-270GB"
+    assert first["results"][0]["figure"] == "173,950 tok/s (system)"
 
 
 def test_variant_without_a_figure_says_so():
     cfg = next(c for c in load_registry() if c.config_id == "gemma4-31b-vllm-in-bf16")
     row = next(r for r in variant_rows(cfg) if r["variant"] == "vllm-bf16-2gpu")
-    assert row["figure"] == "" and row["badge"] == "" and row["source"] == ""
+    assert row["hardware"] == "2 × A100/H100" and row["results"] == []
+
+
+def test_deployment_tab_keeps_scenario_cost_separate_from_published_setups():
+    home = Path(__file__).resolve().parents[1] / "pome/app/home.py"
+    app = AppTest.from_file(home, default_timeout=15).run()
+    tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
+    assert not app.exception
+    summary, evidence = [element.proto.body for element in tab.get("html")]
+    assert "₹3,48,328/month" in summary and "Ollama" not in summary
+    assert "₹3,48,328/month" not in evidence and "20 GB model weights" in evidence
+    assert "Setup guidance only" in evidence and "No published benchmark matches" in evidence
+
+    app.selectbox(key="deployment_model").select("llama31-8b-vllm-in-bf16").run()
+    tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
+    assert not app.exception
+    summary, evidence = [element.proto.body for element in tab.get("html")]
+    assert "llama31-8b-vllm-in-bf16" in summary
+    assert "POME workload matches" in evidence and "173,950 tok/s (system)" in evidence
+    assert "20 GB model weights" not in evidence
 
 
 def test_every_evidence_row_carries_a_provenance_badge(tmp_path):

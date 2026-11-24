@@ -18,7 +18,7 @@ _ROW_ORDER = {"eligible": 0, "eligible_modeled": 1, "rejected": 2, "unverified":
 _METRIC_LABEL = {
     "throughput_tok_s_system": "tok/s (system)", "output_tok_s_per_gpu": "tok/s per GPU",
     "output_tok_s_per_user": "tok/s per user", "decode_tok_s_single_stream":
-    "tok/s decode, 1 stream", "output_tok_s": "tok/s", "weights_memory_gb": "GB weights",
+    "tok/s decode, 1 stream", "output_tok_s": "tok/s", "weights_memory_gb": "GB model weights",
     "quality_recovery_pct": "% quality kept", "mmlu_hindi_recovery_pct": "% Hindi MMLU kept",
     "weights_memory_reduction_pct": "% less weight memory",
 }
@@ -90,34 +90,43 @@ def split_configs(registry: list[ConfigEntry]) -> tuple[list[str], list[str]]:
     return measured, [c.config_id for c in registry if c.config_id not in measured]
 
 
-def _figure(metrics: dict[str, EvidenceValue]) -> str:
-    out = []
-    for key, e in metrics.items():
-        num = f"{e.value:,}" if isinstance(e.value, int) else f"{e.value:,.4g}"
-        out.append(f"{num} {_METRIC_LABEL.get(key, f'{key} ({e.unit})')}")
-    return "; ".join(out)
-
-
-def variant_rows(cfg: ConfigEntry) -> list[dict[str, str]]:
-    """One row per published deployment setting of an open-weight model."""
+def variant_rows(cfg: ConfigEntry) -> list[dict]:
+    """One published setup per row, with each result's own provenance and conditions."""
     rows = []
     for v in cfg.variants:
-        gpu = f"{v.gpu_count}x {v.gpu}" if v.gpu_count else v.gpu
-        settings = [v.stack, v.quant, gpu, v.batch_concurrency, v.context]
+        conditions = []
+        if v.batch_concurrency != "not stated":
+            conditions.append(("Load / parallelism", v.batch_concurrency))
+        if v.context != "not stated":
+            conditions.append(("Context", v.context))
         if v.input_tokens or v.output_tokens:
-            settings.append(f"{v.input_tokens or 'n/s'} in / {v.output_tokens or 'n/s'} out")
-        first = next(iter(v.metrics.values()), None)
+            lengths = f"{v.input_tokens or 'n/s'} in / {v.output_tokens or 'n/s'} out"
+            conditions.append(("Token lengths", lengths))
+        results = []
+        for key, e in v.metrics.items():
+            value = f"{e.value:,}" if isinstance(e.value, int) else f"{e.value:,.4g}"
+            unit = _METRIC_LABEL.get(key, f"{key} ({e.unit})")
+            results.append({
+                "figure": f"{value} {unit}",
+                "badge": badge(e),
+                "source": e.source,
+                "retrieved": e.retrieved_at.date().isoformat(),
+                "conditions": ", ".join(f"{k}: {val}" for k, val in (e.measured_under or {}).items()),
+            })
         rows.append({
             "variant": v.variant_id,
-            "settings": " · ".join(s for s in settings if s and s != "not stated"),
-            "figure": _figure(v.metrics), "badge": badge(first) if first else "",
-            "match": v.match, "source": first.source if first else "",
-            "retrieved": first.retrieved_at.date().isoformat() if first else "",
-            "measured_under": first.measured_under if first else None, "note": v.note,
+            "stack": v.stack,
+            "quant": v.quant,
+            "hardware": f"{v.gpu_count} × {v.gpu}" if v.gpu_count else v.gpu,
+            "match": v.match,
+            "conditions": conditions,
+            "results": results,
+            "note": v.note,
         })
     return rows
 
 
+# Insertion order is the reading order within each group.
 _EVIDENCE_METRICS = {
     "Intent and out-of-scope detection": {
         "intent.banking77.macro_f1": ("BANKING77 intent macro-F1",
