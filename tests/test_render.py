@@ -1,4 +1,4 @@
-from pome.app.render import TOKENS, badge, cell, evidence_table, gate_table
+from pome.app.render import TOKENS, badge, cell, evidence_display, gate_table
 
 ROW = {"config": "a", "status": "rejected", "gates": {"G1": "fail", "G2": "pass"}}
 
@@ -17,7 +17,7 @@ def test_switched_off_gate_columns_are_dimmed_but_keep_their_value():
 def test_registry_and_source_text_is_escaped():
     r = {"config": "<x>", "metric": "m", "value": "1", "unit": "u", "provenance": "MEASURED",
          "source": "<script>alert(1)</script>", "formula": "", "retrieved": "2026-11-22"}
-    html = evidence_table([r])
+    html = evidence_display({"<x>": {"Other evidence": [r]}})
     assert "<script>" not in html and "&lt;script&gt;" in html and "&lt;x&gt;" in html
 
 

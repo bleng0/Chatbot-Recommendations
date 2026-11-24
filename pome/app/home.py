@@ -25,7 +25,7 @@ from pome.app.views import (
     baselines,
     cost_curves,
     display_gate,
-    evidence_rows,
+    evidence_sections,
     gate_info_rows,
     gate_matrix,
     indian,
@@ -244,7 +244,7 @@ with tab_cost:
             st.dataframe(pd.DataFrame({"tickets": points, **inr_curves}), hide_index=True)
 
 with tab_ev:
-    st.html(render.evidence_table([r for r in evidence_rows(snap) if r["config"] in ids]))
+    st.html(render.evidence_display(evidence_sections(snap, ids)))
 
 with tab_var:
     shown = [c for c in registry if c.config_id in ids and c.variants]

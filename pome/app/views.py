@@ -118,6 +118,46 @@ def variant_rows(cfg: ConfigEntry) -> list[dict[str, str]]:
     return rows
 
 
+_EVIDENCE_METRICS = {
+    "Intent and out-of-scope detection": {
+        "intent.banking77.macro_f1": ("BANKING77 intent macro-F1",
+            "Balances precision and recall for each banking intent, giving every intent equal weight."),
+        "oos.clinc150.recall": ("CLINC150 out-of-scope recall",
+            "Share of out-of-scope requests the model correctly flags."),
+        "oos.clinc150.precision": ("CLINC150 out-of-scope precision",
+            "Share of flagged requests that are actually out of scope."),
+        **{f"intent.massive.macro_f1.{code}": (f"MASSIVE intent macro-F1 ({language})",
+            (f"Balances precision and recall for each intent in {language}, giving every intent "
+            "equal weight.")) for code, language in (("en", "English"), ("hi", "Hindi"))},
+    },
+    "FAQ quality": {
+        f"faq.{metric}.{code}": (f"{label} ({language})", description)
+        for metric, label, description in (
+            ("correct", "FAQ answer correctness", "Share of answerable FAQ questions answered correctly."),
+            ("declined", "FAQ correct declines", "Share of unanswerable FAQ questions correctly declined."),
+        )
+        for code, language in (("en", "English"), ("hi", "Hindi"), ("hinglish", "Hinglish"))
+    },
+    "Serving performance": {
+        "serving.p95_ms": ("p95 latency at peak load",
+            "Time within which 95% of requests finish at peak load."),
+        "serving.sustainable_rps": ("Sustainable throughput",
+            "Requests per second the service can sustain within the latency and error limits."),
+        "serving.error_pct": ("Error rate after retries",
+            "Percentage of requests that still fail after retries at peak load."),
+    },
+    "Cost": {
+        "cost.monthly_usd": ("Monthly cost",
+            "Estimated monthly cost at the selected ticket volume and hosting settings."),
+    },
+    "Deployment": {
+        "deploy.region": ("Processing region", "Where requests can be processed."),
+        "deploy.retention_days": ("Data retention", "How long customer data can be retained."),
+        "deploy.commercial_use": ("Commercial use", "Whether the license or terms allow commercial use."),
+    },
+}
+
+
 def evidence_rows(snap: Snapshot) -> list[dict[str, str]]:
     out = []
     for key in sorted(snap.values):
@@ -130,6 +170,39 @@ def evidence_rows(snap: Snapshot) -> list[dict[str, str]]:
                     "provenance": badge(e), "source": e.source,
                     "formula": e.formula or "", "retrieved": e.retrieved_at.date().isoformat()})
     return out
+
+
+def evidence_sections(
+    snap: Snapshot, config_ids: set[str],
+) -> dict[str, dict[str, list[dict[str, str]]]]:
+    """Configuration sections containing only evidence present in the snapshot."""
+    by_config: dict[str, dict] = {cid: {} for cid in sorted(config_ids)}
+    for row in evidence_rows(snap):
+        if row["config"] in by_config:
+            by_config[row["config"]][row["metric"]] = row
+
+    sections: dict[str, dict[str, list[dict[str, str]]]] = {}
+    for cid, rows in by_config.items():
+        groups: dict[str, list[dict[str, str]]] = {}
+        for group, metrics in _EVIDENCE_METRICS.items():
+            for key, (label, description) in metrics.items():
+                if key not in rows:
+                    continue
+                row = rows.pop(key)
+                row.update(label=label, description=description)
+                value = snap.values[f"{cid}.{key}"].value
+                if row["unit"] == "ratio" and isinstance(value, int | float) and not isinstance(value, bool):
+                    row.update(value=f"{value:.2%}", unit="", raw=str(value))
+                elif row["unit"] == "bool" and isinstance(value, bool):
+                    row.update(value="Yes" if value else "No", unit="")
+                groups.setdefault(group, []).append(row)
+        if rows:
+            for key, row in rows.items():
+                recorded = snap.values[f"{cid}.{key}"]
+                row.update(value=str(recorded.value), unit=recorded.unit)
+            groups["Other evidence"] = list(rows.values())
+        sections[cid] = groups
+    return sections
 
 
 def cost_curves(snap: Snapshot, *, volume: int, points: list[int]) -> dict[str, list[float]]:

@@ -297,17 +297,38 @@ def config_table(rows: list[dict[str, str]]) -> str:
             f"<tbody>{body}</tbody></table></div>")
 
 
-def evidence_table(rows: list[dict[str, str]]) -> str:
-    body = "".join(
-        f'<tr><th scope="row" class="cid">{escape(r["config"])}</th>'
-        f'<td>{_details(r["metric"], [("Source", r["source"]), ("Formula", r["formula"])])}</td>'
-        f'<td class="num">{escape(r["value"])} <span class="unit">{escape(_UNIT.get(r["unit"], r["unit"]))}</span></td>'
-        f'<td>{badge(r["provenance"])}</td><td class="num">{escape(r["retrieved"])}</td></tr>'
-        for r in rows)
-    return (f'<div class="tw"><table class="ev"><thead><tr><th scope="col">Configuration</th>'
-            f'<th scope="col">Metric (open for source)</th><th scope="col">Value</th>'
-            f'<th scope="col">Provenance</th><th scope="col">Retrieved</th></tr></thead>'
-            f"<tbody>{body}</tbody></table></div>")
+def evidence_display(sections: dict) -> str:
+    parts = ['<div class="evidence"><h2>Configurations</h2>']
+    if not sections:
+        parts.append('<p class="one">No evidence recorded.</p>')
+    for cid, groups in sections.items():
+        count = sum(map(len, groups.values()))
+        noun = "metric" if count == 1 else "metrics"
+        parts.append(f'<details class="ev-config"><summary><code>{escape(cid)}</code>'
+                     f'<span class="muted">{count} {noun}</span></summary>')
+        if not groups:
+            parts.append('<p class="one">No evidence recorded.</p>')
+        for group, rows in groups.items():
+            parts.append(f'<h3>{escape(group)}</h3><dl class="ev-metrics">')
+            for row in rows:
+                label = escape(row.get("label", row["metric"]))
+                description = escape(row.get("description", ""))
+                unit = _UNIT.get(row["unit"], row["unit"]) if description else row["unit"]
+                value = escape(row["value"])
+                suffix = f'<span class="unit">{escape(unit)}</span>' if unit else ""
+                detail = _details("Source details", [
+                    ("Metric key", row["metric"]), ("Recorded ratio", row.get("raw", "")),
+                    ("Source", row["source"]), ("Retrieved", row["retrieved"]),
+                    ("Formula", row["formula"]),
+                ])
+                parts.append(f'<div class="ev-metric"><dt>{label}'
+                             f'<span class="ev-description">{description}</span></dt>'
+                             f'<dd class="ev-value"><span class="num">{value} {suffix}</span>'
+                             f'{badge(row["provenance"])}</dd><dd class="ev-details">{detail}</dd>'
+                             '</div>')
+            parts.append('</dl>')
+        parts.append('</details>')
+    return "".join(parts) + "</div>"
 
 
 def variant_table(rows: list[dict]) -> str:
@@ -452,6 +473,27 @@ table details summary::before{content:"";width:.4rem;height:.4rem;border-right:1
   transition:transform var(--dur) var(--ease-out)}
 table details[open] summary::before{transform:rotate(45deg)}
 table details[open] .dx{animation:open var(--dur) var(--ease-out)}
+.evidence h2{font-size:1.25rem;margin:.5rem 0 .75rem}
+.ev-config{border:1px solid var(--line);border-radius:6px;margin-bottom:.5rem;
+  background:var(--panel);padding:.65rem .85rem;overflow-wrap:anywhere}
+.ev-config>summary,.ev-details summary{cursor:pointer}
+.ev-config>summary code{margin-right:.75rem}
+.ev-config>summary span{font-size:.8125rem}
+.ev-config h3{font-size:1rem;margin:1rem 0 .25rem;padding-bottom:.25rem;
+  border-bottom:1px solid var(--line)}
+.ev-metrics{margin:0}
+.ev-metric{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);
+  gap:.2rem 1rem;padding:.55rem .25rem;border-bottom:1px solid var(--line)}
+.ev-metric:last-child{border-bottom:0}
+.ev-metric dt{font-weight:500}
+.ev-description{display:block;color:var(--muted);font-size:.875rem;font-weight:400}
+.ev-description:empty{display:none}
+.ev-metric dd{margin:0}
+.ev-value{display:flex;align-items:baseline;gap:.4rem;flex-wrap:wrap}
+.ev-details{grid-column:1/-1;color:var(--muted);font-size:.8125rem}
+@media (max-width:600px){
+  .ev-metric{grid-template-columns:minmax(0,1fr)}
+}
 @keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .dx dl{margin:.4rem 0 .2rem;display:grid;grid-template-columns:auto 1fr;gap:.2rem .75rem;
   white-space:normal;max-width:64ch;font-size:.8125rem}

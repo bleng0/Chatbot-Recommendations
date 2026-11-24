@@ -97,3 +97,27 @@ def test_cost_curves_api_is_linear_selfhost_flat(tmp_path):
     api, selfhost = curves["gem25f-api-global"], curves["gemma4-12b-vllm-in-bf16"]
     assert api[2] == 2 * api[1] and api[0] * 2 == api[1]
     assert len(set(selfhost)) == 1
+
+
+def test_evidence_sections_cover_current_snapshot_and_keep_unknown_metrics():
+    from pome.app.views import evidence_sections
+
+    snapshot, _ = decide(Scenario())
+    ids = {c.config_id for c in load_registry()}
+    sections = evidence_sections(snapshot, ids)
+    rows = [r for groups in sections.values() for group in groups.values() for r in group]
+    assert list(sections) == sorted(ids)
+    assert len(sections) == 20
+    assert len(rows) == len(snapshot.values) == 360
+    assert {f"{r['config']}.{r['metric']}" for r in rows} == set(snapshot.values)
+    assert {r["metric"] for r in rows if r["description"]} == {
+        key.split(".", 1)[1] for key in snapshot.values
+    }
+    assert len({r["metric"] for r in rows}) == 18
+    ratio = next(r for r in rows if "raw" in r)
+    assert ratio["value"] == f"{float(ratio['raw']):.2%}"
+
+    unknown = evidence_sections(
+        snap(override={"present.future.metric": ev(0.5)}), {"present", "empty"})
+    assert unknown["empty"] == {}
+    assert unknown["present"]["Other evidence"][0]["metric"] == "future.metric"
