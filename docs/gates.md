@@ -1,5 +1,7 @@
 # How POME models serving gates G8–G10
 
+For deployment screening gates, see [Compliance screening](compliance.md).
+
 POME uses estimates to fill missing serving metrics. It combines values saved from external sources, project assumptions, and a reference evaluation run. The examples below reproduce the values in the repository, so they use the stored inputs even if a provider has since changed its rates or benchmark results.
 
 | Gate | What a peak-load test would measure | Target |

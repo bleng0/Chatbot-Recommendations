@@ -74,9 +74,13 @@ The upper panel identifies the **parent configuration** and separately labels th
 | **G9 · Sustainable throughput** | Sustain **≥ 5 requests/second** while meeting G8 and G10. |
 | **G10 · Failure rate after retries** | **≤ 1%** of requests still fail after retries at the target load. |
 | **G11 · Monthly budget** | Estimated monthly cost is at or below the sidebar’s maximum. |
-| **G12 · Data residency** | Customer data is processed in India. Optional and inactive in this prototype profile. |
-| **G13 · Retention** | Provider retention **≤ 30 days**. Optional and inactive in this prototype profile. |
+| **G12 · Data residency** | Inference processing stays in India. Available as an opt-in filter. |
+| **G13 · Retention** | Provider prompt and response retention stays within the selected cap. Available as an opt-in filter. |
 | **G14 · Commercial use** | The documented model licence or provider terms permit commercial use. |
+| **G15–G19 · Governance** | Optional India-only storage, no training, no prompt logging, buyer-reviewed contract, and buyer-verified settings. |
+
+The [compliance decision record](compliance.md) describes how deployment-specific facts and
+unknowns feed these filters.
 
 G2 starts with all genuinely out-of-scope questions. G3 starts with all questions the model flagged. If it catches 17 of 20 out-of-scope questions and wrongly flags 5 legitimate ones, its recall is **85%**, while its precision is **17 ÷ 22 ≈ 77%**. It passes G2 and fails G3.
 

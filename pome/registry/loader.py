@@ -19,8 +19,8 @@ class Pricing(BaseModel):
 class Deployment(BaseModel):
     """None means the evidence is missing: shown as 'unverified', never assumed to pass."""
     model_config = ConfigDict(extra="forbid", frozen=True)
-    region_processing: EvidenceValue | None
-    retention_days: EvidenceValue | None
+    region_processing: EvidenceValue | None = None
+    retention_days: EvidenceValue | None = None
     commercial_use: EvidenceValue | None
 
 

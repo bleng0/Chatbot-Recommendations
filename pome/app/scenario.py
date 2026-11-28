@@ -12,13 +12,14 @@ from pathlib import Path
 from pome.cost.infrastructure import Estimate
 from pome.cost.model import selfhost_monthly_cost
 from pome.evidence.build import build_evidence, build_published_evidence
+from pome.evidence.compliance import ComplianceEvidence, build_compliance, load_catalog
 from pome.evidence.gapfill import build_gap_evidence
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot, build_snapshot
 from pome.profiles.loader import Gate, Profile, load_profile, what_if_profile
 from pome.registry.hosting import PRICE_DATE
 from pome.registry.loader import ConfigEntry, load_registry
-from pome.selection.engine import Decision, select
+from pome.selection.engine import COMPLIANCE_GATES, Decision, select
 
 EVIDENCE_AT = datetime(2026, 11, 22, 12, 0, tzinfo=UTC)
 RECORDS = Path(__file__).resolve().parents[2] / "runs" / "records"
@@ -72,6 +73,8 @@ class Scenario:
     ops_monthly_usd: float = 0.0
     max_spend_usd: float = 1500.0  # the user's monthly budget; it is the G11 threshold
     max_error_pct: float = 1.0  # the user's error-rate limit; it is the G10 threshold
+    compliance_gates: tuple[str, ...] = ()
+    retention_days: int = 30
 
 
 def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
@@ -87,11 +90,20 @@ def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
         retrieved_at=EVIDENCE_AT, formula=b.formula)
 
 
-def _profile(s: Scenario) -> Profile:
+def scenario_profile(s: Scenario) -> Profile:
     base = load_profile()
     gates = {**base.gates,
              "G11": base.gates["G11"].model_copy(update={"value": float(s.max_spend_usd)}),
              "G10": base.gates["G10"].model_copy(update={"value": float(s.max_error_pct)})}
+    if set(s.compliance_gates) - COMPLIANCE_GATES:
+        raise ValueError("unknown compliance gate")
+    if "G13" in s.compliance_gates and (
+        type(s.retention_days) is not int or s.retention_days < 0
+    ):
+        raise ValueError("retention cap must be a nonnegative number of whole days")
+    for gid in s.compliance_gates:
+        gates[gid] = (Gate(op="<=", value=s.retention_days, unit="days") if gid == "G13"
+                      else Gate(op="required", value=True, unit="bool"))
     return base.model_copy(update={"volume_tickets_per_month": s.volume, "gates": gates})
 
 
@@ -188,8 +200,9 @@ def _deployment_evidence(ev: dict[str, EvidenceValue], cfg: ConfigEntry,
 def decide(s: Scenario, records: Path = RECORDS,
            registry: list[ConfigEntry] | None = None, *,
            deployment_plans: dict[str, DeploymentPlan] | None = None,
-           scope: str = "all", inr_per_usd: float = 1.0) -> tuple[Snapshot, Decision]:
-    profile = _profile(s)
+           scope: str = "all", inr_per_usd: float = 1.0,
+           compliance: ComplianceEvidence | None = None) -> tuple[Snapshot, Decision]:
+    profile = scenario_profile(s)
     reg = registry if registry is not None else load_registry()
     ev = build_evidence(reg, records, profile, EVIDENCE_AT)
     ev |= build_published_evidence(reg, profile, EVIDENCE_AT)
@@ -200,6 +213,9 @@ def decide(s: Scenario, records: Path = RECORDS,
         [c for c in reg if deployment_plans is None or c.hosting_kind != "owned"],
         ev, profile, records)
     blocks = {}
+    if compliance is None:
+        compliance = build_compliance(reg, s.gpu, load_catalog(), None, EVIDENCE_AT.date())
+    ev.update(compliance.values)
     if deployment_plans is not None:
         for c in reg:
             if c.hosting_kind != "api" and (scope == "all" or c.hosting_kind == scope):
@@ -230,7 +246,7 @@ def decide_what_if(snap: Snapshot, s: Scenario, off: tuple[str, ...]) -> Decisio
     """The snapshot decide() built, judged against banking_mvp minus the gates in off.
     Exploration only: never the official recommendation. (Evidence depends only on volume,
     never on which gates are on, so the official snapshot is the right input.)"""
-    return select(snap, what_if_profile(_profile(s), off),
+    return select(snap, what_if_profile(scenario_profile(s), off),
                   deployment_blocks=_recorded_blocks(snap))
 
 
@@ -243,7 +259,7 @@ def decide_sliders(snap: Snapshot, s: Scenario, off: tuple[str, ...],
     """What-if with per-gate threshold sliders. Returns the what-if decision and, per config,
     the loosened gates it passes only because of the slider ("Not recommended").
     Never the official recommendation."""
-    base = _profile(s)
+    base = scenario_profile(s)
     moved = {g: v for g, v in thresholds.items() if v != base.gates[g].value}
     blocks = _recorded_blocks(snap)
     wi = select(snap, what_if_profile(base, off, moved), deployment_blocks=blocks)

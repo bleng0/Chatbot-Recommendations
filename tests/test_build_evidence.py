@@ -84,10 +84,10 @@ def test_no_cost_without_a_price_or_without_measured_tokens(tmp_path, reg):
     assert f"{FL}.cost.monthly_usd" not in ev  # priced but nothing measured
 
 
-def test_deployment_values_keep_registry_provenance(tmp_path, reg):
+def test_benchmark_builder_does_not_supply_compliance_facts(tmp_path, reg):
     ev = build_evidence(reg, tmp_path, load_profile(), NOW)
-    assert ev[f"{FL}.deploy.retention_days"].provenance == "vendor-doc"
-    assert ev[f"{VLLM}.deploy.retention_days"].provenance == "modeled"
+    assert f"{FL}.deploy.retention_days" not in ev
+    assert f"{VLLM}.deploy.retention_days" not in ev
     assert f"{FL}.deploy.region" not in ev and f"{FL}.deploy.commercial_use" not in ev
 
 

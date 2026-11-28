@@ -10,9 +10,11 @@ and lands in its own commit, never alongside the code that was failing.
 
 ## A. Decision gates (product bar, profile `banking_mvp`)
 
-Proof-of-concept scope (owner decision 2026-11-22): G12 (data processed in India) and G13
-(provider retention ≤ 30 days) are dropped from `banking_mvp`. The engine still supports them
-as optional gates for a stricter profile; the app reports region and retention as information.
+The standard profile keeps deployment compliance requirements off by default. Users can enable
+India-only processing (G12), provider retention (G13), India-only storage (G15), no training
+(G16), no prompt logging (G17), contract review (G18), and settings verification (G19).
+Enabled requirements block candidates with conflicting, missing, or conditional evidence.
+See [the compliance decision record](docs/compliance.md) for evidence and scope.
 
 A config is `eligible` only if every gate passes. A gate whose evidence is missing is
 `unverified`, never `pass`. Evidence marked `modeled` can pass a gate but the config is

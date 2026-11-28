@@ -192,11 +192,11 @@ def test_non_english_scoring_higher_is_not_a_gap():
 
 # ---- modeled evidence -------------------------------------------------------------------
 
-def test_modeled_deployment_evidence_is_eligible_but_flagged():
+def test_modeled_deployment_evidence_cannot_satisfy_governance():
     d = select(snap(passing("self", deploy_prov="modeled")), PROFILE)
     v = verdict(d, "self")
-    assert v.status == "eligible_modeled"
-    assert d.recommended == "self" and d.recommended_is_modeled
+    assert v.status == "unverified"
+    assert d.recommended is None
 
 
 def test_cost_projection_alone_does_not_flag_a_config_as_modeled():
@@ -206,9 +206,9 @@ def test_cost_projection_alone_does_not_flag_a_config_as_modeled():
 
 # ---- contract -----------------------------------------------------------------------------
 
-def test_required_keys_cover_all_fourteen_gates():
+def test_required_keys_cover_all_gate_checks():
     keys = required_keys("c")
-    assert len(keys) == 18 and all(k.startswith("c.") for k in keys)
+    assert len(keys) == 23 and all(k.startswith("c.") for k in keys)
 
 
 def test_verdicts_are_sorted_by_config_id():

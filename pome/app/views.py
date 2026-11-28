@@ -10,7 +10,7 @@ from pome.registry.hosting import HOSTING
 from pome.registry.loader import ConfigEntry
 from pome.selection.engine import CHECKS, Decision, check_observation
 
-BADGE = {"measured": "SELF-TESTED", "vendor-doc": "VENDOR-DOC", "modeled": "MODELED",
+BADGE = {"buyer-verified": "BUYER-VERIFIED", "measured": "SELF-TESTED", "vendor-doc": "VENDOR-DOC", "modeled": "MODELED",
          "study": "PUBLISHED"}
 _STATUS = {"eligible": "Eligible", "eligible_modeled": "Eligible (modeled inputs)",
            "rejected": "Rejected", "unverified": "Unverified (evidence missing)"}
@@ -43,7 +43,7 @@ def gate_matrix(d: Decision) -> list[dict]:
 
 GateValues = dict[str, list[tuple[str, str, tuple[str, ...]]]]
 _LANGUAGE_LABELS = {"en": "English", "hi": "Hindi", "hinglish": "Hinglish"}
-_GATE_VALUE_UNITS = {"ms": " ms", "req_per_s": " req/s"}
+_GATE_VALUE_UNITS = {"ms": " ms", "req_per_s": " req/s", "days": " days"}
 
 
 def gate_values(snap: Snapshot, config_id: str, gates: list[str]) -> GateValues:
@@ -202,6 +202,11 @@ _EVIDENCE_METRICS = {
     "Deployment": {
         "deploy.region": ("Processing region", "Where requests can be processed."),
         "deploy.retention_days": ("Data retention", "How long customer data can be retained."),
+        "deploy.storage_region": ("Storage region", "Documented location of persisted content."),
+        "deploy.no_training": ("Training excluded", "Whether prompts and responses are excluded from model training."),
+        "deploy.no_prompt_logging": ("Prompt logging excluded", "Whether provider logs exclude prompt and response content."),
+        "deploy.contract_verified": ("Contract reviewed", "Buyer reviewed the contract covering this deployment."),
+        "deploy.configuration_verified": ("Settings verified", "Buyer reviewed the settings for this deployment."),
         "deploy.commercial_use": ("Commercial use", "Whether the license or terms allow commercial use."),
     },
 }
@@ -346,6 +351,11 @@ GATE_INFO = {
     "G12": "Customer data is processed in India",
     "G13": "Provider deletes customer data quickly",
     "G14": "Licence allows commercial use",
+    "G15": "Stored prompt and response data stay in India",
+    "G16": "Provider excludes prompts and responses from training",
+    "G17": "Provider logs exclude prompt and response content",
+    "G18": "Buyer reviewed the contract for this deployment",
+    "G19": "Buyer verified the deployed settings",
 }
 # Gates on screen are renumbered without gaps; G10 and G11 are sidebar settings instead.
 SETTINGS = {"G10", "G11"}
@@ -353,6 +363,10 @@ SETTINGS = {"G10", "G11"}
 SHORT_NAME = {"G1": "Intent", "G2": "Out-of-scope", "G3": "No over-refusal", "G4": "FAQ accuracy",
               "G5": "FAQ decline", "G6": "Hindi gap", "G7": "Hinglish gap", "G8": "Latency",
               "G9": "Capacity", "G14": "Licence"}
+COMPLIANCE_SHORT = {
+    "G12": "Processing", "G13": "Retention", "G15": "Storage", "G16": "Training",
+    "G17": "Prompt logs", "G18": "Contract", "G19": "Settings",
+}
 SHOWN_GATES = ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G14"]
 _DISPLAY = {g: f"G{i}" for i, g in enumerate(SHOWN_GATES, 1)} | {
     "G10": "Error limit", "G11": "Budget"}
@@ -369,21 +383,29 @@ def relabel(text: str) -> str:
 
 
 _UNIT_TXT = {"ratio": "", "ratio_gap": " gap", "ms": " ms", "req_per_s": " req/s",
-             "percent": "%"}
+             "percent": "%", "days": " days"}
 
 
-def gate_info_rows(profile: Profile) -> list[dict[str, str]]:
+def gate_info_rows(profile: Profile, *, compliance_only: bool = False) -> list[dict[str, str]]:
     rows = []
     # G10 and G11 are sidebar settings (error limit, max spend), not gates on screen
-    for g in sorted(set(profile.gates) - SETTINGS, key=lambda x: int(x[1:])):
+    gates = set(COMPLIANCE_SHORT) if compliance_only else set(profile.gates) - SETTINGS
+    for g in sorted(gates, key=lambda x: int(x[1:])):
+        if g not in profile.gates:
+            rows.append({"gate": g, "checks": GATE_INFO[g], "pass_if": "Off"})
+            continue
         gate = profile.gates[g]
-        if gate.op == "required":
+        if g == "G12":
+            pass_if = f"Processing only in {profile.region}"
+        elif g == "G15":
+            pass_if = f"Storage only in {profile.region} or no persistence"
+        elif gate.op == "required":
             pass_if = "required"
         elif gate.unit == "usd_per_month":
             pass_if = f"{gate.op.replace('<=', '≤').replace('>=', '≥')} {inr(gate.value)} / month"
         else:
             num = f"{gate.value:,.0f}" if gate.unit == "ms" else (
-                f"{gate.value:g}" if gate.unit in ("req_per_s", "percent") else f"{gate.value:.2f}")
+                f"{gate.value:g}" if gate.unit in ("req_per_s", "percent", "days") else f"{gate.value:.2f}")
             if gate.unit == "percent":
                 num = f"{gate.value:.1f}"
             pass_if = (f"{gate.op.replace('<=', '≤').replace('>=', '≥')} {num}"
@@ -521,7 +543,8 @@ def baselines(d: Decision, snap: Snapshot, registry: list[ConfigEntry], *,
         else:
             delta_txt = (f"{inr(abs(delta))} {'more' if delta > 0 else 'less'} a month "
                          "than our pick")
-        fails = [f"{display_gate(g.gate)}{' ' + SHORT_NAME[g.gate] if g.gate in SHORT_NAME else ''}"
+        names = {**SHORT_NAME, **COMPLIANCE_SHORT, "G10": "Error rate", "G11": "Budget"}
+        fails = [f"{display_gate(g.gate)} {names.get(g.gate, '')}".strip()
                  + (" (no evidence)" if g.status == "unverified" else "")
                  for g in sorted(v.gates, key=lambda g: int(g.gate[1:]))
                  if g.status in ("fail", "unverified")]

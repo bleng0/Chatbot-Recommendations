@@ -1,0 +1,90 @@
+# Governance claims for the named configurations. Omitted facts require evidence.
+configurations:
+  gem35fl-api-global:
+    scope: Gemini 3.5 Flash-Lite on the global Gemini Developer API; billing tier unspecified.
+    reviewed_on: 2026-11-24
+    sources: ["https://ai.google.dev/gemini-api/terms", "https://ai.google.dev/gemini-api/docs/zdr"]
+    facts: {processing_region: Global}
+    notes: Paid and unpaid terms differ. Confirm the project billing tier, prompt logging, and the applicable retention ceiling.
+  gem25f-api-global:
+    scope: Gemini 2.5 Flash, paid Gemini Developer API, global.
+    reviewed_on: 2026-11-24
+    sources: ["https://ai.google.dev/gemini-api/terms", "https://ai.google.dev/gemini-api/docs/zdr"]
+    facts: {processing_region: Global, no_training: true, no_prompt_logging: false}
+    notes: Paid API prompts may be logged for abuse monitoring. The documented limited retention is not a ceiling for all selected features. Confirm account settings and the feature set.
+  gemma4-26b-api-global:
+    scope: Gemma 4 26B on unpaid Gemini Developer API quota for the India buyer.
+    reviewed_on: 2026-11-24
+    sources: ["https://ai.google.dev/gemini-api/terms"]
+    facts: {processing_region: Global, no_training: false}
+    notes: Applicable unpaid terms permit use of content for improvement. Confirm billing treatment and retention before evaluating a production deployment.
+  gpt54nano-api-global: &openai
+    scope: OpenAI Standard API, current global text inference deployment.
+    reviewed_on: 2026-11-24
+    sources: ["https://developers.openai.com/api/docs/guides/your-data", "https://openai.com/policies/data-processing-addendum/", "https://developers.openai.com/api/docs/guides/data-residency"]
+    facts: {processing_region: Global, no_training: true}
+    notes: Routine abuse logs may contain content for up to 30 days, with exceptions. ZDR requires organization or project approval, enablement and supported endpoint features. Confirm logging and retention for the account.
+  gpt54mini-api-global: *openai
+  haiku55-api-global: &anthropic
+    scope: Claude Standard API, current global Messages deployment.
+    reviewed_on: 2026-11-24
+    sources: ["https://platform.claude.com/docs/en/manage-claude/api-and-data-retention", "https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data", "https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training"]
+    facts: {processing_region: Global, no_training: true}
+    fact_sources: {no_training: "https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training"}
+    notes: The normal 30-day deletion interval has exceptions. Confirm organization approval, model and feature eligibility, and actual settings for ZDR.
+  sonnet55-api-global: *anthropic
+  gem35f-vertex-global:
+    scope: Vertex AI Standard pay-as-you-go on the global endpoint.
+    reviewed_on: 2026-11-24
+    sources: ["https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency", "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention"]
+    facts: {processing_region: Global, storage_region: Global, no_training: true}
+    fact_sources: {no_training: "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention"}
+    notes: The global endpoint offers no residency boundary. Contract, model and features affect logging and retention. Confirm the actual project configuration.
+  mistralsmall4-api-global:
+    scope: Mistral Small 4 on the standard API endpoint.
+    reviewed_on: 2026-11-24
+    sources: ["https://docs.mistral.ai/inference/regional-inference", "https://docs.mistral.ai/admin/monitor-comply/zero-data-retention", "https://legal.mistral.ai/terms/commercial-terms-of-service/"]
+    facts: {}
+    notes: Dedicated EU or US endpoints are different offerings. Verify the standard endpoint geography and tier. ZDR is conditional on approval and eligible stateless calls. Confirm training preferences and terms for the actual product.
+  sarvam105b-api-in: &sarvam
+    scope: Sarvam Model APIs for inference physically hosted by Sarvam in India.
+    reviewed_on: 2026-11-24
+    sources: ["https://www.sarvam.ai/token-factory", "https://docs.sarvam.ai/api/platform/data-retention", "https://docs.sarvam.ai/api/platform/faq"]
+    facts: {processing_region: India}
+    notes: The workspace defaults to indefinite retention until configured. ZDR is available on request. Confirm workspace retention, organization training preference, prompt logging, and storage location.
+  deepseekv41flash-sarvam-in: *sarvam
+  deepseekflash-api-global:
+    scope: Direct DeepSeek Open Platform API; excludes DeepSeek weights served by other hosts.
+    reviewed_on: 2026-11-24
+    sources: ["https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html", "https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html"]
+    facts: {}
+    notes: The linked privacy policy identifies China for covered personal data. Developer terms exclude downstream end-user handling from that policy, so the inference and storage boundaries and retention for customer content remain unverified.
+  gemma4-12b-ollama-local-q4:
+    scope: Local Ollama laptop used for the recorded quality run.
+    reviewed_on: 2026-11-24
+    sources: ["https://docs.ollama.com/faq"]
+    facts: {}
+    notes: The quality run does not establish a production location or absence of persistence, forwarding, logging, or backups. Review the actual operator configuration.
+gpu_options:
+  azure-ci-a100: &azure
+    scope: Proposed self-managed inference confined to the selected Azure Central India VM.
+    reviewed_on: 2026-11-24
+    sources: ["https://learn.microsoft.com/en-us/azure/reliability/regions-list"]
+    facts: {}
+    notes: The named VM region supports the proposed inference boundary. Confirm deployed routing, telemetry, storage and backups before production use.
+  azure-ci-h100: *azure
+  aws-mum-h100: &aws
+    scope: Proposed self-managed inference confined to the selected EC2 Mumbai VM.
+    reviewed_on: 2026-11-24
+    sources: ["https://docs.aws.amazon.com/global-infrastructure/latest/regions/regions-zones.html"]
+    facts: {}
+    notes: The named VM region supports the proposed inference boundary. Confirm deployed routing, telemetry, storage and backups before production use.
+  aws-mum-4l40s: *aws
+  e2e-a100: &e2e
+    scope: E2E GPU rental option without an identified instance location.
+    reviewed_on: 2026-11-24
+    sources: ["https://www.e2enetworks.com/gpu-cloud"]
+    facts: {}
+    notes: Confirm the exact instance region, tenancy, routing, telemetry, storage and backups. A GPU price listing does not establish these controls.
+  e2e-l40s: *e2e
+  e2e-h100: *e2e

@@ -93,48 +93,27 @@ price_proxy:               # same weights at another host's published price
 cost_proxy:                # copy the cost of the deployment it stands for
   gemma4-12b-ollama-local-q4: gemma4-12b-vllm-in-bf16
 
-# Deployment facts (EvidenceValue fields). Only used where the registry has none.
+# Commercial-use terms where the registry has none.
 deploy:
   gem35fl-api-global: &gemini_api
-    region:   {value: "global (any country with Google facilities)", unit: region, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/terms"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/terms"}
   gem25f-api-global: *gemini_api
-  gemma4-26b-api-global:
-    region:   {value: "global (any country with Google facilities)", unit: region, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/terms"}
-    retention_days: {value: 55, unit: days, provenance: vendor-doc, source: "https://ai.google.dev/gemini-api/docs/usage-policies"}
-  gemma4-12b-ollama-local-q4:
-    region:   {value: "local machine", unit: region, provenance: modeled, source: "owner laptop", formula: "region = where the process runs (quality-only config)"}
-    retention_days: {value: 0, unit: days, provenance: modeled, source: "Ollama runs locally", formula: "nothing leaves the machine; retention set by the operator"}
   gpt54nano-api-global: &openai
-    region:   {value: "global (regional processing is an opt-in endpoint)", unit: region, provenance: vendor-doc, source: "https://developers.openai.com/api/docs/models/gpt-5.4-nano"}
-    retention_days: {value: 30, unit: days, provenance: vendor-doc, source: "https://developers.openai.com/api/docs/guides/your-data"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://openai.com/policies/services-agreement/"}
   gpt54mini-api-global: *openai
   haiku55-api-global: &anthropic
-    region:   {value: "global (US-only inference is opt-in)", unit: region, provenance: vendor-doc, source: "https://platform.claude.com/docs/en/api/service-tiers"}
-    retention_days: {value: 30, unit: days, provenance: vendor-doc, source: "https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organizations-data"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://www.anthropic.com/legal/commercial-terms"}
   sonnet55-api-global: *anthropic
   gem35f-vertex-global:
-    region:   {value: "global endpoint (no residency guarantee)", unit: region, provenance: vendor-doc, source: "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency"}
-    retention_days: {value: 1, unit: days, provenance: vendor-doc, source: "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/data-governance"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://cloud.google.com/terms/service-terms"}
   mistralsmall4-api-global:
-    region:   {value: "EU (default endpoint)", unit: region, provenance: modeled, source: "https://docs.mistral.ai/admin/monitor-comply/privacy-data-controls", formula: "EU by default per third-party summaries; no Mistral page read states the processing region"}
-    retention_days: {value: 30, unit: days, provenance: vendor-doc, source: "https://help.mistral.ai/en/articles/156207-how-long-are-model-inputs-or-outputs-stored-on-mistral-ai-servers"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://legal.mistral.ai/terms"}
   sarvam105b-api-in: &sarvam
-    retention_days: {value: 0, unit: days, provenance: vendor-doc, source: "https://docs.sarvam.ai/api/platform/data-retention"}
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://www.sarvam.ai/terms-of-service"}
   deepseekv41flash-sarvam-in: *sarvam
   deepseekflash-api-global:
-    region:   {value: "China", unit: region, provenance: vendor-doc, source: "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html"}
-    retention_days: {value: "no maximum stated", unit: days, provenance: vendor-doc, source: "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html"}
-    commercial_use: {value: true, unit: bool, provenance: modeled, source: "pay-as-you-go business API", formula: "paid API offered for building products; terms of service not read"}
+    commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html"}
   llama31-8b-vllm-in-bf16:
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://www.llama.com/llama3_1/license/"}
   museglimmer30b-vllm-in-bf16:
     commercial_use: {value: true, unit: bool, provenance: vendor-doc, source: "https://huggingface.co/meta-models/Muse-Glimmer-30B"}
-selfhost_deploy:           # every self-hosted config, same design assumption as the 12B
-  region:   {value: "India", unit: region, provenance: modeled, source: "design assumption: operator deploys in an India-region GPU instance", formula: "region is a deployment choice, not validated by this project"}
-  retention_days: {value: 0, unit: days, provenance: modeled, source: "design assumption: vLLM configured not to persist prompts or outputs", formula: "retention is operator-enforced, not validated by this project"}

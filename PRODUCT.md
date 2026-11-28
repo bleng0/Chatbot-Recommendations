@@ -46,8 +46,9 @@ shown in INR at the RBI reference rate noted in the footer.
 
 ## Evidence on Hand
 runs/records (self-tested eval runs), pome/registry/configs.yaml (20 configs, published sources
-with retrieval dates), pome/registry/gapfill.yaml (proxies and formulas for every gate key that
-was not self-tested, so every gate has a value; none is labelled self-tested unless a run exists).
+with retrieval dates) and pome/registry/gapfill.yaml (proxy quality and serving inputs).
+Deployment compliance uses scoped public and buyer-reviewed evidence. Unknown governance facts
+remain unverified. See [Compliance screening](docs/compliance.md).
 No load tests were run: serving figures are published or modeled.
 
 ## Product Principles

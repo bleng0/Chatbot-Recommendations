@@ -1,5 +1,5 @@
 # Thresholds mirror CONSTRAINTS.md section A and are checked by tests/test_profile.py.
-# G12 (India region) and G13 (retention) dropped for the proof of concept, owner 2026-11-22.
+# G12, G13 and G15–G19 are opt-in deployment screening gates.
 name: banking_mvp
 tasks: [intent, oos, faq]
 languages: [en, hi, hinglish]

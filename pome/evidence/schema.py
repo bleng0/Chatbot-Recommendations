@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, field_validator, model_validator
 
-Provenance = Literal["measured", "vendor-doc", "modeled"]
+Provenance = Literal["measured", "vendor-doc", "modeled", "buyer-verified"]
 
 
 class EvidenceValue(BaseModel):

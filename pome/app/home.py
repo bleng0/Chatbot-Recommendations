@@ -2,9 +2,14 @@
 
 Replays recorded evaluation results (runs/records); never calls an LLM API.
 """
+from datetime import UTC, datetime
+from os import environ
+from pathlib import Path
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+from pydantic import ValidationError
 
 from pome.app import cost_charts, render
 from pome.app.hosting_controls import owned_plans, rented_plans
@@ -14,9 +19,11 @@ from pome.app.scenario import (
     Scenario,
     decide,
     decide_sliders,
+    scenario_profile,
 )
 from pome.app.sliders import current, gate_sliders, slider_specs
 from pome.app.views import (
+    COMPLIANCE_SHORT,
     SHORT_NAME,
     SHOWN_GATES,
     USD_INR,
@@ -37,6 +44,7 @@ from pome.app.views import (
     variant_rows,
     what_if_pick,
 )
+from pome.evidence.compliance import build_compliance, load_buyer_evidence, load_catalog
 from pome.profiles.loader import load_profile, what_if_profile
 from pome.registry.hosting import HOSTING, OWNED, RESPONSIBILITY, owned_config
 from pome.registry.loader import load_registry
@@ -49,7 +57,31 @@ profile = load_profile()
 catalog = load_registry() + [owned_config(preset) for preset in OWNED.values()]
 # G10 (error limit) and G11 (budget) are sidebar settings; the rest are gates, numbered 1-10
 GATES = SHOWN_GATES
+COMPLIANCE_CONTROLS = {
+    "G12": "Require India-only inference",
+    "G13": "Limit provider prompt retention",
+    "G15": "Require India-only prompt storage",
+    "G16": "Exclude provider model training",
+    "G17": "Exclude provider prompt logging",
+    "G18": "Require a buyer-reviewed contract",
+    "G19": "Require buyer-verified settings",
+}
+TABLE_GATES = [*GATES, *COMPLIANCE_CONTROLS]
 RATE = float(USD_INR.value)
+
+
+def reset_compliance() -> None:
+    key = "compliance"
+    for gate in COMPLIANCE_CONTROLS:
+        st.session_state[f"{key}_{gate}"] = False
+    st.session_state[f"{key}_retention"] = 30
+
+
+def apply_india_preset(key: str) -> None:
+    st.session_state[f"{key}_G12"] = True
+    st.session_state[f"{key}_G13"] = True
+    st.session_state[f"{key}_retention"] = 0
+
 
 with st.sidebar:
     st.header("Scenario")
@@ -83,14 +115,48 @@ with st.sidebar:
                 if not st.toggle(f"{row['gate']} · {SHORT_NAME[g]}", value=True, key=f"gate_{g}",
                                  help=f"{row['checks']}. Passes if {row['pass_if']}."))
 
+    with st.expander("Compliance filters"):
+        st.caption("Screen deployments against your requirements. Unverified evidence blocks "
+                   "eligibility when a filter is enabled.")
+        compliance_key = "compliance"
+        st.button("Require India + zero provider retention", on_click=apply_india_preset,
+                  args=(compliance_key,))
+        st.button("Reset compliance filters", on_click=reset_compliance)
+        compliance_gates = tuple(
+            gid for gid, label in COMPLIANCE_CONTROLS.items()
+            if st.checkbox(f"{gid} {label}", key=f"{compliance_key}_{gid}")
+        )
+        retention_days = st.number_input(
+            "Max provider retention (days)", min_value=0, value=30, step=1,
+            key=f"{compliance_key}_retention", disabled="G13" not in compliance_gates,
+            help="Maximum retention of prompts and responses. Zero requires documented no persistence.")
+
+
 default_usd = float(profile.gates["G11"].value)
 # the default INR budget maps back to the exact banking_mvp value, so the decision hash holds
 max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
                  else float(max_spend_inr) / RATE)
 scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
-                    max_spend_usd=max_spend_usd, max_error_pct=float(max_error))
+                    max_spend_usd=max_spend_usd, max_error_pct=float(max_error),
+                    compliance_gates=compliance_gates, retention_days=retention_days)
+buyer = None
+buyer_path = environ.get("POME_COMPLIANCE_EVIDENCE_FILE")
+if buyer_path:
+    try:
+        buyer = load_buyer_evidence(Path(buyer_path))
+    except ValidationError as error:
+        st.warning("The local buyer evidence file is invalid. Using public evidence only.")
+        problems = error.errors(include_input=False, include_context=False, include_url=False)
+        for problem in problems[:5]:
+            location = ".".join(map(str, problem["loc"])) or "file"
+            st.text(f"{location}: {problem['type']}")
+    except (OSError, UnicodeError):
+        st.warning("The local buyer evidence file could not be read as UTF-8. Using public "
+                   "evidence only. Check its path and permissions.")
+compliance = build_compliance(catalog, gpu, load_catalog(), buyer, datetime.now(UTC).date())
+effective_profile = scenario_profile(scenario)
 snap, d = decide(scenario, registry=catalog, deployment_plans=plans,
-                 scope=scope, inr_per_usd=RATE)
+                 scope=scope, inr_per_usd=RATE, compliance=compliance)
 registry = [c for c in catalog if scope == "all" or scope == c.hosting_kind]
 by_id = {c.config_id: c for c in registry}
 
@@ -134,7 +200,7 @@ if d.recommended:
         decision_hash=d.decision_hash[:12],
         source="From published vendor data" if d.recommended_is_modeled else ""))
 else:
-    st.html(render.answer(relabel(answer_line(d, snap, profile)), recommended=False))
+    st.html(render.answer(relabel(answer_line(d, snap, effective_profile)), recommended=False))
     st.html(render.stats([("configurations", len(d.verdicts)),
                           ("rejected", sum(v.status == "rejected" for v in d.verdicts))]))
     st.html(f'<p class="hash">decision {d.decision_hash[:12]}… · same inputs, same hash</p>')
@@ -171,7 +237,7 @@ with tab_gates:
         pick, flagged = what_if_pick(wi, not_rec)
         cost_of = {v.config_id: v.monthly_cost for v in wi.verdicts}
         if pick is None:
-            line = render.answer(relabel(answer_line(wi, snap, what_if_profile(profile, off, moved))),
+            line = render.answer(relabel(answer_line(wi, snap, what_if_profile(effective_profile, off, moved))),
                                  recommended=False, what_if=True)
         else:
             c = cost_of[pick]
@@ -196,7 +262,7 @@ with tab_gates:
         help="Show the evidence used by each gate, including modeled values and language gaps.",
     )
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
-    observations = ({row["config"]: gate_values(snap, row["config"], GATES) for row in rows}
+    observations = ({row["config"]: gate_values(snap, row["config"], TABLE_GATES) for row in rows}
                     if show_gate_values else None)
     wi_status = ({v.config_id: ("not_recommended" if v.config_id in not_rec else v.status)
                   for v in wi.verdicts} if wi else None)
@@ -220,13 +286,17 @@ with tab_gates:
     if order == "Descending":
         rows.reverse()
     gate_sliders(slider_specs(profile, GATES, display_gate, SHORT_NAME),
-                 render.gate_table(rows, GATES, set(off), wi_status, cost=cost_cells,
-                                   labels={g: display_gate(g) for g in GATES},
-                                   short=SHORT_NAME,
+                 render.gate_table(rows, TABLE_GATES,
+                                   set(off) | (COMPLIANCE_CONTROLS.keys() - set(compliance_gates)),
+                                   wi_status, cost=cost_cells,
+                                   labels={g: display_gate(g) for g in TABLE_GATES},
+                                   short={**SHORT_NAME, **COMPLIANCE_SHORT},
                                    error=error_cells, notes=nr_notes, values=observations,
                                    deployment={cid: (hosting_label(cid), readiness(cid))
                                                for cid in ids}),
                  render.css("light"), key="gate_sliders")
+    with st.expander("Compliance gate information"):
+        st.dataframe(gate_info_rows(effective_profile, compliance_only=True), hide_index=True)
     no_ev = sorted(ids - {r["config"] for r in rows})
     if no_ev:
         st.html(f'<p class="one">No evidence recorded yet: {", ".join(no_ev)}</p>')
@@ -319,6 +389,18 @@ with tab_ev:
         if group_ids:
             st.subheader(HOSTING[kind])
             st.html(render.evidence_display(evidence_sections(snap, group_ids)))
+
+    with st.expander("Compliance sources and verification gaps"):
+        st.caption("Public policies and buyer reviews support screening. See docs/compliance.md "
+                   "for applicability and evidence scope.")
+        for cid in sorted(ids):
+            st.markdown(f"**{cid}**")
+            public = compliance.public.get(cid)
+            if public is not None:
+                st.text(f"{public.scope} Reviewed {public.reviewed_on}. {public.notes}")
+                for index, source in enumerate(public.sources, 1):
+                    st.markdown(f"[Source {index}]({source})")
+            st.caption(compliance.buyer_status.get(cid, "No matching buyer review supplied."))
 
 with tab_var:
     selected = st.selectbox("Deployment to inspect", list(by_id), key="deployment_model",

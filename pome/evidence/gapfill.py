@@ -7,7 +7,7 @@ Rules, applied only to keys that are still missing after build_evidence:
 - error rate: 100 - published uptime SLA, else the 95% Wilson upper bound of POME's own
   error share on a hosted API;
 - self-host serving: memory-bandwidth decode model (docs/research/evidence-plan.md section B);
-- deployment: vendor docs, or the self-host design assumption.
+- commercial-use terms where the registry has none.
 """
 import json
 import math
@@ -26,8 +26,7 @@ QUALITY = ("intent.banking77.macro_f1", "oos.clinc150.recall", "oos.clinc150.pre
            "faq.correct.en", "faq.correct.hi", "faq.correct.hinglish", "faq.declined.en",
            "faq.declined.hi", "faq.declined.hinglish", "intent.massive.macro_f1.en",
            "intent.massive.macro_f1.hi")
-_DEPLOY = {"region": "deploy.region", "retention_days": "deploy.retention_days",
-           "commercial_use": "deploy.commercial_use"}
+
 
 
 def load_gapfill(path: Path = DEFAULT_PATH) -> dict:
@@ -164,11 +163,8 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
                 b.total, "usd_per_month", f"list price {src}; tokens assumed",
                 f"{b.formula} | tokens per ticket assumed: {in_tok} in, {out_tok} out", at))
 
-        # deployment
-        facts = dict(d["deploy"].get(cid, {}))
-        if cfg.hosting_kind == "rental":
-            facts = {**d["selfhost_deploy"], **facts}
-        for name, key in _DEPLOY.items():
-            if name in facts:
-                put(cid, key, lambda f=facts[name]: EvidenceValue(**f, retrieved_at=at))
+        licence = d["deploy"].get(cid, {}).get("commercial_use")
+        if licence is not None:
+            put(cid, "deploy.commercial_use",
+                lambda licence=licence: EvidenceValue(**licence, retrieved_at=at))
     return out

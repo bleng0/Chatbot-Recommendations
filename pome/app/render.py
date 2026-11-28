@@ -342,7 +342,8 @@ def evidence_display(sections: dict) -> str:
                 detail = _details("Source details", [
                     ("Metric key", row["metric"]), ("Recorded ratio", row.get("raw", "")),
                     ("Source", row["source"]), ("Retrieved", row["retrieved"]),
-                    ("Formula", row["formula"]), ("Test settings", row.get("conditions", "")),
+                    ("Scope" if row["metric"].startswith("deploy.") else "Formula", row["formula"]),
+                    ("Test settings", row.get("conditions", "")),
                 ])
                 parts.append(f'<div class="ev-metric"><dt>{label}'
                              f'<span class="ev-description">{description}</span></dt>'
@@ -535,7 +536,7 @@ td.set{white-space:normal;min-width:22rem;color:var(--muted)}
 .st-unverified,.st-not_tested{color:var(--muted)}
 .bdg{display:inline-block;white-space:nowrap;font:500 .6875rem/1 "Fira Sans",sans-serif;
   letter-spacing:.04em;padding:.22rem .45rem;color:var(--text);vertical-align:middle}
-.bdg-measured{border:1px solid var(--stroke);border-radius:3px}
+.bdg-buyer-verified,.bdg-measured{border:1px solid var(--stroke);border-radius:3px}
 .bdg-published{border-radius:999px;background:var(--tint);border:1px solid transparent}
 .bdg{transition:transform var(--dur-fast) var(--ease-out)}
 tr:hover .bdg{transform:translateY(-1px)}

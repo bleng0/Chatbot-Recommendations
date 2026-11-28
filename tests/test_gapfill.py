@@ -1,17 +1,17 @@
-"""Gap fill: every config gets a value for every gate key, never as `measured`."""
+"""Gap fill: every config gets evidence for the standard gates, never as `measured`."""
 from pome.app.scenario import Scenario, decide
 from pome.registry.loader import load_registry
-from pome.selection.engine import required_keys
+from pome.selection.engine import CHECKS, COMPLIANCE_GATES
 
 
 def _snap():
     return decide(Scenario())[0]
 
 
-def test_every_config_has_every_required_key():
+def test_every_config_has_every_standard_gate_key():
     snap = _snap()
-    missing = [k for c in load_registry() for k in required_keys(c.config_id)
-               if k not in snap.values]
+    keys = {k for check in CHECKS if check.gate not in COMPLIANCE_GATES for k in check.keys}
+    missing = [k for c in load_registry() for k in keys if f"{c.config_id}.{k}" not in snap.values]
     assert missing == []
 
 

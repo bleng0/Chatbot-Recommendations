@@ -32,14 +32,16 @@ from pome.profiles.loader import Profile, profile_hash
 LANGS_NON_EN = ("hi", "hinglish")
 QUALITY_GATES = {"G1", "G2", "G3", "G4", "G5", "G6", "G7"}
 # A profile may leave these out (banking_mvp does: proof of concept, owner decision 2026-11-22).
-OPTIONAL_GATES = {"G12", "G13"}
+COMPLIANCE_GATES = {"G12", "G13", "G15", "G16", "G17", "G18", "G19"}
+OPTIONAL_GATES = COMPLIANCE_GATES
 # Missing evidence for these is "not_tested" (free tier cannot load-test): shown, not blocking.
 # Present-but-failing or invalid serving evidence still rejects / leaves the config unverified.
 SERVING_GATES = {"G8", "G9", "G10"}
 GATE_OPS = {
     "G1": ">=", "G2": ">=", "G3": ">=", "G4": ">=", "G5": ">=", "G6": "<=", "G7": "<=",
     "G8": "<=", "G9": ">=", "G10": "<=", "G11": "<=", "G12": "required", "G13": "<=",
-    "G14": "required",
+    "G14": "required", "G15": "required", "G16": "required", "G17": "required",
+    "G18": "required", "G19": "required",
 }
 # metric suffix -> (expected unit, (min, max) allowed range for numbers)
 _RATIO = ("ratio", (0.0, 1.0))
@@ -49,13 +51,18 @@ METRIC_SPEC: dict[str, tuple[str, tuple[float, float] | None]] = {
     "serving.error_pct": ("percent", (0.0, 100.0)),
     "cost.monthly_usd": ("usd_per_month", (0.0, math.inf)),
     "deploy.retention_days": ("days", (0.0, math.inf)),
+    "deploy.storage_region": ("region", None),
+    "deploy.no_training": ("bool", None),
+    "deploy.no_prompt_logging": ("bool", None),
+    "deploy.contract_verified": ("bool", None),
+    "deploy.configuration_verified": ("bool", None),
     "deploy.region": ("region", None),
     "deploy.commercial_use": ("bool", None),
 }
 
 
 class InvalidProfile(ValueError):
-    """The profile does not define gates G1-G14 with the expected operators."""
+    """The profile has missing gates or unexpected operators."""
 
 
 @dataclass(frozen=True)
@@ -63,7 +70,7 @@ class _Check:
     gate: str
     label: str
     keys: tuple[str, ...]
-    kind: Literal["threshold", "gap", "region", "true"]
+    kind: Literal["threshold", "gap", "region", "storage", "true"]
 
 
 def _checks() -> tuple[_Check, ...]:
@@ -93,6 +100,11 @@ def _checks() -> tuple[_Check, ...]:
         _Check("G12", "in-region data processing", ("deploy.region",), "region"),
         _Check("G13", "provider retention", ("deploy.retention_days",), "threshold"),
         _Check("G14", "licence permits commercial use", ("deploy.commercial_use",), "true"),
+        _Check("G15", "approved storage location", ("deploy.storage_region",), "storage"),
+        _Check("G16", "no provider model training", ("deploy.no_training",), "true"),
+        _Check("G17", "no provider prompt logging", ("deploy.no_prompt_logging",), "true"),
+        _Check("G18", "buyer-reviewed contract", ("deploy.contract_verified",), "true"),
+        _Check("G19", "buyer-verified configuration", ("deploy.configuration_verified",), "true"),
     ]
     return tuple(c)
 
@@ -149,6 +161,12 @@ _OPS: dict[str, Callable[[float, float], bool]] = {
 
 def _invalid(metric: str, e: EvidenceValue) -> str | None:
     """Why this evidence value is unusable, or None if it is fine."""
+    if (metric in {"deploy.contract_verified", "deploy.configuration_verified"}
+            and e.provenance != "buyer-verified"):
+        return "buyer review required"
+    if (metric.startswith("deploy.") and metric != "deploy.commercial_use"
+            and (e.provenance not in {"vendor-doc", "buyer-verified"} or e.study)):
+        return "deployment-specific evidence required"
     unit, rng = METRIC_SPEC.get(metric, _RATIO)
     if e.unit != unit:
         return f"unit {e.unit!r}, expected {unit!r}"
@@ -180,6 +198,10 @@ def _validate_profile(profile: Profile) -> None:
             raise InvalidProfile(f"profile has no gate {gid}")
         if g.op != op:
             raise InvalidProfile(f"gate {gid} must use op {op!r}, got {g.op!r}")
+        if gid == "G13" and (
+            isinstance(g.value, bool) or not float(g.value).is_integer() or g.value < 0
+        ):
+            raise InvalidProfile("G13 retention cap must be a nonnegative number of whole days")
     extra = sorted(set(profile.gates) - set(GATE_OPS))
     if extra:
         raise InvalidProfile(f"profile has unknown gates {extra}")
@@ -202,9 +224,12 @@ def check_observation(ch: _Check, evidence: list[EvidenceValue]) -> float | str 
 def _evaluate_check(ch: _Check, ev: list[EvidenceValue], profile: Profile
                     ) -> tuple[bool, str, float | None]:
     """-> (passed, detail, quality slack or None). Evidence is already validated."""
-    if ch.kind == "region":
+    if ch.kind in {"region", "storage"}:
         val = ev[0].value
-        ok = val.strip().lower() == profile.region.strip().lower()
+        target = profile.region.strip()
+        if ch.kind == "storage" and val.strip().lower() == "no persistence":
+            return True, f"{ch.label}: documented no persistence", None
+        ok = val.strip().lower() == target.lower()
         return ok, f"{ch.label}: {val!r} vs required {profile.region.strip()!r}", None
     if ch.kind == "true":
         ok = ev[0].value is True
@@ -235,6 +260,14 @@ def _verdict(cid: str, values: dict[str, EvidenceValue], profile: Profile) -> Ve
         full = [f"{cid}.{k}" for k in ch.keys]
         absent = [k for k in full if k not in values]
         if absent:
+            if ch.gate == "G13" and profile.gates["G13"].value == 0:
+                logging = values.get(f"{cid}.deploy.no_prompt_logging")
+                if (logging is not None and logging.value is False
+                        and _invalid("deploy.no_prompt_logging", logging) is None):
+                    detail = "provider logs retain prompt content; zero retention required"
+                    slot["fail"].append(detail)
+                    fails.append(f"G13 {detail}")
+                    continue
             missing += [k for k in absent if k not in missing]
             if ch.gate in SERVING_GATES:
                 slot["not_tested"].append(f"{ch.gate} {ch.label}: not tested (no load test run)")

@@ -38,10 +38,9 @@ an answer box with the recommended model, hosting plan and monthly cost (INR), a
 Gates, Baselines, Cost, Evidence, Deployment variants and Configurations. Baselines shows
 what simpler benchmark and cost rules would pick instead, with the cost difference and the gates each one fails. The sidebar sets tickets per
 month, max monthly spend, max error rate, hosting scope and infrastructure costs. It has a Tweak mode toggle per
-gate. In the Gates tab a vertical slider above each gate column moves that gate's threshold for
-a what-if view; the recommendation never changes, and a config that passes only because a gate
-was loosened is marked "Not recommended". Rules: CONSTRAINTS.md section A; decisions: SPEC.md
-sections 15-16. See [Hosting distinction](docs/distinction.md) for cost and deployment details.
+gate. In the Gates tab, threshold sliders update a separate what-if result.
+Opt-in compliance filters apply to the main recommendation. See [Compliance screening](docs/compliance.md)
+for the India and zero-retention preset, evidence, and buyer review setup. See [Hosting distinction](docs/distinction.md) for cost and deployment details.
 
 In a container: `docker compose -f compose.pome.yaml up --build`, then open the same address
 (start Docker Desktop first on Windows; verified on the owner's PC 2026-11-23).

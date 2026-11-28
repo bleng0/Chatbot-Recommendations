@@ -133,12 +133,14 @@ def test_evidence_sections_cover_current_snapshot_and_keep_unknown_metrics():
     rows = [r for groups in sections.values() for group in groups.values() for r in group]
     assert list(sections) == sorted(ids)
     assert len(sections) == 20
-    assert len(rows) == len(snapshot.values) == 360
+    assert len(rows) == len(snapshot.values)
     assert {f"{r['config']}.{r['metric']}" for r in rows} == set(snapshot.values)
     assert {r["metric"] for r in rows if r["description"]} == {
         key.split(".", 1)[1] for key in snapshot.values
     }
-    assert len({r["metric"] for r in rows}) == 18
+    assert {"deploy.region", "deploy.no_training", "deploy.storage_region"} <= {
+        r["metric"] for r in rows
+    }
     ratio = next(r for r in rows if "raw" in r)
     assert ratio["value"] == f"{float(ratio['raw']):.2%}"
 

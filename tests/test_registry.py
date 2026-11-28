@@ -51,10 +51,9 @@ def test_gemma_api_has_no_paid_price(configs):
     assert p.input_per_1m is None and p.output_per_1m is None
 
 
-def test_hosted_gemini_retention_is_55_days_from_usage_policy(configs):
+def test_hosted_gemini_has_no_registry_retention_ceiling(configs):
     r = configs["gem35fl-api-global"].deployment.retention_days
-    assert r.value == 55 and r.provenance == "vendor-doc"
-    assert r.source == "https://ai.google.dev/gemini-api/docs/usage-policies"
+    assert r is None
 
 
 def test_missing_region_evidence_is_unverified_not_assumed(configs):
@@ -72,10 +71,10 @@ def test_registry_never_claims_measured(configs):
             assert ev is None or ev.provenance in ("vendor-doc", "modeled")
 
 
-def test_selfhost_deployment_values_are_modeled_or_vendor_doc(configs):
+def test_selfhost_deployment_keeps_the_licence_without_governance_assumptions(configs):
     d = configs["gemma4-12b-vllm-in-bf16"].deployment
-    assert d.region_processing.provenance == "modeled"
-    assert d.retention_days.provenance == "modeled"
+    assert d.region_processing is None
+    assert d.retention_days is None
     assert d.commercial_use.provenance == "vendor-doc"
     assert d.commercial_use.source.startswith("https://opensource.googleblog.com/")
 

@@ -24,8 +24,7 @@ MIN_ITEMS = 15
 # assumption (600 in / 200 out), not a measurement.
 ASSUMED_IN_TOKENS, ASSUMED_OUT_TOKENS = 600, 200
 LANGS = ("en", "hi", "hinglish")
-_DEPLOY = {"region_processing": "deploy.region", "retention_days": "deploy.retention_days",
-           "commercial_use": "deploy.commercial_use"}
+_DEPLOY = {"commercial_use": "deploy.commercial_use"}
 
 
 def _load(path: Path) -> list[dict]:
