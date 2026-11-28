@@ -27,7 +27,7 @@ def rented_plans(registry: list[ConfigEntry], gpu: str, nodes: int, ops: float,
     priced_on = PRICE_DATE if opt.india_inr is not None else opt.price.retrieved_at.date().isoformat()
     st.caption(f"Price reference: {priced_on} · check taxes and region.")
     st.markdown(f"[Rate source]({source.split(' (filter:')[0]})")
-    hours = st.number_input("Billed hours per month", 1, 744, 730)
+    hours = st.number_input("Billed hours per month", 1, 744, 730, key="rental_hours")
     storage = st.number_input("Storage and backup, ₹/month", min_value=0, value=0,
                               key="rental_storage")
     network = st.number_input("Network and egress, ₹/month", min_value=0, value=0,

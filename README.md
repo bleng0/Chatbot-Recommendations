@@ -37,8 +37,8 @@ What the page shows (2026-11-23): the question "Which model and hosting plan sho
 an answer box with the recommended model, hosting plan and monthly cost (INR), and tabs for
 Gates, Baselines, Cost, Evidence, Deployment variants and Configurations. Baselines shows
 what simpler benchmark and cost rules would pick instead, with the cost difference and the gates each one fails. The sidebar sets tickets per
-month, max monthly spend, max error rate, hosting scope and infrastructure costs. It has a Tweak mode toggle per
-gate. In the Gates tab, threshold sliders update a separate what-if result.
+month, max monthly spend, max error rate, hosting scope and infrastructure costs. Gate switches and threshold sliders update eligibility and
+the recommendation as you edit them. Use **Reset to recommended** in the sidebar to restore all app settings.
 Opt-in compliance filters apply to the main recommendation. See [Compliance screening](docs/compliance.md)
 for the India and zero-retention preset, evidence, and buyer review setup. See [Hosting distinction](docs/distinction.md) for cost and deployment details.
 

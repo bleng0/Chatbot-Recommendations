@@ -27,10 +27,8 @@ shown in INR at the RBI reference rate noted in the footer.
 
 ## Capabilities and Constraints
 - Replay only: the UI never calls an LLM API, even when a key is present (owner, 2026-11-23).
-- Tweak mode (owner, 2026-11-23): reviewers switch gates off in the sidebar, or move a gate's
-  threshold with the vertical slider above its column in the Gates table, to see a what-if
-  result. The recommendation always uses banking_mvp unchanged and stays on top. A config that
-  passes only because a threshold was loosened is labelled "Not recommended".
+- Gate switches in the sidebar and threshold sliders in the Gates table update eligibility
+  and the recommendation. Reset to recommended restores all app settings.
 - Wording (owner, 2026-11-23): the screen says "recommended", never "official"; "self-tested",
   never the project name as tester; gates are numbered G1-G10 on screen with a short name each
   (Intent, Out-of-scope, No over-refusal, FAQ accuracy, FAQ decline, Hindi gap, Hinglish gap,

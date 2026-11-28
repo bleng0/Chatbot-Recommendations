@@ -65,13 +65,14 @@ def test_motion_loader_points_at_self_hosted_files_that_exist():
 
 
 def test_status_cells_are_word_chips_coloured_by_status():
-    html = gate_table([ROW], ["G1", "G2"], set(), {"a": "eligible_modeled"})
+    eligible = {**ROW, "config": "b", "status": "eligible_modeled"}
+    html = gate_table([ROW, eligible], ["G1", "G2"], set())
     assert '<span class="chip chip-rejected">Rejected</span>' in html
     assert '<span class="chip chip-eligible_modeled">Eligible (modeled)</span>' in html
 
 
 def test_gate_table_can_show_a_monthly_cost_column_with_over_budget_marked():
-    html = gate_table([ROW], ["G1", "G2"], set(), None,
+    html = gate_table([ROW], ["G1", "G2"], set(),
                       cost={"a": ("₹1,500", True)})
     assert ('<td class="num r over" title="Over the monthly budget">'
             '<span class="ic ic-warn" aria-hidden="true"></span>₹1,500'
@@ -80,7 +81,7 @@ def test_gate_table_can_show_a_monthly_cost_column_with_over_budget_marked():
 
 
 def test_gate_table_shows_hidden_setting_failures_in_red_columns():
-    html = gate_table([ROW], ["G1", "G2"], set(), None,
+    html = gate_table([ROW], ["G1", "G2"], set(),
                       cost={"a": ("₹1", False)}, error={"a": ("3.43%", True)})
     assert "Error rate" in html
     assert ('<td class="num r over" title="Over the error limit">'

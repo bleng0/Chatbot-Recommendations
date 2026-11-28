@@ -25,7 +25,7 @@ _PATHS = {
     "warn": '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 '
             '3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
 }
-_SHORT = {"not_recommended": "Not recommended", "eligible": "Eligible", "eligible_modeled": "Eligible (modeled)",
+_SHORT = {"eligible": "Eligible", "eligible_modeled": "Eligible (modeled)",
           "rejected": "Rejected", "unverified": "Unverified"}
 _UNIT = {"usd_per_month": "USD/month", "inr_per_month": "/month", "inr_per_hour": "/hour",
          "inr_per_1m_tokens": "/1M tokens", "req_per_s": "req/s", "tok_per_s": "tok/s",
@@ -86,9 +86,8 @@ def stats(items: list[tuple[str, int]]) -> str:
     return f'<p class="tally">{parts}</p>'
 
 
-def answer(text: str, *, recommended: bool, what_if: bool = False) -> str:
-    # coral outline marks only the official recommendation, never a what-if
-    cls = "ans" + (" ans-rec" if recommended and not what_if else "") + (" ans-wi" if what_if else "")
+def answer(text: str, *, recommended: bool) -> str:
+    cls = "ans" + (" ans-rec" if recommended else "")
     # keep a comparison such as "0.75 < 0.80" on one line
     text = escape(text).replace(" &lt; ", "\u00a0&lt;\u00a0").replace(" &gt; ", "\u00a0&gt;\u00a0")
     text = text.replace(" (cost MODELED)", ' <span class="bdg bdg-modeled">MODELED</span>')
@@ -112,30 +111,26 @@ def _gate_observations(lines: list[tuple[str, str, tuple[str, ...]]]) -> str:
 
 
 def gate_table(rows: list[dict], gates: list[str], off: set[str],
-               what_if: dict[str, str] | None = None,
+               *,
                cost: dict[str, tuple[str, bool]] | None = None,
                labels: dict[str, str] | None = None,
                error: dict[str, tuple[str, bool]] | None = None,
-               notes: dict[str, str] | None = None,
-               short: dict[str, str] | None = None, *,
+               short: dict[str, str] | None = None,
                values: dict[str, GateValues] | None = None,
                deployment: dict[str, tuple[str, str]] | None = None) -> str:
     """Gate matrix with optional evidence lines below the check statuses."""
-    labels, notes, short = labels or {}, notes or {}, short or {}
+    labels, short = labels or {}, short or {}
     head = "".join(
         f'<th scope="col" class="g{" off" if g in off else ""}" data-gate="{escape(g)}">'
         f'{escape(labels.get(g, g))}<span class="gs">{escape(short.get(g, ""))}</span>'
         f'{"<small>off</small>" if g in off else ""}</th>' for g in gates)
     cols = ['<col class="c-id">', '<col class="c-st">']
-    wi_head = ""
-    if what_if is not None:
-        wi_head += '<th scope="col">What-if</th>'
-        cols.append('<col class="c-wi">')
+    metric_head = ""
     if cost is not None:
-        wi_head += '<th scope="col" class="r">Monthly cost</th>'
+        metric_head += '<th scope="col" class="r">Monthly cost</th>'
         cols.append('<col class="c-cost">')
     if error is not None:
-        wi_head += '<th scope="col" class="r">Error rate</th>'
+        metric_head += '<th scope="col" class="r">Error rate</th>'
         cols.append('<col class="c-err">')
     cols += ['<col class="c-g">'] * len(gates)
 
@@ -153,26 +148,23 @@ def gate_table(rows: list[dict], gates: list[str], off: set[str],
             status = cell(r["gates"][g]) if g in r["gates"] else ""
             details = _gate_observations(observed.get(g, []))
             cells.append(f'<td class="g{" off" if g in off else ""}">{status + details or "—"}</td>')
-        note = (f'<small class="nr">{escape(notes[r["config"]])}</small>'
-                if r["config"] in notes else "")
-        wi = (f'<td class="stat">{_chip(what_if[r["config"]])}{note}</td>'
-              if what_if is not None else "")
+        metrics = ""
         if cost is not None:
-            wi += _num(*cost.get(r["config"], ("—", False)), "Over the monthly budget")
+            metrics += _num(*cost.get(r["config"], ("—", False)), "Over the monthly budget")
         if error is not None:
-            wi += _num(*error.get(r["config"], ("—", False)), "Over the error limit")
+            metrics += _num(*error.get(r["config"], ("—", False)), "Over the error limit")
         meta = ""
         if deployment and r["config"] in deployment:
             kind, readiness = deployment[r["config"]]
             meta = f'<small class="gate-host">{escape(kind)} · {escape(readiness)}</small>'
         body.append(f'<tr><th scope="row" class="cid" title="{escape(r["config"])}">'
                     f'{escape(r["config"])}{meta}</th>'
-                    f'<td class="stat">{_chip(r["status"])}</td>{wi}{"".join(cells)}</tr>')
+                    f'<td class="stat">{_chip(r["status"])}</td>{metrics}{"".join(cells)}</tr>')
     extra_class = " gm-values" if values is not None else ""
     return (f'<div class="tw"><table class="gm fx{extra_class}"><caption class="sr">Gate results per '
             f'configuration</caption><colgroup>{"".join(cols)}</colgroup><thead><tr>'
-            f'<th scope="col">Configuration</th><th scope="col">Recommended status</th>'
-            f'{wi_head}{head}</tr></thead><tbody>{"".join(body)}</tbody></table></div>')
+            f'<th scope="col">Configuration</th><th scope="col">Eligibility</th>'
+            f'{metric_head}{head}</tr></thead><tbody>{"".join(body)}</tbody></table></div>')
 
 
 def answer_card(*, model: str, config: str, host: str, region: str, cost: str, modeled: bool,
@@ -475,7 +467,7 @@ h1.q .k::after{content:"";position:absolute;left:0;right:0;bottom:-.08em;height:
 @media (max-width:1000px){.bl{grid-template-columns:1fr 1fr}.bl-c:nth-child(3){border-left:0}.bl-c{border-top:1px solid #E6E6E8}}
 @media (max-width:560px){.bl{grid-template-columns:1fr}.bl-c{border-left:0}}
 .gm.fx{table-layout:fixed;width:max-content;min-width:100%}
-.gm.fx col.c-id{width:12.75rem}.gm.fx col.c-st{width:8.25rem}.gm.fx col.c-wi{width:8.75rem}
+.gm.fx col.c-id{width:12.75rem}.gm.fx col.c-st{width:8.25rem}
 .gm.fx col.c-cost{width:7rem}.gm.fx col.c-err{width:5rem}.gm.fx col.c-g{width:3.25rem}
 .gm.fx th,.gm.fx td{padding:.45rem .5rem}
 .gm.fx .cid{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -497,9 +489,6 @@ code,.num,.cid,.hash{font-family:"Fira Code",ui-monospace,monospace;
 .ans{font-size:1.375rem;line-height:1.35;font-weight:500;margin:0;padding:.875rem 1.125rem;
   border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:72ch;}
 .ans-rec{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 7%,var(--panel))}
-.ans-wi{font-size:1.125rem;border-style:dashed}
-.wi h3{font-size:1rem;font-weight:600;margin:1.75rem 0 .5rem}
-.wi h3 .muted{font-weight:400}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
 table{border-collapse:collapse;width:100%;font-size:.875rem}
 th,td{padding:.45rem .6rem;text-align:left;border-bottom:1px solid var(--line);
@@ -620,8 +609,6 @@ table details[open] .dx{animation:open var(--dur) var(--ease-out)}
   color:var(--accent)}
 .chip-eligible_modeled{border-style:dashed}
 .chip-rejected{color:var(--text)}
-.chip-not_recommended{color:var(--coraltext);border-color:var(--coral);background:#fff}
-.nr{color:var(--coraltext)}small.nr{display:block;font-size:.75rem;margin-top:.2rem}
 thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 .gm tbody tr:nth-child(even)>*{background:color-mix(in srgb,var(--bg) 60%,var(--panel))}
 .gm tbody tr:hover>*{background:var(--tint)}
@@ -630,8 +617,6 @@ thead th{background:var(--bg)!important;border-bottom:2px solid var(--line)}
 .bdg-vendor-doc{border-color:var(--grey)!important}
 .bdg-modeled{border-color:var(--grey)!important}
 .bdg-published{background:rgba(43,207,206,.22)!important}
-.wi{margin-top:1.25rem}
-.ans-wi{border-color:var(--grey);background:var(--bg)}
 .mt-match{background:var(--tint);padding:.1rem .4rem;border-radius:3px}
 *{scrollbar-color:var(--line) transparent}
 [data-testid="stSidebar"] h2{border-bottom:2px solid var(--teal);padding-bottom:.3rem;

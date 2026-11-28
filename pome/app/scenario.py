@@ -5,7 +5,7 @@ inputs always give the same decision hash. GPU prices come from docs/research/ev
 """
 import json
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -75,6 +75,8 @@ class Scenario:
     max_error_pct: float = 1.0  # the user's error-rate limit; it is the G10 threshold
     compliance_gates: tuple[str, ...] = ()
     retention_days: int = 30
+    disabled_gates: tuple[str, ...] = ()
+    gate_thresholds: dict[str, float] = field(default_factory=dict)
 
 
 def _selfhost_cost(s: Scenario, profile: Profile) -> EvidenceValue:
@@ -104,7 +106,10 @@ def scenario_profile(s: Scenario) -> Profile:
     for gid in s.compliance_gates:
         gates[gid] = (Gate(op="<=", value=s.retention_days, unit="days") if gid == "G13"
                       else Gate(op="required", value=True, unit="bool"))
-    return base.model_copy(update={"volume_tickets_per_month": s.volume, "gates": gates})
+    profile = base.model_copy(update={"volume_tickets_per_month": s.volume, "gates": gates})
+    if s.disabled_gates or s.gate_thresholds:
+        return what_if_profile(profile, s.disabled_gates, s.gate_thresholds)
+    return profile
 
 
 @dataclass(frozen=True)
@@ -243,9 +248,7 @@ def _recorded_blocks(snap: Snapshot) -> dict[str, str]:
 
 
 def decide_what_if(snap: Snapshot, s: Scenario, off: tuple[str, ...]) -> Decision:
-    """The snapshot decide() built, judged against banking_mvp minus the gates in off.
-    Exploration only: never the official recommendation. (Evidence depends only on volume,
-    never on which gates are on, so the official snapshot is the right input.)"""
+    """Rescore an existing snapshot with additional gates disabled."""
     return select(snap, what_if_profile(scenario_profile(s), off),
                   deployment_blocks=_recorded_blocks(snap))
 

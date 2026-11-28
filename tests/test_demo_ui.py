@@ -52,8 +52,9 @@ def test_answer_text_turns_cost_modeled_into_a_badge():
     assert "(cost MODELED)" not in html and 'class="bdg' in html
 
 
-def test_gate_table_says_recommended_not_official_and_shows_short_names():
+def test_gate_table_shows_one_eligibility_column_and_short_names():
     html = render.gate_table([{"config": "a", "status": "rejected", "gates": {"G8": "pass"}}],
-                             ["G8"], set(), {"a": "eligible"}, labels={"G8": "G8"},
+                             ["G8"], set(), labels={"G8": "G8"},
                              short={"G8": "Latency"})
-    assert "official" not in html.lower() and "Recommended status" in html and "Latency" in html
+    assert html.count("Eligibility") == 1 and "Latency" in html
+    assert "What-if" not in html

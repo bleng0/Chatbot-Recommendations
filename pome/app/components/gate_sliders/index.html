@@ -17,9 +17,7 @@ tr.sl th.lab{padding-left:.75rem;vertical-align:middle;text-align:left}
 .key i{display:inline-block;vertical-align:middle;margin-right:.3rem}
 .key .k1{width:12px;height:2px;background:#1C1D1F}
 .key .k2{width:12px;height:6px;border-radius:2px;background:rgba(236,77,37,.10);outline:1px solid rgba(236,77,37,.45)}
-.btn{font:inherit;font-size:.75rem;padding:.35rem .7rem;min-height:32px;border:1px solid #CDCDCF;border-radius:6px;background:#fff;color:#1C1D1F;cursor:pointer;transition:border-color 150ms}
-.btn:hover{border-color:#0B7372}.btn[disabled]{opacity:.45;cursor:default}
-.btn:focus-visible,.trk:focus-visible{outline:2px solid #0B7372;outline-offset:3px}
+.trk:focus-visible{outline:2px solid #0B7372;outline-offset:3px}
 .vs{display:flex;flex-direction:column;align-items:center;gap:.3rem}
 .val{font:500 .6875rem/1 "Fira Code",monospace;padding:.25rem .3rem;border-radius:4px;min-width:2.75rem;white-space:nowrap;text-align:center;border:1px solid transparent}
 .vs.loose .val{color:#C23A17;background:rgba(236,77,37,.10);border-color:rgba(236,77,37,.35)}
@@ -79,17 +77,15 @@ function render(){
   const head=root.querySelector("thead tr");if(!head)return height();
   const row=document.createElement("tr");row.className="sl";
   const ths=[...head.children],lead=ths.filter(t=>!t.dataset.gate).length;
-  const moved=specs.some(s=>cur[s.id]!==s.official);
   const lab=document.createElement("th");lab.className="lab";lab.colSpan=lead;
-  lab.innerHTML=`<span class="lt">Thresholds</span><span class="ls">Slide any gate to explore. The recommendation above never changes.</span><span class="key"><span><i class="k1"></i>recommended</span><span><i class="k2"></i>looser side</span></span>`;
-  const b=document.createElement("button");b.className="btn";b.type="button";b.textContent="Reset to recommended";b.disabled=!moved;
-  b.onclick=()=>{for(const s of specs)cur[s.id]=s.official;render();emit()};lab.appendChild(b);row.appendChild(lab);
+  lab.innerHTML=`<span class="lt">Thresholds</span><span class="ls">Adjust a threshold to update eligibility and the recommendation.</span><span class="key"><span><i class="k1"></i>recommended</span><span><i class="k2"></i>looser side</span></span>`;
+  row.appendChild(lab);
   for(const th of ths.slice(lead)){const c=document.createElement("th");const g=th.dataset.gate;
     if(th.classList.contains("off"))c.innerHTML='<span class="yn">off</span>';
     else if(by[g])c.appendChild(slider(by[g]));else c.innerHTML='<span class="yn">yes/no</span>';row.appendChild(c)}
   head.parentNode.insertBefore(row,head);
   if(focused){const f=root.querySelector(`[aria-label="${focused}"]`);if(f)f.focus({preventScroll:true})}
-  // cells and what-if chips that changed since the last render settle in, nothing else moves
+  // cells and status chips that changed since the last render settle in, nothing else moves
   const cells=[...root.querySelectorAll("tbody td")];const now=cells.map(td=>td.textContent+"|"+td.className);
   if(A&&!reduce){const changed=lastCells?cells.filter((td,i)=>lastCells[i]!==undefined&&lastCells[i]!==now[i]).map(td=>td.firstElementChild||td):
       [...root.querySelectorAll("td.g .st")];

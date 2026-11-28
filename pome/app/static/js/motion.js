@@ -14,7 +14,7 @@
   const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const fade = (t) => animate(t, { opacity: [0, 1], duration: 120, ease: "out" });
   const seen = (window.__pomeSeen = window.__pomeSeen ||
-    { first: true, ans: {}, table: "", off: "", counts: {}, charts: new WeakSet(),
+    { first: true, answer: "", table: "", off: "", counts: {}, charts: new WeakSet(),
       tabsBound: new WeakSet() });
 
   function countUp(el, from) {
@@ -28,7 +28,7 @@
   function entrance() {
     // one authored moment on load: the verdict wipes in, its numbers count up, then the
     // gate icons settle in a wave. Everything else is already visible and stays still.
-    const verdict = document.querySelector(".ans:not(.ans-wi)");
+    const verdict = document.querySelector(".ans");
     const rows = document.querySelectorAll(".gm tbody tr");
     const icons = document.querySelectorAll(".gm td.g .ic");
     if (reduce()) { if (verdict) fade(verdict); }
@@ -55,21 +55,17 @@
   }
 
   function answers() {
-    document.querySelectorAll(".ans").forEach((el) => {
-      const key = el.classList.contains("ans-wi") ? "wi" : "official";
-      if (seen.ans[key] === el.textContent) return;
-      const was = seen.ans[key];
-      seen.ans[key] = el.textContent;
-      if (seen.first && key === "official") return; // part of the entrance
-      if (reduce()) return fade(el);
-      // the verdict wipes in left to right; a new what-if block also slides down
-      animate(el, { clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"], opacity: [0.2, 1],
-                    duration: DUR.base, ease: "outExpo" });
-      if (key === "wi" && was === undefined) {
-        animate(el.closest(".wi") || el, { opacity: [0, 1], translateY: [-8, 0],
-                                           duration: DUR.base, ease: "outQuart" });
-      }
-    });
+    const el = document.querySelector(".ans");
+    if (!el) {
+      seen.answer = "";
+      return;
+    }
+    if (seen.answer === el.textContent) return;
+    seen.answer = el.textContent;
+    if (seen.first) return;
+    if (reduce()) return fade(el);
+    animate(el, { clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"], opacity: [0.2, 1],
+                  duration: DUR.base, ease: "outExpo" });
   }
 
   function counts() {

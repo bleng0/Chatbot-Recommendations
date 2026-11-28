@@ -1,4 +1,4 @@
-"""Per-gate threshold sliders (CLAUDE.md section 3 exception): session-only what-if."""
+"""Threshold sliders, session profiles, and the live gate table."""
 import json
 from pathlib import Path
 
@@ -63,11 +63,66 @@ def test_slider_specs_cover_number_gates_only_with_official_inside_the_range():
     assert all(s["min"] <= s["official"] <= s["max"] for s in specs)
 
 
-def test_not_recommended_chip_and_note_render_in_the_what_if_column():
-    from pome.app import render
-    html = render.gate_table([{"config": "a", "status": "rejected", "gates": {}}], [], set(),
-                             {"a": "not_recommended"}, notes={"a": "G8 official ≤ 20,000 ms"})
-    assert "Not recommended" in html and "G8 official" in html
+def test_relaxed_capacity_updates_the_main_recommendation_and_eligibility():
+    default_snapshot, default = decide(Scenario())
+    snapshot, edited = decide(Scenario(gate_thresholds={"G9": 1.0}))
+    assert snapshot.sha256 == default_snapshot.sha256
+    assert edited.decision_hash != default.decision_hash
+    assert edited.recommended != default.recommended
+    previous = {v.config_id: v for v in default.verdicts}[edited.recommended]
+    assert any(g.gate == "G9" and g.status == "fail" for g in previous.gates)
+    assert edited.shortlist[0].status.startswith("eligible")
+
+
+def test_streamlit_live_gate_edits_and_reset():
+    home = Path(__file__).resolve().parents[1] / "pome/app/home.py"
+    app = AppTest.from_file(home, default_timeout=20).run()
+
+    def outputs():
+        assert not app.exception
+        component, = app.get("component_instance")
+        table = json.loads(component.proto.json_args)["table"]
+        answer = next(item.proto.body for item in app.get("html")
+                      if 'class="ac"' in item.proto.body or 'class="ans"' in item.proto.body)
+        return answer, table, component.proto.id
+
+    original_answer, original_table, original_component = outputs()
+    app.session_state["gate_sliders_0"] = {"G9": 1.0}
+    app.run()
+    live_answer, live_table, _ = outputs()
+    _, edited = decide(Scenario(gate_thresholds={"G9": 1.0}))
+    assert edited.recommended in live_answer and live_answer != original_answer
+    assert live_table != original_table and "What-if" not in live_table
+
+    app.toggle(key="gate_G9").set_value(False).run()
+    disabled_answer, disabled_table, _ = outputs()
+    assert disabled_answer != live_answer and "Capacity</span><small>off</small>" in disabled_table
+
+    app.select_slider(key="volume").set_value(200_000)
+    app.number_input(key="max_spend").set_value(10_000)
+    app.number_input(key="max_error").set_value(2.0)
+    app.radio(key="hosting_scope").set_value("rental")
+    app.selectbox(key="rental_machine").set_value("e2e-h100")
+    app.number_input(key="rental_nodes").set_value(2)
+    app.number_input(key="rental_hours").set_value(500)
+    app.number_input(key="rental_storage").set_value(500)
+    owned_input = next(widget for widget in app.number_input if widget.key.endswith("_tariff"))
+    owned_input.set_value(12.0)
+    app.checkbox(key="compliance_G16").check()
+    app.toggle(key="show_gate_values").set_value(True)
+    app.run()
+    assert outputs()[:2] != (original_answer, original_table)
+
+    next(b for b in app.sidebar.button if b.label == "Reset to recommended").click().run()
+    answer, table, component = outputs()
+    assert (answer, table) == (original_answer, original_table)
+    assert component != original_component
+    assert app.number_input(key=owned_input.key).value == 10.0
+    assert app.number_input(key="rental_hours").value == 730
+    assert app.number_input(key="rental_storage").value == 0
+    assert not app.checkbox(key="compliance_G16").value
+    app.run()
+    assert outputs() == (answer, table, component)
 
 
 def test_gate_values_toggle_shows_evidence_in_the_slider_table():

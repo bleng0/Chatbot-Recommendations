@@ -144,7 +144,7 @@ settings and deploy the same revisions the evidence records. Confirm licence and
 required deployment evidence before promotion.
 
 Gates shows actual values or compact verdicts with hosting and readiness always visible.
-The sidebar gate help explains thresholds, and what-if sliders cannot override deployment
+The sidebar gate help explains thresholds, and threshold sliders cannot override deployment
 readiness. Baselines shows simple
 rules scoped to the current filter. Cost groups the three pricing models. Evidence identifies
 historical serving proxies as reference rather than using them for a different GPU.

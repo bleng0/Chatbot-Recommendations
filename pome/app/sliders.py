@@ -1,5 +1,4 @@
-"""Vertical per-gate threshold sliders: a what-if input only (CLAUDE.md section 3).
-Values live in the browser session; they never touch CONSTRAINTS.md or the profile file."""
+"""Session-local thresholds and the gate results table."""
 from pathlib import Path
 
 from streamlit.components.v1 import declare_component

@@ -27,7 +27,7 @@ class Profile(BaseModel):
     peak_rps: float
     region: str
     gates: dict[str, Gate]
-    # Set only on exploration profiles (CONSTRAINTS.md section A); the official profile has None.
+    # Identifies a session-derived profile. The profile loaded from disk has None.
     what_if_of: str | None = Field(default=None, min_length=1)
 
 
@@ -40,9 +40,7 @@ def load_profile(path: Path = DEFAULT_PATH) -> Profile:
 
 def what_if_profile(base: Profile, off: Iterable[str],
                     thresholds: dict[str, float] | None = None) -> Profile:
-    """Exploration only: base minus the switched-off gates, with optional per-gate threshold
-    overrides from the UI sliders (session only, CLAUDE.md section 3). The official
-    recommendation never uses this profile."""
+    """Derive a profile from disabled gates and session-only threshold overrides."""
     off_sorted = sorted(set(off))
     moved = dict(sorted((thresholds or {}).items()))
     if not off_sorted and not moved:

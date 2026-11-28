@@ -18,7 +18,6 @@ from pome.app.scenario import (
     SERVING_METRICS,
     Scenario,
     decide,
-    decide_sliders,
     scenario_profile,
 )
 from pome.app.sliders import current, gate_sliders, slider_specs
@@ -42,10 +41,9 @@ from pome.app.views import (
     status_label,
     tickets_options,
     variant_rows,
-    what_if_pick,
 )
 from pome.evidence.compliance import build_compliance, load_buyer_evidence, load_catalog
-from pome.profiles.loader import load_profile, what_if_profile
+from pome.profiles.loader import load_profile
 from pome.registry.hosting import HOSTING, OWNED, RESPONSIBILITY, owned_config
 from pome.registry.loader import load_registry
 
@@ -70,6 +68,14 @@ TABLE_GATES = [*GATES, *COMPLIANCE_CONTROLS]
 RATE = float(USD_INR.value)
 
 
+def reset_to_recommended() -> None:
+    next_revision = st.session_state.get("reset_revision", 0) + 1
+    for key in list(st.session_state):
+        del st.session_state[key]
+    # A fresh component key remounts the iframe and discards its local slider state.
+    st.session_state["reset_revision"] = next_revision
+
+
 def reset_compliance() -> None:
     key = "compliance"
     for gate in COMPLIANCE_CONTROLS:
@@ -85,35 +91,36 @@ def apply_india_preset(key: str) -> None:
 
 with st.sidebar:
     st.header("Scenario")
+    st.button("Reset to recommended", on_click=reset_to_recommended)
     volume = st.select_slider("Tickets per month", tickets_options(),
-                              value=profile.volume_tickets_per_month, format_func=indian)
+                              value=profile.volume_tickets_per_month, format_func=indian, key="volume")
     st.caption("1 ticket = 1 customer question.")
     max_spend_inr = st.number_input(
         "Max monthly spend, INR", 0, 10_00_00_000,
-        round(float(profile.gates["G11"].value) * RATE), step=5_000,
+        round(float(profile.gates["G11"].value) * RATE), step=5_000, key="max_spend",
         help="Configs costing more are rejected.")
     max_error = st.number_input(
         "Max error rate after retries, %", 0.0, 100.0, float(profile.gates["G10"].value),
-        step=0.1, format="%.1f", help="Configs failing more requests are rejected.")
-    scope = st.radio("Hosting scope", list(HOSTING), format_func=HOSTING.get)
+        step=0.1, format="%.1f", key="max_error", help="Configs failing more requests are rejected.")
+    scope = st.radio("Hosting scope", list(HOSTING), format_func=HOSTING.get, key="hosting_scope")
     with st.expander("Rented cloud GPU"):
         gpu = st.selectbox("Rental machine", list(GPU_OPTIONS),
-                           format_func=lambda k: GPU_OPTIONS[k].label)
+                           format_func=lambda k: GPU_OPTIONS[k].label, key="rental_machine")
         st.caption(GPU_OPTIONS[gpu].note)
-        gpus = st.number_input("Rental nodes", 1, 64, 1,
+        gpus = st.number_input("Rental nodes", 1, 64, 1, key="rental_nodes",
                                help="Number of whole rental machines, including bundled GPUs.")
         ops_inr = st.number_input("Rented GPU operations, ₹/month", 0, 10_00_00_000, 0,
-                                  step=10_000)
+                                  step=10_000, key="rental_ops")
         plans = rented_plans(catalog, gpu, gpus, ops_inr, RATE)
     st.subheader("Owned self-hosting")
     plans.update(owned_plans())
     ops = float(ops_inr) / RATE
-    st.header("Tweak mode")
-    st.caption("Switch a gate off to see a what-if view; the recommendation is unchanged.")
+    st.header("Eligibility gates")
+    st.caption("Enabled gates determine which configurations qualify.")
     info = dict(zip(GATES, gate_info_rows(profile), strict=True))
     off = tuple(g for g, row in info.items()
                 if not st.toggle(f"{row['gate']} · {SHORT_NAME[g]}", value=True, key=f"gate_{g}",
-                                 help=f"{row['checks']}. Passes if {row['pass_if']}."))
+                                 help=f"{row['checks']}. Recommended threshold: {row['pass_if']}."))
 
     with st.expander("Compliance filters"):
         st.caption("Screen deployments against your requirements. Unverified evidence blocks "
@@ -132,13 +139,18 @@ with st.sidebar:
             help="Maximum retention of prompts and responses. Zero requires documented no persistence.")
 
 
+slider_key = f'gate_sliders_{st.session_state.get("reset_revision", 0)}'
+thresholds = {g: v for g, v in current(slider_key).items()
+              if g not in off and v != float(profile.gates[g].value)}
+
 default_usd = float(profile.gates["G11"].value)
 # the default INR budget maps back to the exact banking_mvp value, so the decision hash holds
 max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
                  else float(max_spend_inr) / RATE)
 scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
                     max_spend_usd=max_spend_usd, max_error_pct=float(max_error),
-                    compliance_gates=compliance_gates, retention_days=retention_days)
+                    compliance_gates=compliance_gates, retention_days=retention_days,
+                    disabled_gates=off, gate_thresholds=thresholds)
 buyer = None
 buyer_path = environ.get("POME_COMPLIANCE_EVIDENCE_FILE")
 if buyer_path:
@@ -205,8 +217,6 @@ else:
                           ("rejected", sum(v.status == "rejected" for v in d.verdicts))]))
     st.html(f'<p class="hash">decision {d.decision_hash[:12]}… · same inputs, same hash</p>')
 
-wi_box = st.container()  # filled once the sliders in the Gates tab are read
-
 ids = {c.config_id for c in registry}
 
 tab_gates, tab_base, tab_cost, tab_ev, tab_var, tab_cfg = st.tabs(
@@ -225,38 +235,10 @@ with tab_base:
                 'our pick is already an API.</p>')
 
 with tab_gates:
-    st.html('<p class="one">Slide a gate to explore. Configs that pass only because a gate is '
-            'looser than recommended are marked <b>Not recommended</b>; the recommendation above '
-            'never changes.</p>')
-    moved = {g: v for g, v in current("gate_sliders").items()
-             if g not in off and v != float(profile.gates[g].value)}
-    wi, not_rec = (decide_sliders(snap, scenario, off, moved) if off or moved else (None, {}))
-    if wi:
-        parts = [f"{display_gate(g)} off" for g in off] + [
-            f"{display_gate(g)} moved" for g in moved]
-        pick, flagged = what_if_pick(wi, not_rec)
-        cost_of = {v.config_id: v.monthly_cost for v in wi.verdicts}
-        if pick is None:
-            line = render.answer(relabel(answer_line(wi, snap, what_if_profile(effective_profile, off, moved))),
-                                 recommended=False, what_if=True)
-        else:
-            c = cost_of[pick]
-            line = render.answer(f"Cheapest passing: {pick} at "
-                                 f"{'no cost evidence' if c is None else inr(c) + '/month'}",
-                                 recommended=True, what_if=True)
-        why = ""
-        if flagged:
-            gs = ", ".join(f"{display_gate(g)} (recommended {info[g]['pass_if']})"
-                           for g in not_rec[pick])
-            why = (f'<p class="nr">Not recommended: {pick} passes only because {gs} was '
-                   f'loosened.</p>')
-        wi_box.html(
-            f'<div class="wi"><h3>What-if ({", ".join(parts)}): '
-            f'<span class="muted">not the recommendation</span></h3>{line}{why}'
-            f'<p class="hash">what-if decision {wi.decision_hash[:12]}…</p></div>')
     sort_by = st.segmented_control(
-        "Sort by", ["Status", "Monthly cost", "Error rate"], default="Status")
-    order = st.segmented_control("Order", ["Ascending", "Descending"], default="Ascending")
+        "Sort by", ["Status", "Monthly cost", "Error rate"], default="Status", key="gate_sort")
+    order = st.segmented_control(
+        "Order", ["Ascending", "Descending"], default="Ascending", key="gate_order")
     show_gate_values = st.toggle(
         "Show gate values", key="show_gate_values",
         help="Show the evidence used by each gate, including modeled values and language gaps.",
@@ -264,10 +246,6 @@ with tab_gates:
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
     observations = ({row["config"]: gate_values(snap, row["config"], TABLE_GATES) for row in rows}
                     if show_gate_values else None)
-    wi_status = ({v.config_id: ("not_recommended" if v.config_id in not_rec else v.status)
-                  for v in wi.verdicts} if wi else None)
-    nr_notes = {cid: "; ".join(f"{display_gate(g)} recommended {info[g]['pass_if']}" for g in gs)
-                for cid, gs in not_rec.items()}
     budget_usd = max_spend_usd
 
     def _val(cid: str, metric: str) -> float | None:
@@ -288,13 +266,13 @@ with tab_gates:
     gate_sliders(slider_specs(profile, GATES, display_gate, SHORT_NAME),
                  render.gate_table(rows, TABLE_GATES,
                                    set(off) | (COMPLIANCE_CONTROLS.keys() - set(compliance_gates)),
-                                   wi_status, cost=cost_cells,
+                                   cost=cost_cells,
                                    labels={g: display_gate(g) for g in TABLE_GATES},
                                    short={**SHORT_NAME, **COMPLIANCE_SHORT},
-                                   error=error_cells, notes=nr_notes, values=observations,
+                                   error=error_cells, values=observations,
                                    deployment={cid: (hosting_label(cid), readiness(cid))
                                                for cid in ids}),
-                 render.css("light"), key="gate_sliders")
+                 render.css("light"), key=slider_key)
     with st.expander("Compliance gate information"):
         st.dataframe(gate_info_rows(effective_profile, compliance_only=True), hide_index=True)
     no_ev = sorted(ids - {r["config"] for r in rows})
@@ -370,6 +348,7 @@ with tab_cost:
         api_costs = {cid: cost for cid, cost in costs.items() if by_id[cid].hosting_kind == "api"}
         if infrastructure and api_costs:
             compared = st.selectbox("Infrastructure plan to compare", infrastructure,
+                                    key="comparison_plan",
                                     format_func=lambda cid: f"{hosting_label(cid)} · {cid}")
             cost_charts.show_api_comparison(
                 {**api_costs, compared: costs[compared]}, volume=int(volume),

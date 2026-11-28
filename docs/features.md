@@ -30,13 +30,13 @@ Open [localhost:8501](http://localhost:8501). The dashboard reads the bundled re
 | **Rented cloud GPU** | Prices whole machines, billed hours, storage, network and operator costs. |
 | **Owned self-hosting** | Edits the bill of materials, node count, amortization, power and recurring costs for each preset. |
 | **Budget and error limit** | Set the recommendation's G11 and G10 limits. |
-| **Tweak mode** | Shows separate what-if results from sidebar gate switches and in-table threshold sliders. |
+| **Eligibility settings** | Gate switches and threshold sliders update the recommendation. Reset to recommended restores all app settings. |
 
 ## What each tab shows
 
 | Tab | What to look for |
 |---|---|
-| **Gates** | Hosting type, readiness and verdict per configuration, with a toggle for actual values and a separate what-if column during exploration. |
+| **Gates** | Hosting type, readiness and verdict per configuration, with a toggle for actual values. |
 | **Baselines** | Alternative selection rules scoped to the current deployment filter. |
 | **Cost** | Upfront and monthly costs by hosting type, budget and break-even comparisons for complete estimates. |
 | **Evidence** | Metric provenance, test settings, formulas and serving references excluded from the current plan. |
