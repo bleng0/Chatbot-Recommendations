@@ -40,7 +40,10 @@ what simpler benchmark and cost rules would pick instead, with the cost differen
 month, max monthly spend, max error rate, hosting scope and infrastructure costs. Gate switches and threshold sliders update eligibility and
 the recommendation as you edit them. Use **Reset to recommended** in the sidebar to restore all app settings.
 Opt-in compliance filters apply to the main recommendation. See [Compliance screening](docs/compliance.md)
-for the India and zero-retention preset, evidence, and buyer review setup. See [Hosting distinction](docs/distinction.md) for cost and deployment details.
+for the India and zero-retention preset, evidence, and buyer review setup.
+For GPU hosting, pick a listed rental machine, enter a cloud quote, or describe your owned NVIDIA hardware. The app lists
+the compatible checkpoint and precision combinations, estimates costs from your inputs,
+and sizes the plan at one replica per GPU. See [Hosting distinction](docs/distinction.md) for cost and deployment details.
 
 In a container: `docker compose -f compose.pome.yaml up --build`, then open the same address
 (start Docker Desktop first on Windows; verified on the owner's PC 2026-11-23).

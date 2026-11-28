@@ -70,9 +70,10 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
 
     for cfg in registry:
         cid = cfg.config_id
+        rental_id = cid.replace("-owned-", "-vllm-in-") if cfg.hosting_kind == "owned" else cid
         # quality proxies
         for key in QUALITY:
-            first = d["quality_anchor"].get(cid) if key.startswith("intent.banking77") else None
+            first = d["quality_anchor"].get(rental_id) if key.startswith("intent.banking77") else None
             anchor = next((a for a in (first, d["quality_default_anchor"])
                            if a and f"{a}.{key}" in ev), None)
             if anchor is None:
@@ -163,7 +164,7 @@ def build_gap_evidence(registry: list[ConfigEntry], ev: dict[str, EvidenceValue]
                 b.total, "usd_per_month", f"list price {src}; tokens assumed",
                 f"{b.formula} | tokens per ticket assumed: {in_tok} in, {out_tok} out", at))
 
-        licence = d["deploy"].get(cid, {}).get("commercial_use")
+        licence = d["deploy"].get(rental_id, {}).get("commercial_use")
         if licence is not None:
             put(cid, "deploy.commercial_use",
                 lambda licence=licence: EvidenceValue(**licence, retrieved_at=at))

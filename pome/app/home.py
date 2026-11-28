@@ -14,7 +14,6 @@ from pydantic import ValidationError
 from pome.app import cost_charts, render
 from pome.app.hosting_controls import owned_plans, rented_plans
 from pome.app.scenario import (
-    GPU_OPTIONS,
     SERVING_METRICS,
     Scenario,
     decide,
@@ -44,7 +43,7 @@ from pome.app.views import (
 )
 from pome.evidence.compliance import build_compliance, load_buyer_evidence, load_catalog
 from pome.profiles.loader import load_profile
-from pome.registry.hosting import HOSTING, OWNED, RESPONSIBILITY, owned_config
+from pome.registry.hosting import HOSTING, RESPONSIBILITY, owned_candidates, rental_candidates
 from pome.registry.loader import load_registry
 
 st.set_page_config(page_title="Model and hosting selection", layout="wide")
@@ -52,7 +51,9 @@ T = render.TOKENS["light"]
 st.html(render.css("light"))
 
 profile = load_profile()
-catalog = load_registry() + [owned_config(preset) for preset in OWNED.values()]
+base_registry = load_registry()
+rentals = rental_candidates(base_registry)
+owned = owned_candidates(rentals)
 # G10 (error limit) and G11 (budget) are sidebar settings; the rest are gates, numbered 1-10
 GATES = SHOWN_GATES
 COMPLIANCE_CONTROLS = {
@@ -103,18 +104,11 @@ with st.sidebar:
         "Max error rate after retries, %", 0.0, 100.0, float(profile.gates["G10"].value),
         step=0.1, format="%.1f", key="max_error", help="Configs failing more requests are rejected.")
     scope = st.radio("Hosting scope", list(HOSTING), format_func=HOSTING.get, key="hosting_scope")
-    with st.expander("Rented cloud GPU"):
-        gpu = st.selectbox("Rental machine", list(GPU_OPTIONS),
-                           format_func=lambda k: GPU_OPTIONS[k].label, key="rental_machine")
-        st.caption(GPU_OPTIONS[gpu].note)
-        gpus = st.number_input("Rental nodes", 1, 64, 1, key="rental_nodes",
-                               help="Number of whole rental machines, including bundled GPUs.")
-        ops_inr = st.number_input("Rented GPU operations, ₹/month", 0, 10_00_00_000, 0,
-                                  step=10_000, key="rental_ops")
-        plans = rented_plans(catalog, gpu, gpus, ops_inr, RATE)
+    gpu, rental_label, plans = rented_plans(rentals, RATE)
     st.subheader("Owned self-hosting")
-    plans.update(owned_plans())
-    ops = float(ops_inr) / RATE
+    owned_label, owned_deployments = owned_plans(owned)
+    plans.update(owned_deployments)
+    st.caption(f"{len(owned_deployments)} configurations fit your GPU.")
     st.header("Eligibility gates")
     st.caption("Enabled gates determine which configurations qualify.")
     info = dict(zip(GATES, gate_info_rows(profile), strict=True))
@@ -123,8 +117,8 @@ with st.sidebar:
                                  help=f"{row['checks']}. Recommended threshold: {row['pass_if']}."))
 
     with st.expander("Compliance filters"):
-        st.caption("Screen deployments against your requirements. Unverified evidence blocks "
-                   "eligibility when a filter is enabled.")
+        st.caption("Owned self-hosting uses the operator-control assumptions described in Evidence. "
+                   "Other deployments require applicable records for enabled filters.")
         compliance_key = "compliance"
         st.button("Require India + zero provider retention", on_click=apply_india_preset,
                   args=(compliance_key,))
@@ -147,10 +141,18 @@ default_usd = float(profile.gates["G11"].value)
 # the default INR budget maps back to the exact banking_mvp value, so the decision hash holds
 max_spend_usd = (default_usd if max_spend_inr == round(default_usd * RATE)
                  else float(max_spend_inr) / RATE)
-scenario = Scenario(volume=int(volume), gpu=gpu, gpus=int(gpus), ops_monthly_usd=float(ops),
+scenario = Scenario(volume=int(volume), gpu=gpu,
                     max_spend_usd=max_spend_usd, max_error_pct=float(max_error),
                     compliance_gates=compliance_gates, retention_days=retention_days,
                     disabled_gates=off, gate_thresholds=thresholds)
+catalog = [cfg for cfg in base_registry if cfg.hosting_kind != "rental"]
+catalog.extend(cfg.model_copy(update={"host": "Rented cloud GPU", "region": "Confirm region"})
+               if gpu.startswith("rental-custom:") and cfg.hosting_kind == "rental" else cfg
+               for cfg, _ in [*rentals, *owned] if cfg.config_id in plans)
+if scope == "rental" and not any(cfg.hosting_kind == "rental" for cfg in catalog):
+    st.info("No rental configurations fit the selected GPU. Choose another rental machine "
+            "or increase VRAM per GPU to see compatible configurations.")
+    st.stop()
 buyer = None
 buyer_path = environ.get("POME_COMPLIANCE_EVIDENCE_FILE")
 if buyer_path:
@@ -165,7 +167,8 @@ if buyer_path:
     except (OSError, UnicodeError):
         st.warning("The local buyer evidence file could not be read as UTF-8. Using public "
                    "evidence only. Check its path and permissions.")
-compliance = build_compliance(catalog, gpu, load_catalog(), buyer, datetime.now(UTC).date())
+compliance = build_compliance(catalog, gpu, load_catalog(), buyer, datetime.now(UTC).date(),
+                              assume_owned_controls=True)
 effective_profile = scenario_profile(scenario)
 snap, d = decide(scenario, registry=catalog, deployment_plans=plans,
                  scope=scope, inr_per_usd=RATE, compliance=compliance)
@@ -176,6 +179,12 @@ by_id = {c.config_id: c for c in registry}
 def hosting_label(cid: str) -> str:
     cfg = by_id[cid]
     return HOSTING[cfg.hosting_kind] + (" · lab only" if cfg.lab_only else "")
+
+
+def deployment_hardware(cid: str) -> str:
+    if cid not in plans:
+        return ""
+    return rental_label if by_id[cid].hosting_kind == "rental" else owned_label
 
 
 def readiness(cid: str) -> str:
@@ -244,6 +253,10 @@ with tab_gates:
         help="Show the evidence used by each gate, including modeled values and language gaps.",
     )
     rows = [r for r in gate_matrix(d) if r["config"] in ids]
+    for row in rows:
+        if by_id[row["config"]].hosting_kind == "owned":
+            for gid in COMPLIANCE_CONTROLS:
+                row["gates"].setdefault(gid, "pass")
     observations = ({row["config"]: gate_values(snap, row["config"], TABLE_GATES) for row in rows}
                     if show_gate_values else None)
     budget_usd = max_spend_usd
@@ -393,14 +406,22 @@ with tab_var:
     st.write(f"Monthly comparison: {inr(float(cost.value))}" if cost else
              "A complete monthly comparison is unavailable.")
     if plan:
-        hardware = GPU_OPTIONS[gpu].label if c.hosting_kind == "rental" else next(
-            preset.parts[0].name for preset in OWNED.values() if preset.id == selected)
+        hardware = deployment_hardware(selected)
         st.write(f"{hardware} · {plan.nodes} nodes · "
                  f"{plan.gpus_per_node} GPU(s) per node · {plan.vram_gb} GB per GPU")
+        replicas = plan.nodes * plan.gpus_per_node
+        st.caption(f"Deployment plan · {replicas} replica(s) · 1 GPU per replica · "
+                   "4,096-token context limit")
         if plan.minimum_gb is not None:
             st.caption(f"Planning floor: {plan.minimum_gb} GB per GPU at short context.")
         else:
             st.caption("A verified memory requirement is unavailable for this checkpoint.")
+        request = snap.values.get(f"{selected}.reference.performance_plan.request_ms")
+        throughput = snap.values.get(f"{selected}.reference.performance_plan.serial_rps")
+        if request and throughput:
+            st.caption(f"Performance model · {int(request.value):,} ms/request · "
+                       f"{float(throughput.value):g} requests/s with one active request per GPU. "
+                       "See Evidence for sources and calculations.")
         serving = snap.values.get(f"{selected}.serving.p95_ms")
         if serving and serving.measured_under:
             tags = serving.measured_under
@@ -420,7 +441,6 @@ with tab_cfg:
         "quant": c.quant.split(" (")[0]} for c in registry if c.config_id in ids]))
     status = {v.config_id: v.status for v in d.verdicts}
     order = [r["config"] for r in gate_matrix(d)]
-    gpu_label = f"{GPU_OPTIONS[gpu].label} · {gpus} billed nodes"
     fan_items = []
     for cid in order:
         c = by_id[cid]
@@ -428,7 +448,7 @@ with tab_cfg:
         fan_items.append({
             "config": cid, "model": c.model_id, "host": f"{hosting_label(c.config_id)} · {c.host}",
             "status": status[cid], "cost": f"{inr(float(cost.value))}/mo" if cost else "—",
-            "steps": architecture_steps(c, gpu=gpu_label)})
+            "steps": architecture_steps(c, gpu=deployment_hardware(cid))})
     st.caption("Scroll the list on the right or use the arrows; the middle card's build steps "
                "show on the left.")
     if order:

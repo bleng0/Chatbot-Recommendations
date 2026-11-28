@@ -20,6 +20,16 @@ FACTS = {
     "contract_verified": ("deploy.contract_verified", "bool"),
     "configuration_verified": ("deploy.configuration_verified", "bool"),
 }
+OWNED_OPERATOR_ASSUMPTIONS = {
+    "processing_region": ("India", "Inference and fallback stay on the operator's India site."),
+    "storage_region": ("No persistence", "No third-party provider persists prompt content."),
+    "retention_days": (0, "No third-party provider retains prompts or responses."),
+    "no_training": (True, "The operator runs frozen weights without a provider training pipeline."),
+    "no_prompt_logging": (True, "Provider prompt logging is absent and operator content logs are disabled."),
+    "contract_verified": (True, "Internal approval is assumed for the operator-owned deployment."),
+    "configuration_verified": (True, "The operator is assumed to have reviewed these settings."),
+}
+
 REGION = Literal["India", "China", "United States", "EU", "Global"]
 
 
@@ -120,7 +130,8 @@ class ComplianceEvidence:
 
 
 def build_compliance(registry: list[ConfigEntry], gpu: str, catalog: PublicCatalog,
-                     buyer: BuyerEvidence | None, review_date: date) -> ComplianceEvidence:
+                     buyer: BuyerEvidence | None, review_date: date, *,
+                     assume_owned_controls: bool = False) -> ComplianceEvidence:
     result = ComplianceEvidence({}, {}, {})
     records = {(record.config_id, record.gpu_option): record
                for record in buyer.records} if buyer else {}
@@ -137,6 +148,16 @@ def build_compliance(registry: list[ConfigEntry], gpu: str, catalog: PublicCatal
                     value=value, unit=unit, provenance="vendor-doc", source=str(public.fact_sources.get(field, public.sources[0])),
                     formula=public.scope, retrieved_at=datetime.combine(
                         public.reviewed_on, time.min, UTC))
+        if assume_owned_controls and config.hosting_kind == "owned":
+            for field, (value, basis) in OWNED_OPERATOR_ASSUMPTIONS.items():
+                key, unit = FACTS[field]
+                result.values.setdefault(f"{cid}.{key}", EvidenceValue(
+                    value=value, unit=unit, provenance="operator-assumed",
+                    source="docs/compliance.md#owned-self-hosting", formula=basis,
+                    retrieved_at=datetime.combine(review_date, time.min, UTC),
+                ))
+            result.buyer_status[cid] = "Owned hosting uses the operator-control assumptions."
+            continue
         record = records.get((cid, gpu_option))
         if record is None:
             continue

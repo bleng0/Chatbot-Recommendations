@@ -1,4 +1,5 @@
 """HTML pieces for the app: escaped strings only, no Streamlit calls (tested)."""
+import re
 from html import escape
 from urllib.parse import quote
 
@@ -212,8 +213,27 @@ def baseline_cards(cards: list[dict]) -> str:
     return f'<div class="bl">{"".join(out)}</div>'
 
 
-def _details(summary: str, lines: list[tuple[str, str]]) -> str:
-    inner = "".join(f"<dt>{escape(k)}</dt><dd>{escape(val)}</dd>" for k, val in lines if val)
+_URL = re.compile(r"""https?://[^\s<>"']+""")
+
+
+def _linked_text(value: str) -> str:
+    parts = []
+    end = 0
+    for match in _URL.finditer(value):
+        url = match.group().rstrip(".,;")
+        while url.endswith(")") and url.count(")") > url.count("("):
+            url = url[:-1]
+        parts.append(escape(value[end:match.start()]))
+        parts.append(f'<a href="{escape(url)}" rel="noopener noreferrer" target="_blank">'
+                     f'{escape(url)}</a>{escape(match.group()[len(url):])}')
+        end = match.end()
+    parts.append(escape(value[end:]))
+    return "".join(parts)
+
+
+def _details(summary: str, lines: list[tuple[str, str]], *, link_sources: bool = False) -> str:
+    display = _linked_text if link_sources else escape
+    inner = "".join(f"<dt>{escape(k)}</dt><dd>{display(val)}</dd>" for k, val in lines if val)
     return (f"<details><summary>{escape(summary)}</summary>"
             f'<div class="dx"><dl>{inner}</dl></div></details>')
 
@@ -336,7 +356,7 @@ def evidence_display(sections: dict) -> str:
                     ("Source", row["source"]), ("Retrieved", row["retrieved"]),
                     ("Scope" if row["metric"].startswith("deploy.") else "Formula", row["formula"]),
                     ("Test settings", row.get("conditions", "")),
-                ])
+                ], link_sources=True)
                 parts.append(f'<div class="ev-metric"><dt>{label}'
                              f'<span class="ev-description">{description}</span></dt>'
                              f'<dd class="ev-value"><span class="num">{value} {suffix}</span>'

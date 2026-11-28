@@ -19,6 +19,19 @@ Enable each independently under **Compliance filters**. **Require India + zero p
 
 A conflicting fact fails and absent, inapplicable, or conditional facts are unverified. Both exclude a configuration when the corresponding gate is on. The engine accepts deployment-specific public evidence and buyer-reviewed facts. Modeled evidence cannot qualify for these seven filters. A vendor's ordinary retention period is not used as a ceiling when broader retention may apply. No public record in this release establishes an operational retention ceiling covering its full deployment scope. Buyer confirmation can enable a qualifying retention result.
 
+## Owned self-hosting
+
+Owned configurations in the interactive app assume that the operator runs inference in India,
+keeps prompt data out of external storage, disables content logging and training, and completes
+internal contract and settings review. With no external inference provider, provider retention
+is set to zero and provider storage is treated as absent. The Evidence tab identifies these
+inputs as operator assumptions. The same assumptions appear in the laptop comparison for
+compliance screening. Its lab-only deployment status still applies.
+
+These assumptions affect the seven opt-in compliance checks. Commercial-use permission still
+follows the checkpoint licence. Managed APIs and rented GPUs continue to use their provider
+evidence. Score, budget and deployment readiness use the existing gates.
+
 ## Catalog decisions and outstanding evidence
 
 [POME Compliance research brief](research/links/POME%20Compliance.md) supplies the initial source list. The runtime catalog records the scope, observed date and links. The review below is dated 2026-11-24. Exact configuration IDs distinguish the direct DeepSeek API from the same model family hosted in India and distinguish the global Vertex endpoint from regional offerings.

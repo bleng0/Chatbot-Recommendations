@@ -161,12 +161,16 @@ _OPS: dict[str, Callable[[float, float], bool]] = {
 
 def _invalid(metric: str, e: EvidenceValue) -> str | None:
     """Why this evidence value is unusable, or None if it is fine."""
-    if (metric in {"deploy.contract_verified", "deploy.configuration_verified"}
-            and e.provenance != "buyer-verified"):
-        return "buyer review required"
-    if (metric.startswith("deploy.") and metric != "deploy.commercial_use"
-            and (e.provenance not in {"vendor-doc", "buyer-verified"} or e.study)):
-        return "deployment-specific evidence required"
+    if e.provenance == "operator-assumed":
+        if metric not in METRIC_SPEC or not metric.startswith("deploy.") or metric == "deploy.commercial_use":
+            return "operator assumption is limited to deployment controls"
+    else:
+        if (metric in {"deploy.contract_verified", "deploy.configuration_verified"}
+                and e.provenance != "buyer-verified"):
+            return "buyer review required"
+        if (metric.startswith("deploy.") and metric != "deploy.commercial_use"
+                and (e.provenance not in {"vendor-doc", "buyer-verified"} or e.study)):
+            return "deployment-specific evidence required"
     unit, rng = METRIC_SPEC.get(metric, _RATIO)
     if e.unit != unit:
         return f"unit {e.unit!r}, expected {unit!r}"
@@ -285,7 +289,7 @@ def _verdict(cid: str, values: dict[str, EvidenceValue], profile: Profile) -> Ve
             unverified.append(msg)
             continue
         ok, detail, slack = _evaluate_check(ch, evs, profile)
-        if ch.gate != "G11" and any(e.provenance == "modeled" or e.study for e in evs):
+        if ch.gate != "G11" and any(e.provenance in {"modeled", "operator-assumed"} or e.study for e in evs):
             modeled = True
         if ch.gate in QUALITY_GATES and slack is not None:
             slacks.append(slack)

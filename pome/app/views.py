@@ -11,7 +11,7 @@ from pome.registry.loader import ConfigEntry
 from pome.selection.engine import CHECKS, Decision, check_observation
 
 BADGE = {"buyer-verified": "BUYER-VERIFIED", "measured": "SELF-TESTED", "vendor-doc": "VENDOR-DOC", "modeled": "MODELED",
-         "study": "PUBLISHED"}
+         "study": "PUBLISHED", "operator-assumed": "OPERATOR ASSUMPTION"}
 _STATUS = {"eligible": "Eligible", "eligible_modeled": "Eligible (modeled inputs)",
            "rejected": "Rejected", "unverified": "Unverified (evidence missing)"}
 # Gate matrix order: failing configs first, then missing evidence, then the ones that pass.
@@ -254,6 +254,17 @@ def evidence_sections(
             for key, row in rows.items():
                 recorded = snap.values[f"{cid}.{key}"]
                 row.update(value=str(recorded.value), unit=recorded.unit)
+            comparison = {
+                "reference.artificial_analysis.first_answer_s": "Hosted time to first answer",
+                "reference.artificial_analysis.endpoint_error_pct": "Hosted endpoint error rate",
+                "reference.performance_plan.request_ms": "Modeled request time",
+                "reference.performance_plan.serial_rps": "Modeled serial throughput",
+            }
+            for key, label in comparison.items():
+                if key in rows:
+                    row = rows.pop(key)
+                    row["label"] = label
+                    groups.setdefault("Performance planning · reference only", []).append(row)
             reference = [rows.pop(k) for k in list(rows) if k.startswith("reference.")]
             if reference:
                 groups["Reference only · excluded from this deployment's verdict"] = reference
@@ -421,7 +432,7 @@ def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sideb
              "own approved text; send anything out of scope to a human agent.")
     if cfg.hosting_kind == "rental":
         return [
-            ("Rent GPUs in India", f"Rent {gpu} in an India region for {cfg.model_id}."),
+            ("Rent GPU nodes", f"Use {gpu} to host {cfg.model_id}. Deployment region: {cfg.region}."),
             ("Serve the model", (f"Run {cfg.serving} with {cfg.model_id} at {cfg.quant}, "
                                  "behind a private endpoint.")),
             ("Add a gateway", ("Put an API gateway and request queue in front; keep logs "
@@ -432,8 +443,8 @@ def architecture_steps(cfg: ConfigEntry, gpu: str = "the GPU picked in the sideb
         ]
     if cfg.hosting_kind == "owned" and not cfg.lab_only:
         return [
-            ("Build the nodes", ("Assemble the selected BOM; confirm GPU clearance, power, "
-             "cooling, UPS runtime and private network capacity.")),
+            ("Build the nodes", (f"Use {gpu}. Confirm GPU clearance, power, cooling, "
+             "UPS runtime and private network capacity.")),
             ("Serve the checkpoint", (f"Install Linux, NVIDIA drivers and Container Toolkit. "
              f"Run the pinned {cfg.model_id} checkpoint at {cfg.quant} with vLLM.")),
             ("Connect the bank gateway", ("Use a private authenticated endpoint; redact "

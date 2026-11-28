@@ -15,7 +15,7 @@ uv run python -m streamlit run pome/app/home.py
 
 Open [localhost:8501](http://localhost:8501). The dashboard reads the bundled records and recalculates the evidence snapshot and decision as inputs change. It needs no API key and makes no live model calls. The repository also includes a separate Next.js scaffold with a health endpoint. The evaluation dashboard runs in Streamlit. [Project README](../README.md)
 
-1. Set monthly tickets and the maximum spend in the sidebar. If exploring self-managed hosting, choose a rental machine or an owned preset and enter its costs.
+1. Set monthly tickets and the maximum spend in the sidebar. If exploring self-managed hosting, choose a rental machine or enter your owned GPU and costs.
 2. Read the recommendation, configuration counts and the abbreviated decision hash at the top.
 3. Open **Gates** to inspect the verdicts. Expand a configuration’s reasons to see what failed or lacked evidence.
 4. Compare estimates in **Cost**, then trace any number to its **Source** and **Formula** in **Evidence**.
@@ -27,8 +27,8 @@ Open [localhost:8501](http://localhost:8501). The dashboard reads the bundled re
 |---|---|
 | **Tickets per month** | Changes usage-priced API estimates. Rental and ownership estimates stay fixed for the selected infrastructure. |
 | **Hosting scope** | Filters the recommendation and tabs to managed cloud APIs, rented cloud GPUs, or owned self-hosting. |
-| **Rented cloud GPU** | Prices whole machines, billed hours, storage, network and operator costs. |
-| **Owned self-hosting** | Edits the bill of materials, node count, amortization, power and recurring costs for each preset. |
+| **Rented cloud GPU** | Accepts a listed or quoted cloud machine, filters by VRAM per GPU, and prices billed hours and operating add-ons. |
+| **Owned self-hosting** | Accepts a known or custom NVIDIA GPU, filters by VRAM per GPU, and models the shared hardware and operating costs. |
 | **Budget and error limit** | Set the recommendation's G11 and G10 limits. |
 | **Eligibility settings** | Gate switches and threshold sliders update the recommendation. Reset to recommended restores all app settings. |
 

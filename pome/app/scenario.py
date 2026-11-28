@@ -14,6 +14,7 @@ from pome.cost.model import selfhost_monthly_cost
 from pome.evidence.build import build_evidence, build_published_evidence
 from pome.evidence.compliance import ComplianceEvidence, build_compliance, load_catalog
 from pome.evidence.gapfill import build_gap_evidence
+from pome.evidence.performance_reference import performance_reference
 from pome.evidence.schema import EvidenceValue
 from pome.evidence.snapshot import Snapshot, build_snapshot
 from pome.profiles.loader import Gate, Profile, load_profile, what_if_profile
@@ -124,6 +125,7 @@ class DeploymentPlan:
     gpus_per_node: int = 1
     hours: int = 730
     priced_on: str = PRICE_DATE
+    memory_bandwidth_gb_s: float | None = None
 
 
 SERVING_METRICS = {"serving.p95_ms": "ms", "serving.sustainable_rps": "req_per_s",
@@ -177,6 +179,10 @@ def _deployment_evidence(ev: dict[str, EvidenceValue], cfg: ConfigEntry,
             ev[f"{cid}.reference.{key.split('.', 1)[1]}"] = ev.pop(key)
     if plan is None:
         return "Lab evidence only. No production infrastructure is assigned."
+    if plan.minimum_gb is None or plan.vram_gb >= plan.minimum_gb:
+        ev.update({f"{cid}.{key}": value for key, value in performance_reference(
+            cid, plan.hardware, plan.nodes * plan.gpus_per_node,
+            memory_bandwidth_gb_s=plan.memory_bandwidth_gb_s).items()})
     estimate = plan.estimate
     priced_at = datetime.fromisoformat(plan.priced_on).replace(tzinfo=UTC)
     ev[f"{cid}.deployment.plan"] = EvidenceValue(
@@ -212,11 +218,9 @@ def decide(s: Scenario, records: Path = RECORDS,
     ev = build_evidence(reg, records, profile, EVIDENCE_AT)
     ev |= build_published_evidence(reg, profile, EVIDENCE_AT)
     for c in reg:
-        if c.hosting_kind == "rental":
+        if c.hosting_kind == "rental" and deployment_plans is None:
             ev[f"{c.config_id}.cost.monthly_usd"] = _selfhost_cost(s, profile)
-    ev |= build_gap_evidence(
-        [c for c in reg if deployment_plans is None or c.hosting_kind != "owned"],
-        ev, profile, records)
+    ev |= build_gap_evidence(reg, ev, profile, records)
     blocks = {}
     if compliance is None:
         compliance = build_compliance(reg, s.gpu, load_catalog(), None, EVIDENCE_AT.date())

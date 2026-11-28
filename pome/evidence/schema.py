@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, field_validator, model_validator
 
-Provenance = Literal["measured", "vendor-doc", "modeled", "buyer-verified"]
+Provenance = Literal["measured", "vendor-doc", "modeled", "buyer-verified", "operator-assumed"]
 
 
 class EvidenceValue(BaseModel):
@@ -33,8 +33,10 @@ class EvidenceValue(BaseModel):
             raise ValueError("measured evidence needs at least one run_id")
         if self.provenance == "vendor-doc" and not self.source.startswith(("http://", "https://")):
             raise ValueError("vendor-doc evidence needs a URL source")
-        if self.provenance == "modeled" and not (self.formula and self.formula.strip()):
-            raise ValueError("modeled evidence needs a stated formula")
+        if self.provenance in {"modeled", "operator-assumed"} and not (
+            self.formula and self.formula.strip()
+        ):
+            raise ValueError(f"{self.provenance} evidence needs a stated basis")
         if self.study:
             if self.provenance != "vendor-doc":
                 raise ValueError("study evidence must be vendor-doc")

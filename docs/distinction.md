@@ -135,7 +135,8 @@ in `runs/serving/<configuration-id>.json` as a mapping from `serving.p95_ms`,
 `serving.sustainable_rps`, and `serving.error_pct` to the standard EvidenceValue objects
 with units `ms`, `req_per_s`, and `percent` respectively. Include source, timestamp, run
 IDs for self-tested measurements or a published study URL, and `measured_under` with
-`config_id`, `hardware` (rental SKU key, `owned-pilot`, or `owned-production`),
+`config_id`, `hardware` (rental SKU key, `owned-pilot`, `owned-production`,
+`owned-custom:<GPU model>:<VRAM>gb`, or `rental-custom:<provider, region and machine>:<VRAM>gb`),
 `nodes`, `gpus_per_node`, `runtime`, `runtime_version`, `checkpoint`,
 `checkpoint_revision`, `precision`, `input_tokens`, `output_tokens`, and
 `max_model_len`. Capture the test duration, request distribution and retry policy in the
@@ -151,3 +152,11 @@ historical serving proxies as reference rather than using them for a different G
 Deployment variants and Configurations describe the actual selected hardware and operator.
 Published or modeled proxies retain their historical provenance. An owned or rented plan
 without applicable complete serving evidence remains planning only even with G8–G10 off.
+
+
+The two owned bills of materials are hardware starting points. The sidebar accepts either GPU
+or a custom NVIDIA GPU. Rental plans accept a catalog SKU or a quoted machine. Both list compatible checkpoint and precision
+combinations using each GPU's VRAM independently. The app plans one replica per GPU at a
+4,096-token context limit and applies the selected topology and costs to each alternative.
+Memory floors are planning estimates. The rented model catalog also includes the Gemma 4 12B
+W4A16 checkpoint for lower-memory GPUs. The plans use no tensor parallelism.

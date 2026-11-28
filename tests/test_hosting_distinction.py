@@ -100,3 +100,101 @@ def test_hosting_filter_scopes_all_tabs():
         )
         assert tabs["Cost"].dataframe
         assert tabs["Baselines"].get("html") or tabs["Baselines"].markdown
+
+
+def test_artificial_analysis_references_follow_hardware_and_stay_out_of_serving_gates():
+    from pome.app.scenario import GPU_OPTIONS
+    from pome.registry.loader import load_registry
+
+    cfg = next(c for c in load_registry() if c.config_id == "gemma4-31b-vllm-in-bf16")
+    gpu = "azure-ci-a100"
+    plan = DeploymentPlan(gpu, 1, GPU_OPTIONS[gpu].vram_gb, 80, Estimate(1000, 100, 200),
+                          "quote", "fixed", gpus_per_node=1)
+
+    def evaluate(deployment):
+        return decide(Scenario(), registry=[cfg], deployment_plans={cfg.config_id: deployment},
+                      scope="rental", inr_per_usd=100)
+
+    snapshot, decision = evaluate(plan)
+    prefix = f"{cfg.config_id}.reference."
+    first_answer = snapshot.values[prefix + "artificial_analysis.first_answer_s"]
+    latency = snapshot.values[prefix + "performance_plan.request_ms"]
+    rate = snapshot.values[prefix + "performance_plan.serial_rps"].value
+    assert first_answer.value == 1.0 and first_answer.study
+    assert latency.provenance == "modeled" and latency.value > 1000
+    assert f"{cfg.config_id}.serving.p95_ms" not in snapshot.values
+    assert decision.recommended is None
+
+    scaled, _ = evaluate(replace(plan, nodes=2))
+    assert scaled.values[prefix + "performance_plan.request_ms"].value == latency.value
+    assert abs(scaled.values[prefix + "performance_plan.serial_rps"].value - 2 * rate) <= 0.001
+    oversized, _ = evaluate(replace(plan, vram_gb=32))
+    assert prefix + "performance_plan.request_ms" not in oversized.values
+
+
+def test_hardware_selection_builds_only_fitting_rental_and_owned_candidates():
+    app = AppTest.from_file(Path("pome/app/home.py").resolve(), default_timeout=20).run()
+
+    def deployment_options():
+        assert not app.exception
+        return " ".join(app.selectbox(key="deployment_model").options)
+
+    app.radio(key="hosting_scope").set_value("rental").run()
+    app.selectbox(key="deployment_model").select("gemma4-31b-vllm-in-bf16").run()
+    app.selectbox(key="rental_machine").select("aws-mum-4l40s").run()
+    options = deployment_options()
+    assert "gemma4-31b-vllm-in-bf16" not in options
+    assert "gemma4-12b-vllm-in-w4a16" in options
+    app.selectbox(key="deployment_model").select("gemma4-12b-vllm-in-w4a16").run()
+    tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
+    assert any("4 replica(s)" in caption.value for caption in tab.caption)
+    assert any("Planning only" in item.value for item in tab.markdown)
+
+    app.selectbox(key="rental_machine").select("custom").run()
+    app.text_input(key="rental_custom_machine").set_value("Private cloud · Mumbai")
+    app.number_input(key="rental_custom_vram").set_value(24)
+    app.number_input(key="rental_custom_gpus").set_value(2)
+    app.number_input(key="rental_hours").set_value(20)
+    app.run()
+    assert "gemma4-12b-vllm-in-bf16" not in deployment_options()
+    app.selectbox(key="deployment_model").select("gemma4-12b-vllm-in-w4a16").run()
+    tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
+    assert any("complete monthly comparison is unavailable" in item.value for item in tab.markdown)
+    app.number_input(key="rental_custom_rate").set_value(50.0).run()
+    tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
+    assert any("₹1,000" in item.value for item in tab.markdown)
+    app.number_input(key="rental_custom_vram").set_value(8).run()
+    assert not app.exception
+    assert any("No rental configurations fit" in info.value for info in app.info)
+
+    app.radio(key="hosting_scope").set_value("owned").run()
+    app.selectbox(key="owned_hardware").select("production").run()
+    assert "gemma4-31b-owned-bf16" in deployment_options()
+    assert "sarvam30b-owned-bf16" in deployment_options()
+
+    app.selectbox(key="owned_hardware").select("custom").run()
+    app.text_input(key="custom_gpu_model").set_value("Test GPU")
+    app.number_input(key="custom_vram").set_value(24)
+    app.number_input(key="custom_gpus").set_value(2)
+    app.number_input(key="custom_nodes").set_value(3)
+    app.number_input(key="owned_custom_bandwidth").set_value(800.0)
+    app.run()
+    options = deployment_options()
+    assert "llama31-8b-owned-bf16" in options
+    assert "gemma4-12b-owned-bf16" not in options
+    app.selectbox(key="deployment_model").select("llama31-8b-owned-bf16").run()
+    tab = next(tab for tab in app.tabs if tab.label == "Deployment variants")
+    assert any("Test GPU · 3 nodes · 2 GPU(s) per node · 24 GB" in item.value
+               for item in tab.markdown)
+    assert any("6 replica(s)" in caption.value for caption in tab.caption)
+    assert any("Performance model" in caption.value for caption in tab.caption)
+    assert any("Planning only" in item.value for item in tab.markdown)
+
+    app.number_input(key="custom_vram").set_value(8).run()
+    assert "llama31-8b-owned-bf16" not in deployment_options()
+    assert "gemma4-12b-ollama-local-q4" in deployment_options()
+
+    next(b for b in app.sidebar.button if b.label == "Reset to recommended").click().run()
+    assert app.selectbox(key="owned_hardware").value == "pilot"
+    assert app.selectbox(key="rental_machine").value == "azure-ci-a100"
+    assert "gemma4-12b-owned-w4a16" in deployment_options()

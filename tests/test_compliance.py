@@ -144,3 +144,21 @@ def test_streamlit_preset_preserves_other_controls_and_reset_clears_it(monkeypat
     assert not app.sidebar.checkbox(key="compliance_G12").value
     assert not app.sidebar.checkbox(key="compliance_G16").value
     assert app.sidebar.number_input(key="compliance_retention").value == 30
+
+
+def test_owned_controls_pass_compliance_without_changing_rented_deployments():
+    from pome.registry.hosting import OWNED, owned_config
+
+    registry = load_registry() + [owned_config(preset) for preset in OWNED.values()]
+    gates = ("G12", "G13", "G15", "G16", "G17", "G18", "G19")
+    compliance = build_compliance(registry, "azure-ci-a100", load_catalog(), None, NOW,
+                                  assume_owned_controls=True)
+    scenario = Scenario(compliance_gates=gates, retention_days=0)
+    snapshot, decision = decide(scenario, registry=registry, compliance=compliance,
+                                deployment_plans={})
+    for preset in OWNED.values():
+        assert all(status(decision, preset.id, gate) == "pass" for gate in (*gates, "G14"))
+        assert snapshot.values[f"{preset.id}.deploy.contract_verified"].provenance == "operator-assumed"
+        assert preset.id not in {item.config_id for item in decision.shortlist}
+    assert status(decision, SELFHOST, "G12") == "unverified"
+    assert status(decision, GLOBAL, "G12") == "fail"

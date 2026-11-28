@@ -1,0 +1,36 @@
+retrieved_at: "2026-11-28T00:00:00+00:00"
+methodology: https://artificialanalysis.ai/methodology/performance-benchmarking
+# First answer token, not first reasoning token. Error rates refer to the named API.
+endpoints:
+  gemma4-26b-vllm-in-bf16:
+    {provider: SiliconFlow, variant: non-reasoning FP8, first_answer_s: 2.42, error_pct: 0.0,
+     source: "https://artificialanalysis.ai/providers/siliconflow"}
+  gemma4-31b-vllm-in-bf16:
+    {provider: Modular, variant: non-reasoning NVFP4, first_answer_s: 1.00, error_pct: 0.0,
+     source: "https://artificialanalysis.ai/providers/modular"}
+  qwen38-27b-vllm-in-bf16:
+    {provider: Modular, variant: non-reasoning NVFP4, first_answer_s: 2.33, error_pct: 0.8,
+     source: "https://artificialanalysis.ai/providers/modular"}
+  llama31-8b-vllm-in-bf16:
+    {provider: Novita, variant: Instruct, first_answer_s: 0.65, error_pct: 0.0,
+     source: "https://artificialanalysis.ai/models/llama-3-1-instruct-8b/providers"}
+  museglimmer30b-vllm-in-bf16:
+    {provider: Modular, variant: high reasoning, first_answer_s: 12.29, error_pct: 0.0,
+     source: "https://artificialanalysis.ai/models/muse-glimmer/providers"}
+hardware:
+  owned-pilot: {gb_s: 1792, source: "https://artificialanalysis.ai/hardware-inference-stack/laptops-workstations/configs"}
+  owned-production: {gb_s: 1792, source: "https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-6000/"}
+  azure-ci-a100: &a100
+    {gb_s: 1935, source: "https://www.nvidia.com/en-us/data-center/a100/"}
+  e2e-a100: *a100
+  e2e-l40s: &l40s
+    {gb_s: 864, source: "https://www.nvidia.com/en-gb/data-center/l40s/"}
+  aws-mum-4l40s: *l40s
+  e2e-h100: {gb_s: 3350, source: "https://www.e2enetworks.com/gpus/nvidia-h100"}
+  aws-mum-h100:
+    {gb_s: 3350, source: "https://aws.amazon.com/ko/blogs/tech/2024-aws-reinvent-ec2-instance-recap/",
+     note: "P5 family per-GPU bandwidth applied to the single-GPU p5.4xlarge"}
+  azure-ci-h100: {gb_s: 3900, source: "https://www.nvidia.com/en-eu/data-center/h100/"}
+# Packed 4-bit weight size before metadata, cache and runtime overhead.
+weight_sizes_gb:
+  gemma4-12b-vllm-in-w4a16: 6

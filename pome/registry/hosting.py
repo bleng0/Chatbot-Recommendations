@@ -97,8 +97,65 @@ def owned_config(preset: Preset) -> ConfigEntry:
     )
     return ConfigEntry(
         config_id=preset.id, model_id=preset.checkpoint, version=preset.precision,
-        host=preset.label, region="Customer site (confirm location)", serving="vLLM",
+        host="Customer-owned GPU", region="Customer site (confirm location)", serving="vLLM",
         quant=preset.precision, evaluation_mode="measured", provider="none", hosting_kind="owned",
         pricing=Pricing(input_per_1m=None, output_per_1m=None),
         deployment=Deployment(region_processing=None, retention_days=None, commercial_use=licence),
     )
+
+
+# Short-context, single-GPU planning floors. For Qwen, Sarvam and Muse-Glimmer
+# the floor rounds up BF16 weights plus 20% overhead and 8 GB runtime reserve
+# using the parameter counts in gapfill.yaml.
+RENTAL_MIN_VRAM_GB = {
+    "gemma4-12b-vllm-in-bf16": 36,
+    "gemma4-26b-vllm-in-bf16": 68,
+    "gemma4-31b-vllm-in-bf16": 80,
+    "qwen38-27b-vllm-in-bf16": 80,
+    "llama31-8b-vllm-in-bf16": 24,
+    "sarvam30b-vllm-in-bf16": 96,
+    "museglimmer30b-vllm-in-bf16": 80,
+    "gemma4-12b-vllm-in-w4a16": OWNED["pilot"].minimum_gb,
+}
+
+
+def rental_candidates(registry: list[ConfigEntry]) -> list[tuple[ConfigEntry, int]]:
+    """Build rental candidates with an explicit per-GPU planning floor."""
+    qat = owned_config(OWNED["pilot"]).model_copy(update={
+        "config_id": "gemma4-12b-vllm-in-w4a16",
+        "host": "rented cloud GPU (India region)",
+        "region": "India",
+        "hosting_kind": "rental",
+    })
+    candidates = {cfg.config_id: cfg for cfg in registry if cfg.hosting_kind == "rental"}
+    candidates.setdefault(qat.config_id, qat)
+    return [(cfg, RENTAL_MIN_VRAM_GB[cid]) for cid, cfg in candidates.items()
+            if cid in RENTAL_MIN_VRAM_GB]
+
+
+def owned_candidates(rentals: list[tuple[ConfigEntry, int]]) -> list[tuple[ConfigEntry, int]]:
+    """Reuse checkpoints and precision options across hosting types."""
+    existing = {
+        "gemma4-12b-vllm-in-w4a16": OWNED["pilot"],
+        "gemma4-31b-vllm-in-bf16": OWNED["production"],
+    }
+    candidates = []
+    for cfg, minimum in rentals:
+        preset = existing.get(cfg.config_id)
+        if preset:
+            owned = owned_config(preset).model_copy(update={"variants": cfg.variants})
+        else:
+            owned = cfg.model_copy(update={
+                "config_id": cfg.config_id.replace("-vllm-in-", "-owned-"),
+                "host": "Customer-owned GPU",
+                "region": "Customer site (confirm location)",
+                "hosting_kind": "owned",
+            })
+        candidates.append((owned, minimum))
+    return candidates
+
+
+def fitting_candidates(candidates: list[tuple[ConfigEntry, int]], vram_gb: int
+                       ) -> list[tuple[ConfigEntry, int]]:
+    """Replicas fit independently; the plan never pools VRAM across GPUs."""
+    return [(cfg, floor) for cfg, floor in candidates if floor <= vram_gb]
